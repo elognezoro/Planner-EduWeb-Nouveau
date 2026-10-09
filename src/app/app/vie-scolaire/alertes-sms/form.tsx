@@ -7,7 +7,7 @@ import { envoyerAlerte, type EtatForm } from "./actions";
 
 const initial: EtatForm = { ok: false };
 const inputCls =
-  "h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base";
 
 export function AlerteForm({
   classes,
@@ -63,11 +63,11 @@ export function AlerteForm({
           required
           maxLength={320}
           placeholder="Ex : Votre enfant a été absent ce jour. Merci de justifier."
-          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
         />
       </div>
 
-      <SubmitButton className="w-auto px-8">
+      <SubmitButton className="w-auto px-8 mobile:w-full">
         <Send size={15} /> Envoyer l&apos;alerte
       </SubmitButton>
     </form>

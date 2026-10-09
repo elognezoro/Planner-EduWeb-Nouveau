@@ -79,23 +79,24 @@ export function OngletBudgets({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mobile:grid-cols-2 mobile:gap-2 mobile:[&>div]:p-3 mobile:[&_p+p]:tabular-nums mobile:[&_p+p]:wrap-anywhere">
         {stats.map((s) => (
           <div key={s.libelle} className="rounded-2xl border border-cream-200 bg-white p-3 shadow-soft">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55">{s.libelle}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/75">{s.libelle}</p>
             <p className={`mt-1 font-display text-sm font-bold ${s.alerte ? "text-red-600" : "text-forest-900"}`}>{s.valeur}</p>
           </div>
         ))}
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5">
+        {/* Téléphone : sous-onglets sur une ligne qui défile au doigt (au lieu de murs de pastilles). */}
+        <div className="flex flex-wrap gap-1.5 rangee-defilante-mobile mobile:w-full">
           {sections.map((s) => (
             <button
               key={s.cle}
               type="button"
               onClick={() => setSection(s.cle)}
-              className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors mobile:h-11 mobile:text-sm ${
                 section === s.cle ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-100"
               }`}
             >
@@ -103,7 +104,7 @@ export function OngletBudgets({
             </button>
           ))}
         </div>
-        <button type="button" onClick={() => setRapportOuvert(true)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+        <button type="button" onClick={() => setRapportOuvert(true)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:w-full mobile:justify-center mobile:text-sm">
           <FileBarChart size={13} /> Rapport d&apos;exécution
         </button>
       </div>
@@ -148,7 +149,7 @@ function SectionExecution({ donnees }: { donnees: DonneesBudgetVue }) {
           <p className="mt-3 text-sm text-ink-700/60">Aucune ligne de dépense votée pour l&apos;exercice {donnees.exercice}.</p>
         ) : (
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[820px] text-sm">
+            <table className="w-full min-w-[820px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
                   <th className="px-2 py-2">Catégorie</th>
@@ -165,25 +166,25 @@ function SectionExecution({ donnees }: { donnees: DonneesBudgetVue }) {
                     <td className="px-2 py-1.5 text-xs">
                       <span className="font-mono">{l.categorie}</span> — {l.libelle}
                       {l.centreCoutLibelle ? <span className="text-ink-700/50"> · {l.centreCoutLibelle}</span> : ""}
-                      {l.depasse && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600">DÉPASSÉ</span>}
-                      {l.procheEpuisement && <span className="ml-1.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">Proche épuisement</span>}
-                      {l.statut === "cloturee" && <span className="ml-1.5 rounded-full bg-cream-200 px-1.5 py-0.5 text-[10px] font-bold text-ink-700/60">clôturée</span>}
+                      {l.depasse && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600 mobile:text-xs">DÉPASSÉ</span>}
+                      {l.procheEpuisement && <span className="ml-1.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 mobile:text-xs">Proche épuisement</span>}
+                      {l.statut === "cloturee" && <span className="ml-1.5 rounded-full bg-cream-200 px-1.5 py-0.5 text-[10px] font-bold text-ink-700/60 mobile:text-xs">clôturée</span>}
                       <BarreExecution ligne={l} />
                     </td>
-                    <td className="px-2 py-1.5 text-right">{fcfa(l.vote)}</td>
-                    <td className="px-2 py-1.5 text-right">{fcfa(l.engageBC + l.engageManuel)}</td>
-                    <td className="px-2 py-1.5 text-right">{fcfa(l.consomme)}</td>
-                    <td className={`px-2 py-1.5 text-right font-semibold ${l.disponible < 0 ? "text-red-600" : "text-forest-800"}`}>{fcfa(l.disponible)}</td>
-                    <td className="px-2 py-1.5 text-right">{pct(l.tauxExecution)}</td>
+                    <td data-label="Voté" className="px-2 py-1.5 text-right">{fcfa(l.vote)}</td>
+                    <td data-label="Engagé" className="px-2 py-1.5 text-right">{fcfa(l.engageBC + l.engageManuel)}</td>
+                    <td data-label="Consommé" className="px-2 py-1.5 text-right">{fcfa(l.consomme)}</td>
+                    <td data-label="Disponible" className={`px-2 py-1.5 text-right font-semibold ${l.disponible < 0 ? "text-red-600" : "text-forest-800"}`}>{fcfa(l.disponible)}</td>
+                    <td data-label="Taux" className="px-2 py-1.5 text-right">{pct(l.tauxExecution)}</td>
                   </tr>
                 ))}
                 <tr className="border-t-2 border-forest-200 font-bold">
                   <td className="px-2 py-2">Total dépenses</td>
-                  <td className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalVote)}</td>
-                  <td className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalEngage)}</td>
-                  <td className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalConsomme)}</td>
-                  <td className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalDisponible)}</td>
-                  <td className="px-2 py-2 text-right">{pct(donnees.tableauBord.tauxExecution)}</td>
+                  <td data-label="Voté" className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalVote)}</td>
+                  <td data-label="Engagé" className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalEngage)}</td>
+                  <td data-label="Consommé" className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalConsomme)}</td>
+                  <td data-label="Disponible" className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalDisponible)}</td>
+                  <td data-label="Taux" className="px-2 py-2 text-right">{pct(donnees.tableauBord.tauxExecution)}</td>
                 </tr>
               </tbody>
             </table>
@@ -197,7 +198,7 @@ function SectionExecution({ donnees }: { donnees: DonneesBudgetVue }) {
             <TrendingUp size={17} className="text-forest-600" /> Recettes (centres de profit)
           </h3>
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
+            <table className="w-full min-w-[480px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
                   <th className="px-2 py-2">Catégorie</th>
@@ -210,15 +211,15 @@ function SectionExecution({ donnees }: { donnees: DonneesBudgetVue }) {
                 {donnees.recettes.map((r) => (
                   <tr key={r.categorie} className="border-b border-cream-100">
                     <td className="px-2 py-1.5 text-xs"><span className="font-mono">{r.categorie}</span> — {r.libelle}</td>
-                    <td className="px-2 py-1.5 text-right">{fcfa(r.vote)}</td>
-                    <td className="px-2 py-1.5 text-right">{fcfa(r.realise)}</td>
-                    <td className="px-2 py-1.5 text-right">{pct(r.taux)}</td>
+                    <td data-label="Prévu" className="px-2 py-1.5 text-right">{fcfa(r.vote)}</td>
+                    <td data-label="Réalisé" className="px-2 py-1.5 text-right">{fcfa(r.realise)}</td>
+                    <td data-label="Taux" className="px-2 py-1.5 text-right">{pct(r.taux)}</td>
                   </tr>
                 ))}
                 <tr className="border-t-2 border-forest-200 font-bold">
                   <td className="px-2 py-2">Total recettes</td>
-                  <td className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalVoteRecettes)}</td>
-                  <td className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalRealiseRecettes)}</td>
+                  <td data-label="Prévu" className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalVoteRecettes)}</td>
+                  <td data-label="Réalisé" className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.totalRealiseRecettes)}</td>
                   <td className="px-2 py-2" />
                 </tr>
               </tbody>
@@ -292,7 +293,7 @@ function SectionEnveloppes({ etablissementId, donnees, droits }: { etablissement
               <span>
                 <strong className="text-forest-900">{b.libelle}</strong>
                 <span className="text-ink-700/55"> · {LIBELLE_TYPE_BUDGET[b.type] ?? b.type} · {b.nbLignes} ligne(s) · {fcfa(b.totalVote)}</span>
-                <span className={`ml-2 rounded-full px-2 py-0.5 text-[11px] font-semibold ${b.statut === "execution" ? "bg-forest-50 text-forest-800" : b.statut === "soumis" ? "bg-amber-50 text-amber-700" : b.statut === "cloture" ? "bg-cream-200 text-ink-700/60" : "bg-cream-200 text-forest-800"}`}>
+                <span className={`ml-2 rounded-full px-2 py-0.5 text-[11px] font-semibold mobile:text-xs ${b.statut === "execution" ? "bg-forest-50 text-forest-800" : b.statut === "soumis" ? "bg-amber-50 text-amber-700" : b.statut === "cloture" ? "bg-cream-200 text-ink-700/60" : "bg-cream-200 text-forest-800"}`}>
                   {LIBELLE_ETAT_BUDGET[b.statut] ?? b.statut}
                 </span>
                 {b.voteParNom && <span className="ml-1.5 text-xs text-ink-700/55">voté par {b.voteParNom} le {dateFr(b.dateVote)}</span>}
@@ -300,7 +301,7 @@ function SectionEnveloppes({ etablissementId, donnees, droits }: { etablissement
               <span className="flex flex-wrap items-center gap-1.5">
                 {droits.gerer && b.statut === "brouillon" && (
                   <>
-                    <button type="button" onClick={() => { setEnEdition(b); setFormOuvert(true); }} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50"><Pencil size={11} /> Modifier</button>
+                    <button type="button" onClick={() => { setEnEdition(b); setFormOuvert(true); }} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5 mobile:text-xs"><Pencil size={11} /> Modifier</button>
                     <BoutonActionConfirmee libelle="Soumettre" icone={Send} ton="primaire" action={soumettreBudget} champs={{ etablissementId, id: b.id, version: String(b.version) }} onSucces={(m) => setMessage(m ?? "Soumis.")} />
                     <BoutonActionConfirmee libelle="Retirer" icone={Trash2} ton="danger" action={retirerBudget} champs={{ etablissementId, id: b.id, version: String(b.version) }} onSucces={(m) => setMessage(m ?? "Retiré.")} />
                   </>
@@ -386,7 +387,7 @@ function SectionLignes({ etablissementId, donnees, droits }: { etablissementId: 
             </div>
             {etatLigne.message && <div className="sm:col-span-2 lg:col-span-4"><FormAlert ton={etatLigne.ok ? "succes" : "erreur"}>{etatLigne.message}</FormAlert></div>}
           </form>
-          <p className="mt-2 text-[11px] text-ink-700/50">Une seule ligne par catégorie et sens et par exercice (les révisions ajustent le voté).</p>
+          <p className="mt-2 text-[11px] text-ink-700/50 mobile:text-xs">Une seule ligne par catégorie et sens et par exercice (les révisions ajustent le voté).</p>
         </Card>
       )}
 
@@ -443,10 +444,10 @@ function LigneBudgetItem({
         <span>
           <span className="font-mono text-xs">{l.categorie}</span> — {l.libelle} · voté <strong>{fcfa(l.vote)}</strong>
           {l.montantInitial !== l.vote && <span className="text-ink-700/50"> (initial {fcfa(l.montantInitial)})</span>}
-          {l.statut === "cloturee" && <span className="ml-1.5 rounded-full bg-cream-200 px-1.5 py-0.5 text-[10px] font-bold text-ink-700/60">clôturée</span>}
+          {l.statut === "cloturee" && <span className="ml-1.5 rounded-full bg-cream-200 px-1.5 py-0.5 text-[10px] font-bold text-ink-700/60 mobile:text-xs">clôturée</span>}
         </span>
         {droits.reviser && l.statut !== "cloturee" && (
-          <button type="button" onClick={() => setRevision((v) => !v)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50"><Coins size={11} /> Réviser</button>
+          <button type="button" onClick={() => setRevision((v) => !v)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5 mobile:text-xs"><Coins size={11} /> Réviser</button>
         )}
         {droits.gerer && l.ligneId && l.statut !== "cloturee" && (
           <span className="flex gap-1.5">
@@ -457,17 +458,17 @@ function LigneBudgetItem({
       </div>
       {revision && droits.reviser && l.ligneId && (
         <div className="mt-2 grid gap-2 rounded-lg bg-cream-50/70 p-2.5 sm:grid-cols-2 lg:grid-cols-5">
-          <Select value={type} onChange={(e) => setType(e.target.value)} className="h-8 text-xs">
+          <Select value={type} onChange={(e) => setType(e.target.value)} className="h-8 text-xs mobile:h-11 mobile:text-base">
             {TYPES_REVISION.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}
           </Select>
-          <Input type="number" min={1} value={montant} onChange={(e) => setMontant(e.target.value)} placeholder="Montant" className="h-8 text-xs" />
+          <Input type="number" min={1} value={montant} onChange={(e) => setMontant(e.target.value)} placeholder="Montant" className="h-8 text-xs mobile:h-11 mobile:text-base" />
           {type === "virement" && (
-            <Select value={cible} onChange={(e) => setCible(e.target.value)} className="h-8 text-xs">
+            <Select value={cible} onChange={(e) => setCible(e.target.value)} className="h-8 text-xs mobile:h-11 mobile:text-base">
               <option value="">Vers…</option>
               {autresLignes.map((x) => <option key={x.ligneId} value={x.ligneId!}>{x.categorie} — {x.libelle}</option>)}
             </Select>
           )}
-          <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif *" className="h-8 text-xs sm:col-span-2" />
+          <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif *" className="h-8 text-xs sm:col-span-2 mobile:h-11 mobile:text-base" />
           <BoutonActionConfirmee
             libelle="Appliquer la révision" icone={Check} ton="primaire" action={reviserBudget}
             champs={{ etablissementId, ligneId: l.ligneId, ligneCibleId: cible, type, montant, motif }}
@@ -536,7 +537,7 @@ function SectionEngagements({ etablissementId, donnees, droits }: { etablissemen
               <span>
                 <strong>{g.libelle}</strong> · {g.categorie} — {g.categorieLibelle} · {fcfa(g.montant)} · {g.source}
                 {g.reference ? ` · ${g.reference}` : ""}
-                <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${g.statut === "actif" ? "bg-forest-50 text-forest-800" : "bg-cream-200 text-ink-700/60"}`}>{g.statut}</span>
+                <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${g.statut === "actif" ? "bg-forest-50 text-forest-800" : "bg-cream-200 text-ink-700/60"}`}>{g.statut}</span>
               </span>
               {droits.reviser && g.statut === "actif" && (
                 <span className="flex gap-1.5">
@@ -667,46 +668,50 @@ function SectionSimulation({ donnees }: { donnees: DonneesBudgetVue }) {
 function RapportExecution({ donnees, entete, onFermer }: { donnees: DonneesBudgetVue; entete: EnteteEtablissement; onFermer: () => void }) {
   const tb = donnees.tableauBord;
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`@media print { body * { visibility: hidden; } #rapport-budget-impression, #rapport-budget-impression * { visibility: visible; } #rapport-budget-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; overflow: visible; } @page { size: A4 landscape; margin: 12mm; } }`}</style>
-      <div id="rapport-budget-impression" className="mx-auto my-8 w-full max-w-4xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="rapport-budget-impression" className="mx-auto my-8 w-full max-w-4xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Rapport d&apos;exécution budgétaire</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer"><X size={16} /></button>
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer"><X size={16} /></button>
         </div>
         <EnTeteOfficielDoc etab={entete} titre="RAPPORT D'EXÉCUTION BUDGÉTAIRE" sousTitre={`Exercice ${donnees.exercice} — taux d'exécution ${pct(tb.tauxExecution)}`} />
-        <table className="mt-4 w-full border-collapse text-xs">
-          <thead>
-            <tr className="border-y-2 border-forest-800 text-left uppercase tracking-wide">
-              <th className="py-1.5 pr-2">Catégorie</th>
-              <th className="py-1.5 pr-2 text-right">Voté</th>
-              <th className="py-1.5 pr-2 text-right">Engagé</th>
-              <th className="py-1.5 pr-2 text-right">Consommé</th>
-              <th className="py-1.5 pr-2 text-right">Disponible</th>
-              <th className="py-1.5 text-right">Taux</th>
-            </tr>
-          </thead>
-          <tbody>
-            {donnees.execution.map((l) => (
-              <tr key={l.categorie} className="border-b border-cream-200">
-                <td className="py-1 pr-2">{l.categorie} — {l.libelle}</td>
-                <td className="py-1 pr-2 text-right">{fcfa(l.vote)}</td>
-                <td className="py-1 pr-2 text-right">{fcfa(l.engageBC + l.engageManuel)}</td>
-                <td className="py-1 pr-2 text-right">{fcfa(l.consomme)}</td>
-                <td className="py-1 pr-2 text-right">{fcfa(l.disponible)}</td>
-                <td className="py-1 text-right">{pct(l.tauxExecution)}</td>
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-xs">
+            <thead>
+              <tr className="border-y-2 border-forest-800 text-left uppercase tracking-wide">
+                <th className="py-1.5 pr-2">Catégorie</th>
+                <th className="py-1.5 pr-2 text-right">Voté</th>
+                <th className="py-1.5 pr-2 text-right">Engagé</th>
+                <th className="py-1.5 pr-2 text-right">Consommé</th>
+                <th className="py-1.5 pr-2 text-right">Disponible</th>
+                <th className="py-1.5 text-right">Taux</th>
               </tr>
-            ))}
-            <tr className="border-t-2 border-forest-800 font-bold">
-              <td className="py-2 pr-2">Total dépenses</td>
-              <td className="py-2 pr-2 text-right">{fcfa(tb.totalVote)}</td>
-              <td className="py-2 pr-2 text-right">{fcfa(tb.totalEngage)}</td>
-              <td className="py-2 pr-2 text-right">{fcfa(tb.totalConsomme)}</td>
-              <td className="py-2 pr-2 text-right">{fcfa(tb.totalDisponible)}</td>
-              <td className="py-2 text-right">{pct(tb.tauxExecution)}</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {donnees.execution.map((l) => (
+                <tr key={l.categorie} className="border-b border-cream-200">
+                  <td className="py-1 pr-2">{l.categorie} — {l.libelle}</td>
+                  <td className="py-1 pr-2 text-right">{fcfa(l.vote)}</td>
+                  <td className="py-1 pr-2 text-right">{fcfa(l.engageBC + l.engageManuel)}</td>
+                  <td className="py-1 pr-2 text-right">{fcfa(l.consomme)}</td>
+                  <td className="py-1 pr-2 text-right">{fcfa(l.disponible)}</td>
+                  <td className="py-1 text-right">{pct(l.tauxExecution)}</td>
+                </tr>
+              ))}
+              <tr className="border-t-2 border-forest-800 font-bold">
+                <td className="py-2 pr-2">Total dépenses</td>
+                <td className="py-2 pr-2 text-right">{fcfa(tb.totalVote)}</td>
+                <td className="py-2 pr-2 text-right">{fcfa(tb.totalEngage)}</td>
+                <td className="py-2 pr-2 text-right">{fcfa(tb.totalConsomme)}</td>
+                <td className="py-2 pr-2 text-right">{fcfa(tb.totalDisponible)}</td>
+                <td className="py-2 text-right">{pct(tb.tauxExecution)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <p className="mt-3 text-sm">Recettes : réalisé {fcfa(tb.totalRealiseRecettes)} sur {fcfa(tb.totalVoteRecettes)} prévus.</p>
         <div className="mt-6 flex justify-center gap-2 print:hidden">
           <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-full bg-forest-800 px-5 py-2.5 text-sm font-semibold text-cream-50 hover:bg-forest-700"><Printer size={16} /> Imprimer / PDF</button>

@@ -25,8 +25,8 @@ export default async function DevoirEditeurPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/gestion/cours/${coursId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Édition du cours</Link>
-      <PageHeader titre={`Devoir — ${lecon.titre}`} description="Consigne, mode de dépôt et barème. Les apprenants déposent leur travail ; les tuteurs du cours le corrigent." />
+      <Link href={`${BASE}/gestion/cours/${coursId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Édition du cours</Link>
+      <PageHeader titre={`Devoir — ${lecon.titre}`} titreMobile="Devoir" titreVisibleMobile description="Consigne, mode de dépôt et barème. Les apprenants déposent leur travail ; les tuteurs du cours le corrigent." />
 
       <section className="space-y-2">
         <h2 className="inline-flex items-center gap-2 font-display text-sm font-bold uppercase tracking-wide text-ink-700/55"><FileCheck2 size={16} /> Réglages</h2>

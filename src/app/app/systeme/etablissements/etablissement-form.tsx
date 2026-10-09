@@ -69,9 +69,9 @@ export function EtablissementForm({ regions, paysVerrouille = null }: { regions:
         type="button"
         onClick={() => setOuvert((o) => !o)}
         aria-expanded={ouvert}
-        className="flex w-full items-center justify-between gap-3 px-6 py-5 text-left transition-colors hover:bg-cream-50/60"
+        className="flex w-full items-center justify-between gap-3 px-6 py-5 text-left transition-colors hover:bg-cream-50/60 mobile:px-4 mobile:py-4"
       >
-        <span className="flex items-center gap-3">
+        <span className="flex items-center gap-3 mobile:min-w-0">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-forest-800 text-gold-300">
             <Plus size={20} />
           </span>
@@ -96,7 +96,7 @@ export function EtablissementForm({ regions, paysVerrouille = null }: { regions:
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
           >
-            <form ref={formRef} action={action} className="space-y-5 border-t border-cream-100 px-6 py-6">
+            <form ref={formRef} action={action} className="space-y-5 border-t border-cream-100 px-6 py-6 mobile:px-4">
               {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
               {/* Identité */}
@@ -214,12 +214,12 @@ export function EtablissementForm({ regions, paysVerrouille = null }: { regions:
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-3 border-t border-cream-100 pt-4">
-                <p className="flex items-center gap-1.5 text-xs text-ink-700/55">
+              <div className="flex items-center justify-between gap-3 border-t border-cream-100 pt-4 mobile:flex-col mobile:items-stretch">
+                <p className="flex items-center gap-1.5 text-xs text-ink-700/55 mobile:text-ink-700/70">
                   <BadgeCheck size={13} className="text-forest-600" />
                   Doublons et cohérence région/pays vérifiés à la création.
                 </p>
-                <SubmitButton className="w-auto px-8">Créer l&apos;établissement</SubmitButton>
+                <SubmitButton className="w-auto px-8 mobile:w-full">Créer l&apos;établissement</SubmitButton>
               </div>
             </form>
           </motion.div>

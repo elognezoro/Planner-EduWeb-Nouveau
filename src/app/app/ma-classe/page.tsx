@@ -95,7 +95,7 @@ export default async function MaClassePage() {
                 <SectionTitre icone={<NotebookPen size={18} />}>Cahier de texte</SectionTitre>
                 <Link
                   href="/app/vie-scolaire/cahier-texte"
-                  className="inline-flex items-center gap-0.5 text-xs font-semibold text-forest-700 hover:text-forest-900"
+                  className="inline-flex items-center gap-0.5 text-xs font-semibold text-forest-700 hover:text-forest-900 mobile:-mr-2 mobile:min-h-11 mobile:px-2 mobile:text-sm"
                 >
                   Tout voir <ArrowUpRight size={13} />
                 </Link>

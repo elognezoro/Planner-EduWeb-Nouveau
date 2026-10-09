@@ -7,6 +7,8 @@ import { Plus, Trash2, Upload, FileText, Eye, Download, ChevronDown, Search } fr
 import { ajouterNoteCafop, supprimerNoteCafop, importerNotesCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { Modale } from "../entete-cafop";
+import { FiltresMobiles } from "@/components/app/mobile/filtres-mobiles";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 import {
   construireHtmlBulletinCafop,
   appreciationCafop,
@@ -85,7 +87,7 @@ export interface NoteVue {
 }
 
 const initial: EtatForm = { ok: false };
-const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 const fmt = (v: number | null) => (v === null ? "—" : v.toFixed(2).replace(".", ","));
 const nomEleve = (e: { nom: string; prenoms: string | null }) => [e.nom, e.prenoms].filter(Boolean).join(" ");
 /** Date ISO « AAAA-MM-JJ » → « JJ/MM/AAAA » (repli : chaîne d'origine). */
@@ -244,6 +246,8 @@ export function NotesBulletinsCafop({
   const [detail, setDetail] = useState<EleveVue | null>(null);
   const [importOuvert, setImportOuvert] = useState(false);
   const [msgNote, setMsgNote] = useState<string | null>(null);
+  // Téléphone : filtres modifiés (pastille du bouton « Filtres » ; semestre et groupe restent visibles).
+  const filtresActifs = (promotionId !== (promotions[0]?.id ?? "") ? 1 : 0) + (anneeSel !== "" ? 1 : 0) + (eleveSel ? 1 : 0);
 
   function supprimerNote(id: string) {
     setMsgNote(null);
@@ -309,6 +313,23 @@ export function NotesBulletinsCafop({
           Les élèves-maîtres s&apos;affichent par cohortes (promotions) et groupe-classe. Bulletin auto-renseigné :
           moyennes pondérées par les coefficients des modules.
         </p>
+        {/* Téléphone : semestre et groupe-classe sous la main ; les autres filtres (et « Voir le
+            bulletin ») passent dans la feuille « Filtres ». */}
+        <div className="lg:hidden print:hidden mb-3 grid grid-cols-2 gap-3">
+          <Champ label="Semestre">
+            <select value={semestre} onChange={(e) => setSemestre(Number(e.target.value))} className={champCls}>
+              <option value={1}>Premier semestre</option>
+              <option value={2}>Deuxième semestre</option>
+            </select>
+          </Champ>
+          <Champ label="Groupe-classe">
+            <select value={groupeEffectif} onChange={(e) => setGroupe(e.target.value)} className={champCls}>
+              <option value="">Tous les groupes</option>
+              {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
+            </select>
+          </Champ>
+        </div>
+        <FiltresMobiles actifs={filtresActifs}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Champ label="Semestre">
             <select value={semestre} onChange={(e) => setSemestre(Number(e.target.value))} className={champCls}>
@@ -316,7 +337,8 @@ export function NotesBulletinsCafop({
               <option value={2}>Deuxième semestre</option>
             </select>
           </Champ>
-          <Champ label={`Durée de formation — ${cafop.pays}`}>
+          {/* Téléphone : masqué — liste sans effet sur l'affichage. */}
+          <Champ label={`Durée de formation — ${cafop.pays}`} className="mobile:hidden">
             <select defaultValue="3" className={champCls}>
               <option value="3">3 ans</option>
               <option value="2">2 ans</option>
@@ -356,9 +378,32 @@ export function NotesBulletinsCafop({
             </button>
           </div>
         </div>
+        </FiltresMobiles>
+
+        {/* Téléphone : la liste des modules évalués (une colonne, plusieurs écrans) est repliée. */}
+        <details className="lg:hidden print:hidden mt-3 rounded-xl border border-cream-200 bg-cream-50/50">
+          <summary className="flex min-h-11 cursor-pointer items-center px-3 text-sm font-semibold text-forest-800">
+            Modules évalués ({modules.length})
+          </summary>
+          <div className="space-y-3 px-3 pb-3">
+            {grouperParAnnee(modules).map(([an, mods]) => (
+              <div key={an}>
+                <p className="mb-1.5 text-xs font-semibold text-forest-700">{libelleAnnee(an)}</p>
+                <ul className="space-y-1.5">
+                  {mods.map((m) => (
+                    <li key={m.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 text-sm">
+                      <span className="min-w-0 text-forest-900">{m.nom}</span>
+                      <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">coef {m.coefficient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </details>
 
         {/* Modules évalués — regroupés par année de formation */}
-        <div className="mt-4 space-y-3 rounded-xl border border-cream-200 bg-cream-50/50 p-3">
+        <div className="mt-4 space-y-3 rounded-xl border border-cream-200 bg-cream-50/50 p-3 mobile:hidden">
           <p className="text-xs font-semibold uppercase tracking-wide text-ink-700/50">Modules évalués (référentiel de formation)</p>
           {grouperParAnnee(modules).map(([an, mods]) => (
             <div key={an}>
@@ -395,8 +440,9 @@ export function NotesBulletinsCafop({
           </h3>
           {msgNote && <div className="mt-2"><FormAlert ton="erreur">{msgNote}</FormAlert></div>}
         </div>
-        <div className="max-h-96 overflow-auto">
-          <table className="w-full border-collapse text-sm">
+        {/* Téléphone : une carte par note (« libellé : valeur »), sans double défilement. */}
+        <div className="max-h-96 overflow-auto mobile:max-h-none mobile:overflow-visible mobile:p-3">
+          <table className="tableau-cartes-mobile w-full border-collapse text-sm">
             <thead className="sticky top-0">
               <tr className="border-b border-cream-200 bg-cream-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
                 <th className="px-5 py-2.5">Élève</th>
@@ -414,15 +460,15 @@ export function NotesBulletinsCafop({
               ) : (
                 notesGroupe.map((n) => (
                   <tr key={n.id} className="border-b border-cream-100 last:border-0 hover:bg-cream-50/40">
-                    <td className="whitespace-nowrap px-5 py-2 font-medium text-forest-900">{eleveNom.get(n.apprenantId)}</td>
-                    <td className="px-3 py-2 text-ink-700/80">{moduleNom.get(n.moduleId)}</td>
-                    <td className="whitespace-nowrap px-3 py-2"><span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">{n.type}</span></td>
-                    <td className="px-3 py-2 text-right font-semibold text-forest-900">{fmt(n.valeur)}</td>
-                    <td className="px-3 py-2 text-right text-ink-700/60">/{n.bareme}</td>
-                    <td className="px-3 py-2 text-right text-ink-700/80">{n.coefficient}</td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="whitespace-nowrap px-5 py-2 font-medium text-forest-900 mobile:whitespace-normal mobile:font-semibold">{eleveNom.get(n.apprenantId)}</td>
+                    <td data-label="Module" className="px-3 py-2 text-ink-700/80">{moduleNom.get(n.moduleId)}</td>
+                    <td data-label="Type" className="whitespace-nowrap px-3 py-2"><span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">{n.type}</span></td>
+                    <td data-label="Note" className="px-3 py-2 text-right font-semibold text-forest-900">{fmt(n.valeur)}</td>
+                    <td data-label="Barème" className="px-3 py-2 text-right text-ink-700/60">/{n.bareme}</td>
+                    <td data-label="Coef." className="px-3 py-2 text-right text-ink-700/80">{n.coefficient}</td>
+                    <td className="px-3 py-2 text-right mobile:empty:hidden!">
                       {!lectureSeule && (
-                        <button type="button" onClick={() => supprimerNote(n.id)} title="Supprimer" className="text-ink-700/40 hover:text-red-600">
+                        <button type="button" onClick={() => supprimerNote(n.id)} title="Supprimer" aria-label="Supprimer la note" className="text-ink-700/40 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-full mobile:text-red-600 mobile:active:bg-red-50">
                           <Trash2 size={14} />
                         </button>
                       )}
@@ -447,24 +493,26 @@ export function NotesBulletinsCafop({
             <p className="px-5 py-8 text-center text-sm text-ink-700/55">Aucun élève-maître dans ce groupe.</p>
           ) : (
             bulletins.map((b) => (
-              <div key={b.eleve.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 hover:bg-cream-50/40">
-                <div className="flex items-center gap-3">
+              // Téléphone : rang + nom, moyenne en pastille, deux boutons-icônes de 44 px ; faute de place
+              // (nom ≥ 9rem), pastille et boutons passent sur une seconde ligne, alignés à droite.
+              <div key={b.eleve.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 hover:bg-cream-50/40 mobile:gap-2 mobile:px-4">
+                <div className="flex items-center gap-3 mobile:min-w-[9rem] mobile:flex-1">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-forest-100 text-sm font-bold text-forest-800">{b.rang}</span>
-                  <div>
-                    <p className="font-semibold text-forest-900">{nomEleve(b.eleve)}</p>
+                  <div className="mobile:min-w-0">
+                    <p className="font-semibold text-forest-900 mobile:[overflow-wrap:anywhere] mobile:leading-snug">{nomEleve(b.eleve)}</p>
                     <p className="text-xs text-ink-700/55">Semestre {semestre}</p>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-3">
-                  <div className="text-right text-xs text-ink-700/55">
-                    <span className="mr-3">NOTES <b className="text-forest-900">{b.nbNotes}</b></span>
-                    <span>MOYENNE <b className="text-base text-forest-800">{fmt(b.generale)}</b>/20</span>
+                <div className="flex flex-wrap items-center justify-end gap-3 mobile:shrink-0 mobile:flex-nowrap mobile:gap-1.5 mobile:ml-auto">
+                  <div className="text-right text-xs text-ink-700/55 mobile:rounded-full mobile:bg-forest-50 mobile:px-2.5 mobile:py-1">
+                    <span className="mr-3 mobile:hidden">NOTES <b className="text-forest-900">{b.nbNotes}</b></span>
+                    <span><span className="mobile:hidden">MOYENNE </span><b className="text-base text-forest-800">{fmt(b.generale)}</b>/20</span>
                   </div>
-                  <button type="button" onClick={() => setDetail(b.eleve)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 px-3 text-sm font-semibold text-ink-700/70 hover:bg-cream-100">
-                    <Eye size={15} /> Voir détails
+                  <button type="button" onClick={() => setDetail(b.eleve)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 px-3 text-sm font-semibold text-ink-700/70 hover:bg-cream-100 mobile:h-11 mobile:w-11 mobile:justify-center mobile:px-0">
+                    <Eye size={15} /> <span className="mobile:sr-only">Voir détails</span>
                   </button>
-                  <button type="button" onClick={() => telechargerBulletin(b.eleve)} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700">
-                    <Download size={15} /> Télécharger PDF
+                  <button type="button" onClick={() => telechargerBulletin(b.eleve)} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 mobile:h-11 mobile:w-11 mobile:justify-center mobile:px-0">
+                    <Download size={15} /> <span className="mobile:sr-only">Télécharger PDF</span>
                   </button>
                 </div>
               </div>
@@ -502,9 +550,9 @@ export function NotesBulletinsCafop({
   );
 }
 
-function Champ({ label, children }: { label: string; children: React.ReactNode }) {
+function Champ({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <label className="block">
+    <label className={className ? `block ${className}` : "block"}>
       <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-700/50">{label}</span>
       {children}
     </label>
@@ -612,6 +660,8 @@ function AjouterNote({
   const [niveau, setNiveau] = useState<number | "">("");
   const [moduleId, setModuleId] = useState("");
   const [type, setType] = useState(TYPES_EVALUATION[0]);
+  // Pavé décimal sur téléphone seulement : faux au rendu serveur, sur ordinateur et à l'impression.
+  const ecranMobile = useEcranMobile();
   const annees = useMemo(() => [...new Set(modules.map((m) => m.annee))].sort((a, b) => a - b), [modules]);
   const modulesNiveau = useMemo(() => (niveau === "" ? modules : modules.filter((m) => m.annee === niveau)), [modules, niveau]);
   const notifie = useRef(0);
@@ -624,21 +674,22 @@ function AjouterNote({
   }, [etat.ok, onAjoute]);
 
   return (
-    <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
-      <div className="mb-3 flex items-center justify-between">
+    <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft mobile:p-4">
+      <div className="mb-3 flex items-center justify-between mobile:flex-wrap mobile:gap-2">
         <h3 className="font-display text-base font-bold text-forest-900">Ajouter une note</h3>
-        <button type="button" onClick={onImport} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 px-3 text-sm font-semibold text-ink-700/70 hover:bg-cream-100">
+        <button type="button" onClick={onImport} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 px-3 text-sm font-semibold text-ink-700/70 hover:bg-cream-100 mobile:h-11 mobile:px-4">
           <Upload size={15} /> Importer un CSV
         </button>
       </div>
       {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
       <form action={action} className="space-y-3">
         <input type="hidden" name="semestre" value={semestre} />
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Champ label="Élève">
+        {/* Téléphone : une colonne, puis Note · Barème sur une rangée, puis Coefficient. */}
+        <div className="grid gap-3 sm:grid-cols-3 mobile:grid-cols-6 mobile:items-end">
+          <Champ label="Élève" className="mobile:col-span-6">
             <SelectRecherche name="apprenantId" value={eleveId} onChange={setEleveId} placeholder="Sélectionner…" options={eleves.map((e) => ({ value: e.id, label: nomEleve(e) }))} />
           </Champ>
-          <Champ label="Niveau (année)">
+          <Champ label="Niveau (année)" className="mobile:col-span-6">
             <SelectRecherche
               value={niveau === "" ? "" : String(niveau)}
               onChange={(v) => { setNiveau(v === "" ? "" : Number(v)); setModuleId(""); }}
@@ -646,7 +697,7 @@ function AjouterNote({
               options={[{ value: "", label: "Tous les niveaux" }, ...annees.map((a) => ({ value: String(a), label: libelleAnnee(a) }))]}
             />
           </Champ>
-          <Champ label="Module (matière)">
+          <Champ label="Module (matière)" className="mobile:col-span-6">
             <SelectRecherche
               name="moduleId"
               value={moduleId}
@@ -655,20 +706,22 @@ function AjouterNote({
               options={modulesNiveau.map((m) => ({ value: m.id, label: niveau === "" ? `${libelleAnnee(m.annee)} · ${m.nom}` : m.nom }))}
             />
           </Champ>
-          <Champ label="Type d'évaluation">
+          <Champ label="Type d'évaluation" className="mobile:col-span-6">
             <SelectRecherche name="type" value={type} onChange={setType} placeholder="Type…" options={TYPES_EVALUATION.map((t) => ({ value: t, label: t }))} />
           </Champ>
-          <Champ label="Note"><input name="valeur" required placeholder="Ex : 14" className={champCls} /></Champ>
-          <Champ label="Barème (total points)"><input name="bareme" defaultValue="20" className={champCls} /></Champ>
-          <Champ label="Coefficient"><input name="coefficient" type="number" min={1} defaultValue="1" className={champCls} /></Champ>
+          <Champ label="Note" className="mobile:col-span-3"><input name="valeur" required placeholder="Ex : 14" inputMode={ecranMobile ? "decimal" : undefined} className={champCls} /></Champ>
+          <Champ label="Barème (total points)" className="mobile:col-span-3"><input name="bareme" defaultValue="20" inputMode={ecranMobile ? "decimal" : undefined} className={champCls} /></Champ>
+          <Champ label="Coefficient" className="mobile:col-span-6"><input name="coefficient" type="number" min={1} defaultValue="1" className={champCls} /></Champ>
         </div>
-        <div className="rounded-xl border border-dashed border-cream-300 bg-cream-50/50 px-3 py-2 font-mono text-xs text-ink-700/55">
+        {/* Téléphone : rappel masqué — la ligne d'en-tête (≈ 386 px, sans coupure) faisait défiler
+            toute la page ; le format est redonné dans la fenêtre « Importer un CSV ». */}
+        <div className="rounded-xl border border-dashed border-cream-300 bg-cream-50/50 px-3 py-2 font-mono text-xs text-ink-700/55 mobile:hidden">
           <div>FORMAT CSV ATTENDU</div>
           <div>Nom;Prénoms;Module;Type;Note;Barème;Coefficient</div>
           <div>Exemple: KONÉ;Moussa Ibrahim;Droits de l&apos;Homme;Devoir surveillé;14;20;1</div>
         </div>
         <div className="flex justify-end">
-          <SubmitButton className="w-auto px-6"><Plus size={15} /> Enregistrer la note</SubmitButton>
+          <SubmitButton className="w-auto px-6 mobile:w-full"><Plus size={15} /> Enregistrer la note</SubmitButton>
         </div>
       </form>
     </section>
@@ -679,7 +732,7 @@ function AjouterNote({
 function Cellule({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="rounded-lg border border-cream-200 p-2.5">
-      <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">{label}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800 mobile:text-xs">{label}</div>
       <div className="mt-0.5 text-sm font-bold text-ink-900">{children}</div>
     </div>
   );
@@ -721,7 +774,7 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
       {/* En-tête officiel à deux panneaux */}
       <div className="grid grid-cols-1 overflow-hidden rounded-xl border border-forest-700/70 sm:grid-cols-2">
         <div className="space-y-1 border-b border-forest-700/40 p-3 sm:border-b-0 sm:border-r">
-          <div className="text-[11px] font-bold uppercase leading-tight tracking-wide text-forest-900">{intituleEtat}</div>
+          <div className="text-[11px] font-bold uppercase leading-tight tracking-wide text-forest-900 mobile:text-xs">{intituleEtat}</div>
           {armoiries && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={armoiries} alt={`Armoiries — ${data.pays}`} className="my-1 h-11 w-auto object-contain" />
@@ -736,7 +789,7 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
             <img src={data.logoUrl} alt={`Logo ${data.cafop}`} className="mt-2 h-11 w-auto object-contain" />
           )}
           {(data.adresse || data.tel || data.email) && (
-            <div className="mt-1.5 space-y-0.5 text-[11px] leading-snug text-ink-700/70">
+            <div className="mt-1.5 space-y-0.5 text-[11px] leading-snug text-ink-700/70 mobile:text-xs">
               {data.adresse && <div>Adresse : {data.adresse}</div>}
               {data.tel && <div>Tél : {data.tel}</div>}
               {data.email && <div>E-mail : {data.email}</div>}
@@ -749,12 +802,13 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
             <div className="font-display text-base font-extrabold tracking-wide text-forest-900">BULLETIN DE NOTES</div>
             <div className="text-xs font-bold text-ink-800">{ordinalSemestre(data.semestre)}</div>
           </div>
-          <div className="flex items-start gap-3">
+          {/* Téléphone : photo au-dessus de l'identité (côte à côte, il ne restait qu'environ 50 px aux valeurs). */}
+          <div className="flex items-start gap-3 mobile:flex-col-reverse mobile:items-center">
           <table className="w-full min-w-0 text-xs">
             <tbody>
               {identite.map(([k, v]) => (
                 <tr key={k}>
-                  <td className="whitespace-nowrap py-0.5 pr-2 font-semibold text-ink-700/60">{k}</td>
+                  <td className="whitespace-nowrap py-0.5 pr-2 font-semibold text-ink-700/60 mobile:whitespace-normal">{k}</td>
                   <td className="border-b border-dotted border-cream-300 py-0.5 font-bold text-ink-900">{v || " "}</td>
                 </tr>
               ))}
@@ -767,7 +821,7 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
               <img src={data.photoUrl} alt={`Photo d'identité — ${data.eleve}`} className="h-full w-full object-cover" />
             </div>
           ) : (
-            <div className="flex h-28 w-[84px] shrink-0 items-center justify-center rounded-sm border border-dashed border-cream-300 text-[10px] uppercase tracking-wide text-ink-700/40">
+            <div className="flex h-28 w-[84px] shrink-0 items-center justify-center rounded-sm border border-dashed border-cream-300 text-[10px] uppercase tracking-wide text-ink-700/40 mobile:text-xs">
               Photo
             </div>
           )}
@@ -775,9 +829,9 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
         </div>
       </div>
 
-      {/* Tableau des modules */}
+      {/* Tableau des modules — téléphone : une carte par module (« libellé : valeur »). */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-xs">
+        <table className="tableau-cartes-mobile w-full border-collapse text-xs mobile:text-sm">
           <thead>
             <tr className="bg-forest-700 text-[10px] uppercase tracking-wide text-white">
               <th className="border border-forest-600 px-2 py-1.5 text-left">Modules</th>
@@ -791,20 +845,21 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
           <tbody>
             {data.lignes.map((l, i) => (
               <tr key={i}>
-                <td className="border border-cream-200 px-2 py-1.5 font-medium text-forest-900">{l.module}</td>
-                <td className="border border-cream-200 px-2 py-1.5 text-center font-semibold text-forest-900">{fmt(l.moyenne)}</td>
-                <td className="border border-cream-200 px-2 py-1.5 text-center text-ink-700/70">{l.coef}</td>
-                <td className="border border-cream-200 px-2 py-1.5 text-center">{rangFr(l.rang)}</td>
-                <td className="border border-cream-200 px-2 py-1.5 text-center text-[11px]">{mentionCourte(l.moyenne)}</td>
-                <td className="border border-cream-200 px-2 py-1.5 text-ink-700/70">{l.prof ?? ""}</td>
+                <td className="border border-cream-200 px-2 py-1.5 font-medium text-forest-900 mobile:font-semibold">{l.module}</td>
+                <td data-label="Moyenne /20" className="border border-cream-200 px-2 py-1.5 text-center font-semibold text-forest-900">{fmt(l.moyenne)}</td>
+                <td data-label="Coef." className="border border-cream-200 px-2 py-1.5 text-center text-ink-700/70">{l.coef}</td>
+                <td data-label="Rang" className="border border-cream-200 px-2 py-1.5 text-center">{rangFr(l.rang)}</td>
+                <td data-label="Appréciation" className="border border-cream-200 px-2 py-1.5 text-center text-[11px] mobile:text-sm">{mentionCourte(l.moyenne)}</td>
+                {/* Téléphone : « — » quand aucun professeur (la cellule reste vide sur ordinateur). */}
+                <td data-label="Professeur" className="border border-cream-200 px-2 py-1.5 text-ink-700/70">{l.prof ?? <span className="hidden mobile:inline">—</span>}</td>
               </tr>
             ))}
           </tbody>
-          <tfoot>
+          <tfoot className="mobile:block">
             <tr className="bg-forest-50 font-bold text-forest-900">
               <td className="border border-cream-200 px-2 py-1.5">TOTAUX</td>
-              <td className="border border-cream-200 px-2 py-1.5 text-center">—</td>
-              <td className="border border-cream-200 px-2 py-1.5 text-center">{totalCoef}</td>
+              <td data-label="Moyenne /20" className="border border-cream-200 px-2 py-1.5 text-center">—</td>
+              <td data-label="Coef." className="border border-cream-200 px-2 py-1.5 text-center">{totalCoef}</td>
               <td className="border border-cream-200 px-2 py-1.5" colSpan={3}>Total des points : {fmt(totalPondere)}</td>
             </tr>
           </tfoot>
@@ -835,13 +890,13 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
       {/* Distinctions / décision */}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="rounded-lg border border-cream-200 p-3">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">Distinctions</div>
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800 mobile:text-xs">Distinctions</div>
           <Choix on={dist.honneur}>Tableau d&apos;honneur</Choix>
           <Choix on={dist.encouragements}>Encouragements</Choix>
           <Choix on={dist.felicitations}>Félicitations</Choix>
         </div>
         <div className="rounded-lg border border-cream-200 p-3">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">Décision du conseil de classe</div>
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800 mobile:text-xs">Décision du conseil de classe</div>
           <div className="mt-1.5 text-xs">Se référer à la décision de la DECO</div>
         </div>
       </div>
@@ -849,12 +904,12 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
       {/* Sanctions / directeur */}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="rounded-lg border border-cream-200 p-3">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">Sanctions</div>
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800 mobile:text-xs">Sanctions</div>
           <Choix on={false}>Avertissement</Choix>
           <Choix on={false}>Blâme</Choix>
         </div>
         <div className="rounded-lg border border-cream-200 p-3">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">{appliquerTerme("Le Directeur du CAFOP", data.terme ?? "CAFOP")}</div>
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800 mobile:text-xs">{appliquerTerme("Le Directeur du CAFOP", data.terme ?? "CAFOP")}</div>
           <div className="mt-6 text-xs font-bold text-ink-900">{data.directeur ?? ""}</div>
         </div>
       </div>
@@ -862,7 +917,7 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
       {/* Pied : note + téléchargement */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-forest-50 px-4 py-3">
         <p className="text-xs text-ink-700/60">Aperçu conforme au PDF · Semestre {data.semestre} · {nbNotes} note(s)</p>
-        <button type="button" onClick={onPdf} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700">
+        <button type="button" onClick={onPdf} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 mobile:h-11 mobile:w-full mobile:justify-center">
           <Download size={15} /> Télécharger PDF
         </button>
       </div>
@@ -907,11 +962,11 @@ function ImporterNotesModal({
           name="texte"
           rows={5}
           placeholder={"Nom;Prénoms;Module;Type;Note;Barème;Coefficient\nKONÉ;Moussa Ibrahim;Droits de l'Homme;Devoir surveillé;14;20;1"}
-          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <input type="file" name="fichier" accept=".csv,text/csv,.txt" className="text-xs" />
-          <div className="flex gap-2">
+          <input type="file" name="fichier" accept=".csv,text/csv,.txt" className="text-xs mobile:w-full mobile:text-sm" />
+          <div className="flex gap-2 mobile:w-full mobile:justify-end">
             <button type="button" onClick={onFerme} disabled={pending} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100 disabled:opacity-60">Annuler</button>
             <SubmitButton className="w-auto px-6"><Download size={15} /> Importer</SubmitButton>
           </div>

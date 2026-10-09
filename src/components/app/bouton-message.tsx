@@ -31,7 +31,7 @@ export function BoutonMessage({
         title={libelleAria}
         aria-label={libelleAria}
         className={cn(
-          "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cream-300 bg-white text-forest-700 transition-colors hover:border-forest-400 hover:bg-forest-50",
+          "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-cream-300 bg-white text-forest-700 transition-colors hover:border-forest-400 hover:bg-forest-50 mobile:h-11 mobile:w-11",
           className,
         )}
       >

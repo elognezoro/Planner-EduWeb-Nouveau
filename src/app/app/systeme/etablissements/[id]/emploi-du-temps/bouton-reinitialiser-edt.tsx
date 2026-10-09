@@ -63,7 +63,7 @@ export function BoutonReinitialiserEdt({ etablissementId }: { etablissementId: s
                 </h2>
                 <button
                   onClick={fermer}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11"
                   aria-label="Fermer"
                 >
                   <X size={18} />

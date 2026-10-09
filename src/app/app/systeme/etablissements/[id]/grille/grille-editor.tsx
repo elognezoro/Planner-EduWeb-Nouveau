@@ -351,9 +351,11 @@ export function GrilleNiveauEditor({
 
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[680px] border-collapse text-sm">
-          <thead>
+      {/* Téléphone : chaque ligne devient une carte de discipline — ligne 1 : nom, badges et
+          corbeille ; ligne 2 : coefficient, volume, statut ; ligne 3 : les séances à saisir. */}
+      <div className="overflow-x-auto mobile:overflow-visible">
+        <table className="w-full min-w-[680px] border-collapse text-sm mobile:block mobile:min-w-0">
+          <thead className="mobile:hidden">
             <tr className="border-b border-cream-200 text-left">
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Discipline</th>
               <th className="px-2 py-2.5 font-semibold text-ink-700/70">Coef.</th>
@@ -363,7 +365,7 @@ export function GrilleNiveauEditor({
               <th className="w-8 py-2.5" />
             </tr>
           </thead>
-          <tbody>
+          <tbody className="mobile:block mobile:space-y-2">
             {lignes.length === 0 && (
               <tr>
                 <td colSpan={6} className="py-4 text-sm text-ink-700/55">
@@ -376,11 +378,11 @@ export function GrilleNiveauEditor({
               const minutes = ligne.seances.reduce((a, b) => a + (Number(b) || 0), 0);
               const ok = ligne.seances.length > 0 && minutes > 0;
               return (
-                <tr key={d.id} className="border-b border-cream-100 last:border-0 align-top">
-                  <td className="py-2.5 pr-4 font-medium text-forest-900">
+                <tr key={d.id} className="border-b border-cream-100 last:border-0 align-top mobile:flex mobile:flex-wrap mobile:items-center mobile:gap-x-3 mobile:gap-y-2 mobile:rounded-2xl mobile:border-0 mobile:bg-white mobile:p-3 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200">
+                  <td className="py-2.5 pr-4 font-medium text-forest-900 mobile:order-1 mobile:min-w-0 mobile:basis-[calc(100%-4rem)] mobile:p-0">
                     <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ backgroundColor: d.couleur ?? "#999" }} />
                     {renommeId === d.id ? (
-                      <span className="inline-flex items-center gap-1.5 align-middle">
+                      <span className="inline-flex items-center gap-1.5 align-middle mobile:mt-1 mobile:flex">
                         <input
                           value={renommeNom}
                           onChange={(e) => setRenommeNom(e.target.value)}
@@ -390,12 +392,12 @@ export function GrilleNiveauEditor({
                           }}
                           autoFocus
                           maxLength={80}
-                          className="h-7 w-48 rounded border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                          className="h-7 w-48 rounded border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-10 mobile:min-w-0 mobile:flex-1"
                         />
-                        <button type="button" onClick={renommerDiscipline} disabled={pendingRen} title="Enregistrer le nom" className="flex h-6 w-6 items-center justify-center rounded text-forest-700 hover:bg-forest-50 disabled:opacity-50">
+                        <button type="button" onClick={renommerDiscipline} disabled={pendingRen} title="Enregistrer le nom" className="flex h-6 w-6 items-center justify-center rounded text-forest-700 hover:bg-forest-50 disabled:opacity-50 mobile:h-10 mobile:w-10">
                           {pendingRen ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
                         </button>
-                        <button type="button" onClick={() => setRenommeId(null)} title="Annuler" className="flex h-6 w-6 items-center justify-center rounded text-ink-700/40 hover:bg-cream-100">
+                        <button type="button" onClick={() => setRenommeId(null)} title="Annuler" className="flex h-6 w-6 items-center justify-center rounded text-ink-700/40 hover:bg-cream-100 mobile:h-10 mobile:w-10">
                           <X size={13} />
                         </button>
                       </span>
@@ -407,7 +409,7 @@ export function GrilleNiveauEditor({
                           onClick={() => ouvrirRenommage(d.id, d.nom)}
                           title={`Renommer ${d.nom} pour cet établissement`}
                           aria-label={`Renommer la discipline ${d.nom}`}
-                          className="ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full align-middle text-ink-700/35 hover:bg-forest-50 hover:text-forest-700"
+                          className="ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full align-middle text-ink-700/35 hover:bg-forest-50 hover:text-forest-700 mobile:h-10 mobile:w-10 mobile:ml-0.5"
                         >
                           <Pencil size={12} />
                         </button>
@@ -415,7 +417,7 @@ export function GrilleNiveauEditor({
                     )}
                     {facultatives.has(d.id) && (
                       <span
-                        className="ml-2 rounded-full bg-gold-100 px-2 py-0.5 align-middle text-[0.65rem] font-semibold text-gold-800"
+                        className="ml-2 rounded-full bg-gold-100 px-2 py-0.5 align-middle text-[0.65rem] font-semibold text-gold-800 mobile:inline-block mobile:text-xs"
                         title="Facultative (modèle national) : non générée par défaut. Conservez-la pour l'inclure dans votre grille, ou retirez-la."
                       >
                         facultative
@@ -423,7 +425,7 @@ export function GrilleNiveauEditor({
                     )}
                     {estParentAOptions(d.nom) && (
                       <span
-                        className="ml-2 rounded-full bg-forest-50 px-2 py-0.5 align-middle text-[0.6rem] font-semibold text-forest-700"
+                        className="ml-2 rounded-full bg-forest-50 px-2 py-0.5 align-middle text-[0.6rem] font-semibold text-forest-700 mobile:inline-block mobile:text-xs"
                         title="Discipline à options : à la génération de l'EDT, chaque classe reçoit une option concrète (ex. LV2-Allemand/LV2-Espagnol, Arts Plastiques/Musique) selon les enseignants disponibles."
                       >
                         déclinée par classe
@@ -433,40 +435,44 @@ export function GrilleNiveauEditor({
                         pas d'invitation à la remplacer par sa discipline-parent. */}
                     {!listeRestreinte && parentDeOption(d.nom) && (
                       <span
-                        className="ml-2 rounded-full bg-gold-50 px-2 py-0.5 align-middle text-[0.6rem] font-semibold text-gold-700"
+                        className="ml-2 rounded-full bg-gold-50 px-2 py-0.5 align-middle text-[0.6rem] font-semibold text-gold-700 mobile:inline-block mobile:text-xs"
                         title={`Option de « ${parentDeOption(d.nom)} ». Désormais, seule la discipline-parent se déclare ici ; retirez cette ligne et ajoutez « ${parentDeOption(d.nom)} ».`}
                       >
                         option · {parentDeOption(d.nom)}
                       </span>
                     )}
                   </td>
-                  <td className="px-2 py-2.5">
+                  <td className="px-2 py-2.5 mobile:order-3 mobile:flex mobile:items-center mobile:gap-2 mobile:p-0">
+                    <span aria-hidden className="hidden text-sm font-medium text-ink-700/70 mobile:inline">Coef.</span>
                     <input
                       type="number"
                       min={0}
                       step={1}
                       value={ligne.coef}
                       onChange={(e) => setCoef(d.id, Number(e.target.value))}
-                      className="h-8 w-16 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                      aria-label={`Coefficient de ${d.nom}`}
+                      className="h-8 w-16 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-10"
                     />
                   </td>
-                  <td className="px-2 py-2.5">
-                    <div className="flex flex-wrap items-center gap-1.5">
+                  <td className="px-2 py-2.5 mobile:order-6 mobile:basis-full mobile:p-0">
+                    <p className="mb-1.5 hidden text-sm font-medium text-ink-700/70 mobile:block">Séances (durée en min)</p>
+                    <div className="flex flex-wrap items-center gap-1.5 mobile:gap-2">
                       {ligne.seances.map((s, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 rounded-lg border border-cream-300 bg-cream-50 py-0.5 pl-1.5 pr-0.5">
+                        <span key={i} className="inline-flex items-center gap-1 rounded-lg border border-cream-300 bg-cream-50 py-0.5 pl-1.5 pr-0.5 mobile:h-11">
                           <input
                             type="number"
                             min={0}
                             step={5}
                             value={s}
                             onChange={(e) => setSeance(d.id, i, Number(e.target.value))}
-                            className="h-7 w-14 rounded border-0 bg-transparent px-1 text-sm outline-none"
+                            aria-label={`Durée de la séance ${i + 1} (min)`}
+                            className="h-7 w-14 rounded border-0 bg-transparent px-1 text-sm outline-none mobile:h-9 mobile:w-16"
                           />
-                          <span className="text-[0.6rem] text-ink-700/50">min</span>
+                          <span className="text-[0.6rem] text-ink-700/50 mobile:text-xs mobile:text-ink-700/70">min</span>
                           <button
                             type="button"
                             onClick={() => removeSeance(d.id, i)}
-                            className="flex h-5 w-5 items-center justify-center rounded text-ink-700/40 hover:bg-red-50 hover:text-red-600"
+                            className="flex h-5 w-5 items-center justify-center rounded text-ink-700/40 hover:bg-red-50 hover:text-red-600 mobile:ml-1 mobile:h-9 mobile:w-9"
                             aria-label="Retirer la séance"
                           >
                             <X size={12} />
@@ -476,25 +482,28 @@ export function GrilleNiveauEditor({
                       <button
                         type="button"
                         onClick={() => addSeance(d.id)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-dashed border-forest-300 px-2 py-1 text-xs font-medium text-forest-700 hover:bg-forest-50"
+                        className="inline-flex items-center gap-1 rounded-lg border border-dashed border-forest-300 px-2 py-1 text-xs font-medium text-forest-700 hover:bg-forest-50 mobile:min-h-11 mobile:px-3 mobile:text-sm"
                       >
                         <Plus size={12} /> séance
                       </button>
                     </div>
                   </td>
-                  <td className="px-2 py-2.5 text-right font-semibold text-forest-800">{formatVolume(minutes)}</td>
-                  <td className="px-2 py-2.5 text-center">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${ok ? "bg-forest-100 text-forest-800" : "bg-gold-100 text-gold-800"}`}>
+                  <td className="px-2 py-2.5 text-right font-semibold text-forest-800 mobile:order-4 mobile:p-0">
+                    <span className="hidden font-medium text-ink-700/70 mobile:inline">Volume : </span>
+                    {formatVolume(minutes)}
+                  </td>
+                  <td className="px-2 py-2.5 text-center mobile:order-5 mobile:ml-auto mobile:p-0">
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${ok ? "bg-forest-100 text-forest-800" : "bg-gold-100 text-gold-800"} mobile:text-xs`}>
                       {ok ? "OK" : "À définir"}
                     </span>
                   </td>
-                  <td className="px-2 py-2.5 text-center">
+                  <td className="px-2 py-2.5 text-center mobile:order-2 mobile:ml-auto mobile:p-0">
                     <button
                       type="button"
                       onClick={() => removeDiscipline(d.id)}
                       title={`Retirer ${d.nom} de ce niveau`}
                       aria-label={`Retirer la discipline ${d.nom}`}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -503,13 +512,13 @@ export function GrilleNiveauEditor({
               );
             })}
           </tbody>
-          <tfoot>
-            <tr className="border-t border-cream-200">
-              <td className="py-2.5 pr-4 font-medium text-ink-700/70">Total — {niveauNom}</td>
-              <td />
-              <td className="px-2 py-2.5 font-semibold text-gold-700">{totalSeances} séance(s)</td>
-              <td className="px-2 py-2.5 text-right font-display font-bold text-forest-900">{formatVolume(totalMinutes)}</td>
-              <td colSpan={2} />
+          <tfoot className="mobile:mt-2 mobile:block">
+            <tr className="border-t border-cream-200 mobile:flex mobile:flex-wrap mobile:items-baseline mobile:justify-between mobile:gap-x-3 mobile:gap-y-1 mobile:rounded-2xl mobile:border-0 mobile:bg-cream-50 mobile:p-3">
+              <td className="py-2.5 pr-4 font-medium text-ink-700/70 mobile:basis-full mobile:p-0">Total — {niveauNom}</td>
+              <td className="mobile:hidden" />
+              <td className="px-2 py-2.5 font-semibold text-gold-700 mobile:p-0">{totalSeances} séance(s)</td>
+              <td className="px-2 py-2.5 text-right font-display font-bold text-forest-900 mobile:p-0">{formatVolume(totalMinutes)}</td>
+              <td colSpan={2} className="mobile:hidden" />
             </tr>
           </tfoot>
         </table>
@@ -525,7 +534,7 @@ export function GrilleNiveauEditor({
               onChange={(e) => setAjout(e.target.value)}
               aria-label={`Ajouter une discipline à ${niveauNom}`}
               aria-describedby={listeRestreinte ? idAideRestreinte : undefined}
-              className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
+              className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:min-w-0"
             >
               <option value="">{listeRestreinte ? "Ajouter une discipline de l'établissement…" : "Ajouter depuis la liste…"}</option>
               {dispoAjout.map((d) => (
@@ -536,14 +545,14 @@ export function GrilleNiveauEditor({
               type="button"
               onClick={addDiscipline}
               disabled={!ajout}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-11 mobile:text-sm"
             >
               <Plus size={14} /> Ajouter
             </button>
           </div>
         )}
         {listeRestreinte && (
-          <p id={idAideRestreinte} className="text-[0.7rem] text-ink-700/55">
+          <p id={idAideRestreinte} className="text-[0.7rem] text-ink-700/55 mobile:text-xs mobile:text-ink-700/70">
             Au primaire/préscolaire, les spécialités du secondaire ne sont pas proposées : créez les
             disciplines de ce niveau par saisie — chacune s&apos;ajoute aussitôt à ce niveau, puis
             reste proposée dans la liste pour les autres niveaux.
@@ -562,13 +571,13 @@ export function GrilleNiveauEditor({
             placeholder="Créer une discipline par saisie…"
             aria-label={`Créer une discipline et l'ajouter à ${niveauNom}`}
             aria-describedby={listeRestreinte ? idAideRestreinte : undefined}
-            className="h-9 w-60 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="h-9 w-60 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full"
           />
           <button
             type="button"
             onClick={creerDiscipline}
             disabled={pendingDisc || !nouvelleDisc.trim()}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-11 mobile:text-sm"
           >
             {pendingDisc ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Créer
           </button>
@@ -578,14 +587,14 @@ export function GrilleNiveauEditor({
         <p role="status" aria-live="polite" className={msgDisc ? "text-xs text-ink-700/70" : "sr-only"}>
           {msgDisc ?? ""}
         </p>
-        <p className="text-[0.7rem] text-ink-700/45">
+        <p className="text-[0.7rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">
           « Créer » ajoute la discipline à ce niveau et à la liste de l&apos;établissement (si elle existe déjà, elle est simplement ajoutée à ce niveau). Vos saisies de la grille sont enregistrées automatiquement : vous ne perdez rien en créant une discipline.
         </p>
       </div>
 
       {/* Enregistrement : automatique au fil de la saisie + bouton manuel (rassurance). */}
       <div className="flex flex-wrap items-center gap-3">
-        <SubmitButton className="w-auto px-8">Enregistrer la grille de {niveauNom}</SubmitButton>
+        <SubmitButton className="w-auto px-8 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:py-2">Enregistrer la grille de {niveauNom}</SubmitButton>
         <span aria-live="polite" className="inline-flex items-center gap-1.5 text-xs">
           {autoEtat === "encours" && (
             <span className="inline-flex items-center gap-1.5 text-ink-700/60">

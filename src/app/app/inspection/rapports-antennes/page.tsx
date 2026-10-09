@@ -227,7 +227,7 @@ export default async function RapportsAntennesInspectionPage({
         <BoutonImprimerApfc />
       </div>
 
-      <div className="apfc-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8">
+      <div className="apfc-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8 mobile:p-4">
         <style
           dangerouslySetInnerHTML={{
             __html: `@media print { @page { size: A4 portrait; margin: 12mm; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .apfc-feuille { border: 0 !important; box-shadow: none !important; padding: 0 !important; } }`,
@@ -244,7 +244,7 @@ export default async function RapportsAntennesInspectionPage({
           />
         )}
 
-        <div className="mb-5 grid gap-4 sm:grid-cols-3">
+        <div className="mb-5 grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:last:odd:col-span-2">
           <StatCard libelle="Établissements visités" valeur={kpis.etablissements} icone={<Network size={22} />} />
           <StatCard libelle="Visites" valeur={kpis.visites} icone={<Stamp size={22} />} ton="gold" />
           <StatCard libelle="Recommandations à suivre" valeur={kpis.recosOuvertes} icone={<ListChecks size={22} />} />
@@ -261,7 +261,8 @@ export default async function RapportsAntennesInspectionPage({
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+            {/* Téléphone : une carte par établissement (« libellé : valeur »). */}
+            <table className="tableau-cartes-mobile w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs text-ink-700/65">
                   <th className="py-2.5 pr-3 font-semibold">Établissement</th>
@@ -274,11 +275,11 @@ export default async function RapportsAntennesInspectionPage({
               <tbody>
                 {lignes.map((l) => (
                   <tr key={l.nom} className="border-b border-cream-100 last:border-0">
-                    <td className="py-2.5 pr-3 font-medium text-forest-900">{l.nom}</td>
-                    <td className="px-2 py-2.5 text-right text-ink-700/80">{l.visites}</td>
-                    <td className="px-2 py-2.5 text-right text-ink-700/70">{l.realisees}</td>
-                    <td className="px-2 py-2.5 text-right text-gold-700">{l.recosOuvertes}</td>
-                    <td className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.moyenne ?? "—"}</td>
+                    <td className="py-2.5 pr-3 font-medium text-forest-900 mobile:font-semibold">{l.nom}</td>
+                    <td data-label="Visites" className="px-2 py-2.5 text-right text-ink-700/80">{l.visites}</td>
+                    <td data-label="Réalisées" className="px-2 py-2.5 text-right text-ink-700/70">{l.realisees}</td>
+                    <td data-label="Reco. à suivre" className="px-2 py-2.5 text-right text-gold-700">{l.recosOuvertes}</td>
+                    <td data-label="Moy. /20" className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.moyenne ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -363,17 +364,18 @@ export default async function RapportsAntennesInspectionPage({
                     href={`/app/inspection/rapports-antennes/rapport-word?type=${type}&apfc=${encodeURIComponent(
                       apfcChoisie.id,
                     )}&periode=${encodeURIComponent(chainePeriode(periode))}&debut=${fenetre.debutIso}&fin=${fenetre.finIso}`}
-                    className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:h-11"
                   >
                     <Download size={15} /> Télécharger (Word)
                   </a>
                 </div>
               </div>
 
-              {/* En-tête officiel 2 colonnes (mentions configurables, pointillés du modèle). */}
+              {/* En-tête officiel 2 colonnes (mentions configurables, pointillés du modèle).
+                  Téléphone : mentions en 14 px, coupées si un mot (« L'ALPHABÉTISATION ») dépasse la colonne. */}
               <Card>
                 <div className="grid grid-cols-2 items-start gap-4">
-                  <div className="text-[0.7rem] font-semibold uppercase leading-snug text-forest-900">
+                  <div className="text-[0.7rem] font-semibold uppercase leading-snug text-forest-900 mobile:min-w-0 mobile:text-xs mobile:wrap-break-word">
                     <p>{enteteEffectif.ministere}</p>
                     <Pointille />
                     {enteteEffectif.directionRegionale && (
@@ -390,7 +392,7 @@ export default async function RapportsAntennesInspectionPage({
                       </>
                     )}
                   </div>
-                  <div className="text-center text-[0.7rem] leading-tight text-ink-700/80">
+                  <div className="text-center text-[0.7rem] leading-tight text-ink-700/80 mobile:min-w-0 mobile:text-xs mobile:leading-snug mobile:wrap-break-word">
                     <p className="font-semibold uppercase text-forest-900">{enteteEffectif.republique}</p>
                     {armoiries && (
                       <Image

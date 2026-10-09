@@ -36,9 +36,10 @@ function noteFr(note: number | null): string {
 /** Petite tuile chiffrée des sections statistiques (plus discrète que StatCard). */
 function Tuile({ libelle, valeur }: { libelle: string; valeur: ReactNode }) {
   return (
-    <div className="rounded-xl border border-cream-200 bg-white px-3 py-2.5">
+    <div className="rounded-xl border border-cream-200 bg-white px-3 py-2.5 mobile:px-2.5">
       <p className="font-display text-lg font-bold leading-tight text-forest-900">{valeur}</p>
-      <p className="text-[11px] text-ink-700/65">{libelle}</p>
+      {/* Téléphone : plancher de 14 px pour les libellés, coupés (césure) au lieu de déborder de la tuile. */}
+      <p className="text-[11px] text-ink-700/65 mobile:text-xs mobile:leading-snug mobile:hyphens-auto mobile:[overflow-wrap:anywhere]">{libelle}</p>
     </div>
   );
 }
@@ -46,8 +47,8 @@ function Tuile({ libelle, valeur }: { libelle: string; valeur: ReactNode }) {
 /** Sous-carte d'une section statistique (titre + contenu), lisible à l'impression. */
 function BlocStat({ titre, children }: { titre: string; children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-cream-200 bg-cream-50/40 p-3.5">
-      <h3 className="mb-2 text-[13px] font-semibold text-forest-900">{titre}</h3>
+    <div className="rounded-2xl border border-cream-200 bg-cream-50/40 p-3.5 mobile:p-3">
+      <h3 className="mb-2 text-[13px] font-semibold text-forest-900 mobile:text-sm">{titre}</h3>
       {children}
     </div>
   );
@@ -67,7 +68,7 @@ function TableRepartition({
   return (
     <table className="w-full border-collapse text-xs">
       <thead>
-        <tr className="border-b border-cream-200 text-left text-[11px] text-ink-700/60">
+        <tr className="border-b border-cream-200 text-left text-[11px] text-ink-700/60 mobile:text-xs">
           <th className="py-1.5 pr-2 font-semibold">{enteteLibelle}</th>
           <th className="py-1.5 text-right font-semibold">{enteteNombre}</th>
         </tr>
@@ -301,7 +302,8 @@ export default async function SupervisionApfcPage({
         <BoutonImprimerApfc />
       </div>
 
-      <div className="apfc-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8">
+      {/* Téléphone : marge réduite (la feuille contient elle-même des cartes, double marge sinon). */}
+      <div className="apfc-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8 mobile:p-4">
         <style
           dangerouslySetInnerHTML={{
             __html: `@media print { @page { size: A4 portrait; margin: 12mm; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .apfc-feuille { border: 0 !important; box-shadow: none !important; padding: 0 !important; } }`,
@@ -327,7 +329,7 @@ export default async function SupervisionApfcPage({
           <p className="text-sm text-ink-700/70">{T("Impossible de charger la supervision des APFC.")}</p>
         ) : (
           <>
-            <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
               <StatCard libelle={T("Antennes (APFC)")} valeur={kpis.antennes} icone={<Network size={22} />} />
               <StatCard libelle="Cohortes actives" valeur={kpis.cohortesActives} icone={<Layers size={22} />} ton="gold" />
               <StatCard libelle="Sans chef d'antenne" valeur={kpis.sansChefAntenne} icone={<Radar size={22} />} />
@@ -392,7 +394,8 @@ export default async function SupervisionApfcPage({
               <p className="text-sm text-ink-700/60">{T("Aucune APFC dans votre périmètre.")}</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-sm">
+                {/* Téléphone : une carte par antenne (« libellé : valeur »), sans défilement latéral. */}
+                <table className="tableau-cartes-mobile w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-cream-200 text-left text-xs text-ink-700/65">
                       <th className="py-2.5 pr-3 font-semibold">Antenne</th>
@@ -409,14 +412,14 @@ export default async function SupervisionApfcPage({
                   </thead>
                   <tbody>
                     {lignes.map((l) => (
-                      <tr key={l.id} className={`border-b border-cream-100 last:border-0 ${detail?.id === l.id ? "bg-forest-50/50" : ""}`}>
-                        <td className="py-2.5 pr-3 font-medium text-forest-900">{l.nom}</td>
-                        <td className="px-2 py-2.5 text-ink-700/70">{l.region}</td>
-                        <td className="px-2 py-2.5 text-right text-ink-700/80">{l.cohortesActives}</td>
-                        <td className="px-2 py-2.5 text-right text-ink-700/70">{l.cohortesCloturees}</td>
-                        <td className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.apprenants}</td>
-                        <td className="px-2 py-2.5 text-right text-ink-700/70">{l.etablissementsCouverts}</td>
-                        <td className="px-2 py-2.5 text-right">
+                      <tr key={l.id} className={`border-b border-cream-100 last:border-0 ${detail?.id === l.id ? "bg-forest-50/50 mobile:bg-forest-50! mobile:border-forest-300!" : ""}`}>
+                        <td className="py-2.5 pr-3 font-medium text-forest-900 mobile:text-base mobile:font-semibold">{l.nom}</td>
+                        <td data-label="Région" className="px-2 py-2.5 text-ink-700/70">{l.region}</td>
+                        <td data-label="Cohortes actives" className="px-2 py-2.5 text-right text-ink-700/80">{l.cohortesActives}</td>
+                        <td data-label="Clôturées" className="px-2 py-2.5 text-right text-ink-700/70">{l.cohortesCloturees}</td>
+                        <td data-label="Apprenants" className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.apprenants}</td>
+                        <td data-label="Étab. couverts" className="px-2 py-2.5 text-right text-ink-700/70">{l.etablissementsCouverts}</td>
+                        <td data-label="Encadrement" className="px-2 py-2.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             {l.chefAntenne ? (
                               <Badge ton="succes">Chef d&apos;antenne</Badge>
@@ -433,7 +436,7 @@ export default async function SupervisionApfcPage({
                         <td className="px-2 py-2.5 text-right print:hidden">
                           <Link
                             href={`?apfc=${l.id}#detail-apfc`}
-                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-cream-200 bg-white px-2 py-1 text-xs font-semibold text-forest-700 transition hover:bg-forest-50"
+                            className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-cream-200 bg-white px-2 py-1 text-xs font-semibold text-forest-700 transition hover:bg-forest-50 mobile:mt-1 mobile:flex mobile:min-h-11 mobile:w-full mobile:justify-center mobile:rounded-full mobile:text-sm"
                             aria-label={`Statistiques détaillées — ${l.nom}`}
                           >
                             <BarChart3 size={13} /> Statistiques
@@ -454,7 +457,7 @@ export default async function SupervisionApfcPage({
                   </h2>
                   <Link
                     href="/app/inspection/supervision-apfc"
-                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-cream-200 bg-white px-2 py-1 text-xs font-semibold text-ink-700/70 transition hover:bg-cream-100 print:hidden"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-cream-200 bg-white px-2 py-1 text-xs font-semibold text-ink-700/70 transition hover:bg-cream-100 print:hidden mobile:min-h-11 mobile:px-3"
                     aria-label="Fermer les statistiques détaillées"
                   >
                     <X size={13} /> Fermer
@@ -491,7 +494,7 @@ export default async function SupervisionApfcPage({
                     </div>
                     {detail.sessions.length > 0 && (
                       <>
-                        <p className="mb-1 text-[11px] font-semibold text-ink-700/60">Dernières sessions</p>
+                        <p className="mb-1 text-[11px] font-semibold text-ink-700/60 mobile:text-xs">Dernières sessions</p>
                         <table className="w-full border-collapse text-xs">
                           <tbody>
                             {detail.sessions.map((s) => (
@@ -535,7 +538,7 @@ export default async function SupervisionApfcPage({
                     />
                     {detail.topLocalites.length > 0 && (
                       <div className="mt-2">
-                        <p className="mb-1 text-[11px] font-semibold text-ink-700/60">Principales localités</p>
+                        <p className="mb-1 text-[11px] font-semibold text-ink-700/60 mobile:text-xs">Principales localités</p>
                         <div className="flex flex-wrap gap-1.5">
                           {detail.topLocalites.map((v) => (
                             <Puce key={v.libelle} libelle={v.libelle} nombre={v.nombre} />

@@ -23,7 +23,7 @@ export function FormTuteur({ coursId }: { coursId: string }) {
           <label className="mb-1 block text-sm font-medium text-forest-900">Ajouter un tuteur <span className="font-normal text-ink-700/50">(e-mail du compte)</span></label>
           <input name="email" type="email" required placeholder="tuteur@exemple.org" className={champ} />
         </div>
-        <SubmitButton className="w-auto px-5"><UserPlus size={15} /> Ajouter</SubmitButton>
+        <SubmitButton className="w-auto px-5 mobile:w-full"><UserPlus size={15} /> Ajouter</SubmitButton>
       </div>
     </form>
   );
@@ -35,6 +35,6 @@ export function SupprimerTuteurBtn({ id }: { id: string }) {
   return (
     <button type="button" disabled={pending} title="Retirer ce tuteur"
       onClick={async () => { setPending(true); await retirerTuteur(id); router.refresh(); }}
-      className="rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"><Trash2 size={14} /></button>
+      className="rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center"><Trash2 size={14} /></button>
   );
 }

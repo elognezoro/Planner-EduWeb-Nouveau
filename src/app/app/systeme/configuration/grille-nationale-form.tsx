@@ -15,7 +15,7 @@ export function FiltrePaysConfiguration({ pays }: { pays: string }) {
   const info = trouverPays(pays);
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-cream-200 bg-white px-4 py-3 shadow-soft">
-      <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55">
+      <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs">
         Pays
       </span>
       {info && (
@@ -25,7 +25,9 @@ export function FiltrePaysConfiguration({ pays }: { pays: string }) {
       <select
         value={pays}
         onChange={(e) => router.push(`/app/systeme/configuration?pays=${encodeURIComponent(e.target.value)}`)}
-        className="h-10 rounded-full border border-cream-300 bg-white px-4 pr-8 text-sm font-medium text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        // Téléphone : pleine largeur — sinon « République démocratique du Congo » (≈ 330 px)
+        // élargit le bandeau et fait défiler la page en largeur.
+        className="h-10 rounded-full border border-cream-300 bg-white px-4 pr-8 text-sm font-medium text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full mobile:min-w-0"
         aria-label="Pays dont on définit les conditions nationales"
       >
         {PAYS_ONU.map((p) => (
@@ -34,7 +36,7 @@ export function FiltrePaysConfiguration({ pays }: { pays: string }) {
           </option>
         ))}
       </select>
-      <span className="text-xs text-ink-700/55">
+      <span className="text-xs text-ink-700/55 mobile:basis-full">
         Les paramètres ci-dessous (grille horaire nationale…) s&apos;appliquent par défaut aux
         établissements de ce pays — chaque établissement peut ensuite les personnaliser.
       </span>
@@ -72,7 +74,10 @@ export function GrilleNationaleForm({
         <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-cream-200 text-left">
-              <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Discipline</th>
+              {/* Téléphone : colonne « Discipline » figée pendant le défilement horizontal de la
+                  grille (masquage CSS seulement : tous les champs restent montés — l'enregistrement
+                  recrée la grille du pays à partir des SEULS champs reçus). */}
+              <th className="py-2.5 pr-4 font-semibold text-ink-700/70 mobile:sticky mobile:left-0 mobile:z-10 mobile:w-32 mobile:bg-white mobile:shadow-[1px_0_0_var(--color-cream-200)]">Discipline</th>
               {niveaux.map((n) => (
                 <th key={n.id} className="px-1 py-2.5 text-center font-semibold text-ink-700/70">
                   {n.nom}
@@ -83,7 +88,7 @@ export function GrilleNationaleForm({
           <tbody>
             {disciplines.map((d) => (
               <tr key={d.id} className="border-b border-cream-100 last:border-0">
-                <td className="py-2 pr-4 font-medium text-forest-900">
+                <td className="py-2 pr-4 font-medium text-forest-900 mobile:sticky mobile:left-0 mobile:z-10 mobile:bg-white mobile:leading-snug mobile:shadow-[1px_0_0_var(--color-cream-200)]">
                   <span
                     className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
                     style={{ backgroundColor: d.couleur ?? "#999" }}
@@ -105,7 +110,7 @@ export function GrilleNationaleForm({
                         defaultValue={valeur || ""}
                         placeholder="—"
                         aria-label={`${d.nom} — ${n.nom} (heures / semaine)`}
-                        className="h-8 w-14 rounded-lg border border-cream-300 bg-white px-1 text-center text-sm outline-none placeholder:text-ink-700/25 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                        className="h-8 w-14 rounded-lg border border-cream-300 bg-white px-1 text-center text-sm outline-none placeholder:text-ink-700/25 focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-16"
                       />
                     </td>
                   );
@@ -116,7 +121,7 @@ export function GrilleNationaleForm({
         </table>
       </div>
       <div className="mt-4 flex justify-end">
-        <SubmitButton className="w-auto px-6">Enregistrer la grille nationale</SubmitButton>
+        <SubmitButton className="w-auto px-6 mobile:w-full">Enregistrer la grille nationale</SubmitButton>
       </div>
     </form>
   );

@@ -42,7 +42,7 @@ export default async function ForumPage({ params }: { params: Promise<{ slug: st
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/cours/${slug}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+      <Link href={`${BASE}/cours/${slug}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden">
         <ArrowLeft size={15} /> Retour au cours
       </Link>
 

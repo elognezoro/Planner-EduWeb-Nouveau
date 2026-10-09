@@ -64,16 +64,17 @@ export default async function GrilleSupervisionPage({ params }: { params: Promis
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {/* Téléphone : les deux liens passent à 44 px de haut (cibles tactiles). */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/app/inspection/visites"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:min-h-11"
         >
           <ArrowLeft size={15} /> Retour aux visites
         </Link>
         <Link
           href={`/app/inspection/visites/${visite.id}/grille/imprimer`}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:h-11"
         >
           <Printer size={15} /> Fiche imprimable
         </Link>

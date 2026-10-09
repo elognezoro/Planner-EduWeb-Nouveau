@@ -13,6 +13,7 @@ import {
   type EtatForm,
 } from "./config-actions";
 import { FormAlert } from "@/components/ui/form";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 
 const initial: EtatForm = { ok: false };
 
@@ -24,11 +25,11 @@ const initial: EtatForm = { ok: false };
 function BoutonsNiveaux({ actionCalcul }: { actionCalcul: (fd: FormData) => void }) {
   const { pending } = useFormStatus();
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3 mobile:flex-col mobile:items-stretch mobile:gap-2">
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 disabled:pointer-events-none disabled:opacity-70"
+        className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 disabled:pointer-events-none disabled:opacity-70 mobile:justify-center"
       >
         {pending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
         Enregistrer
@@ -37,7 +38,7 @@ function BoutonsNiveaux({ actionCalcul }: { actionCalcul: (fd: FormData) => void
         type="submit"
         formAction={actionCalcul}
         disabled={pending}
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-70"
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-70 mobile:h-auto mobile:min-h-11 mobile:py-2"
       >
         <Calculator size={16} /> Calculer les classes pédagogiques
       </button>
@@ -85,6 +86,9 @@ export function NiveauxForm({
     setNouveauCycle(cycleParDefaut ?? "lycee");
   }
   const [message, setMessage] = useState<string | null>(null);
+  // Téléphone seulement : nom du champ « Effectif » (sa légende visible y est aria-hidden) ;
+  // sur ordinateur, le champ garde le nom de HEAD.
+  const ecranMobile = useEcranMobile();
 
   const totalClasses = lignes.reduce((acc, l) => acc + l.nbClasses, 0);
   const totalEleves = lignes.reduce((acc, l) => acc + (l.effectif || 0), 0);
@@ -129,14 +133,16 @@ export function NiveauxForm({
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       {message && <FormAlert ton="erreur">{message}</FormAlert>}
 
-      <div className="relative overflow-x-auto">
+      {/* Téléphone : une carte par niveau — ligne 1 : nom et boutons ; ligne 2 : effectif et
+          effectif par classe ; ligne 3 : vacation ; ligne 4 : classes calculées. */}
+      <div className="relative overflow-x-auto mobile:overflow-visible">
         {pending && (
           <div className="absolute right-0 top-0 z-10 flex items-center gap-1.5 text-xs text-ink-700/60">
             <Loader2 size={13} className="animate-spin" /> mise à jour…
           </div>
         )}
-        <table className="w-full min-w-[700px] border-collapse text-sm">
-          <thead>
+        <table className="w-full min-w-[700px] border-collapse text-sm mobile:block mobile:min-w-0">
+          <thead className="mobile:hidden">
             <tr className="border-b border-cream-200 text-left">
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Niveau</th>
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Effectif élèves</th>
@@ -146,11 +152,12 @@ export function NiveauxForm({
               <th className="w-28 py-2.5" />
             </tr>
           </thead>
-          <tbody>
+          <tbody className="mobile:block mobile:space-y-2">
             {lignes.map((l, idx) => (
-              <tr key={l.niveauId} className="border-b border-cream-100 last:border-0">
-                <td className="py-2 pr-4 font-medium text-forest-900">{l.nom}</td>
-                <td className="py-2 pr-4">
+              <tr key={l.niveauId} className="border-b border-cream-100 last:border-0 mobile:flex mobile:flex-wrap mobile:items-center mobile:gap-x-2 mobile:gap-y-2 mobile:rounded-2xl mobile:border-0 mobile:bg-white mobile:p-3 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200">
+                <td className="py-2 pr-4 font-medium text-forest-900 mobile:order-1 mobile:min-w-0 mobile:basis-[calc(100%-9rem)] mobile:p-0 mobile:font-semibold">{l.nom}</td>
+                <td className="py-2 pr-4 mobile:order-3 mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+                  <span aria-hidden className="mb-1 hidden text-xs font-medium text-ink-700/70 mobile:block">Effectif</span>
                   {/* key incluant la valeur serveur : après enregistrement, React remonte
                       le champ avec la valeur persistée (sinon le reset de formulaire des
                       actions serveur ferait « disparaître » la saisie à l'écran). */}
@@ -161,21 +168,25 @@ export function NiveauxForm({
                     min={0}
                     defaultValue={l.effectif || ""}
                     placeholder="0"
-                    className="h-9 w-28 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                    aria-label={ecranMobile ? `Effectif d'élèves de ${l.nom}` : undefined}
+                    className="h-9 w-28 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full"
                   />
                 </td>
-                <td className="py-2 pr-4">
+                <td className="py-2 pr-4 mobile:order-5 mobile:min-w-0 mobile:grow mobile:basis-full mobile:p-0">
+                  <span aria-hidden className="mb-1 hidden text-xs font-medium text-ink-700/70 mobile:block">Vacation</span>
                   <select
                     key={`${l.niveauId}:${l.vacation}`}
                     name={`vacation_${l.niveauId}`}
                     defaultValue={l.vacation}
-                    className="h-9 w-28 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                    aria-label={`Vacation de ${l.nom}`}
+                    className="h-9 w-28 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full mobile:px-1.5"
                   >
                     <option value="simple">Simple</option>
                     <option value="double">Double</option>
                   </select>
                 </td>
-                <td className="py-2 pr-4">
+                <td className="py-2 pr-4 mobile:order-4 mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+                  <span aria-hidden className="mb-1 hidden text-xs font-medium text-ink-700/70 mobile:block">Eff. / classe</span>
                   {/* Effectif indicatif PAR CLASSE de CE niveau — second rang : vide, c'est la
                       valeur prioritaire « Effectif souhaité / classe » (en filigrane) qui s'applique. */}
                   <input
@@ -188,13 +199,14 @@ export function NiveauxForm({
                     placeholder={String(effectifClasseGlobal)}
                     title={`Effectif souhaité par classe pour ce niveau — vide = la valeur prioritaire « Effectif souhaité / classe » (${effectifClasseGlobal}) s'applique`}
                     aria-label={`Effectif souhaité par classe pour ${l.nom}`}
-                    className="h-9 w-24 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                    className="h-9 w-24 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full"
                   />
                 </td>
-                <td className="py-2 pr-4 text-right font-semibold text-forest-800">
+                <td className="py-2 pr-4 text-right font-semibold text-forest-800 mobile:order-6 mobile:basis-full mobile:p-0 mobile:text-left">
+                  <span className="hidden font-medium text-ink-700/70 mobile:inline">Classes calculées : </span>
                   {l.nbClasses || "—"}
                 </td>
-                <td className="py-2 text-right">
+                <td className="py-2 text-right mobile:order-2 mobile:ml-auto mobile:p-0">
                   <span className="inline-flex items-center">
                     {/* Réorganisation de l'ordre des niveaux (propre à cet établissement). */}
                     <button
@@ -203,7 +215,7 @@ export function NiveauxForm({
                       disabled={pending || idx === 0}
                       title={`Monter ${l.nom}`}
                       aria-label={`Monter ${l.nom}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-forest-50 hover:text-forest-700 disabled:opacity-25"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-forest-50 hover:text-forest-700 disabled:opacity-25 mobile:h-11 mobile:w-11"
                     >
                       <ChevronUp size={16} />
                     </button>
@@ -213,7 +225,7 @@ export function NiveauxForm({
                       disabled={pending || idx === lignes.length - 1}
                       title={`Descendre ${l.nom}`}
                       aria-label={`Descendre ${l.nom}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-forest-50 hover:text-forest-700 disabled:opacity-25"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-forest-50 hover:text-forest-700 disabled:opacity-25 mobile:h-11 mobile:w-11"
                     >
                       <ChevronDown size={16} />
                     </button>
@@ -222,7 +234,7 @@ export function NiveauxForm({
                       onClick={() => supprimer(l.niveauId)}
                       disabled={pending}
                       title={`Supprimer le niveau ${l.nom}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40 mobile:h-11 mobile:w-11"
                       aria-label={`Supprimer ${l.nom}`}
                     >
                       <Trash2 size={15} />
@@ -233,14 +245,14 @@ export function NiveauxForm({
             ))}
 
             {/* Ligne d'ajout d'un niveau */}
-            <tr>
-              <td className="pt-3 pr-4" colSpan={2}>
+            <tr className="mobile:flex mobile:flex-col mobile:gap-2 mobile:pt-2">
+              <td className="pt-3 pr-4 mobile:p-0" colSpan={2}>
                 <div className="flex gap-2">
                   <input
                     value={nouveauNom}
                     onChange={(e) => setNouveauNom(e.target.value)}
                     placeholder="Nouveau niveau (ex : Tle D, 6ème G…)"
-                    className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                    className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0"
                   />
                   {/* Les 4 cycles acceptés par le serveur : au primaire/préscolaire, un niveau CP1…
                       doit pouvoir être créé dans SON cycle (sinon il rejoint les pools du collège). */}
@@ -248,7 +260,7 @@ export function NiveauxForm({
                     value={nouveauCycle}
                     onChange={(e) => setNouveauCycle(e.target.value)}
                     aria-label="Cycle du nouveau niveau"
-                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11"
                   >
                     <option value="prescolaire">Préscolaire</option>
                     <option value="primaire">Primaire</option>
@@ -257,31 +269,31 @@ export function NiveauxForm({
                   </select>
                 </div>
               </td>
-              <td className="pt-3 pr-4" colSpan={2}>
+              <td className="pt-3 pr-4 mobile:p-0" colSpan={2}>
                 <button
                   type="button"
                   onClick={ajouter}
                   disabled={pending || !nouveauNom.trim()}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:justify-center mobile:text-sm"
                 >
                   <Plus size={14} /> Ajouter
                 </button>
               </td>
-              <td colSpan={2} />
+              <td colSpan={2} className="mobile:hidden" />
             </tr>
           </tbody>
-          <tfoot>
-            <tr className="border-t border-cream-200">
-              <td className="py-2.5 pr-4 text-sm font-medium text-ink-700/70">
+          <tfoot className="mobile:mt-3 mobile:block">
+            <tr className="border-t border-cream-200 mobile:flex mobile:flex-wrap mobile:items-center mobile:gap-x-2 mobile:gap-y-1 mobile:rounded-2xl mobile:border-0 mobile:bg-cream-50 mobile:p-3">
+              <td className="py-2.5 pr-4 text-sm font-medium text-ink-700/70 mobile:basis-full mobile:p-0">
                 Total élèves : <span className="font-bold text-forest-900">{totalEleves}</span>
               </td>
-              <td colSpan={3} className="py-2.5 pr-4 text-right text-sm font-medium text-ink-700/70">
+              <td colSpan={3} className="py-2.5 pr-4 text-right text-sm font-medium text-ink-700/70 mobile:p-0 mobile:text-left">
                 Total des divisions
               </td>
-              <td className="py-2.5 pr-4 text-right font-display text-lg font-bold text-forest-900">
+              <td className="py-2.5 pr-4 text-right font-display text-lg font-bold text-forest-900 mobile:p-0">
                 {totalClasses}
               </td>
-              <td />
+              <td className="mobile:hidden" />
             </tr>
           </tfoot>
         </table>
@@ -297,7 +309,7 @@ export function NiveauxForm({
           id="indexationClasses"
           name="indexationClasses"
           defaultValue={indexation === "#" ? "#" : "@"}
-          className="h-10 rounded-xl border border-cream-300 bg-white px-3 pr-8 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-10 rounded-xl border border-cream-300 bg-white px-3 pr-8 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full"
         >
           <option value="@">@ — Lettres (6ème A, 6ème B…)</option>
           <option value="#"># — Chiffres (6ème 1, 6ème 2…)</option>
@@ -354,7 +366,7 @@ function GenerationComptesEleves({ etablissementId }: { etablissementId: string 
           type="button"
           onClick={generer}
           disabled={enCours}
-          className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold shadow-soft transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-70 ${
+          className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold shadow-soft transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-70 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:py-2 ${
             confirmation
               ? "bg-gold-600 text-white hover:bg-gold-700"
               : "bg-forest-800 text-cream-50 hover:bg-forest-700"
@@ -369,7 +381,7 @@ function GenerationComptesEleves({ etablissementId }: { etablissementId: string 
           <button
             type="button"
             onClick={() => setConfirmation(false)}
-            className="text-sm font-medium text-ink-700/60 hover:text-ink-900"
+            className="text-sm font-medium text-ink-700/60 hover:text-ink-900 mobile:min-h-11 mobile:w-full"
           >
             Annuler
           </button>

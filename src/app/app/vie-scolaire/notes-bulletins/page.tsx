@@ -157,7 +157,7 @@ export default async function NotesBulletinsPage({
           classeSel ? (
             <Link
               href={`${BASE}/bulletin?classe=${classeSel.id}&periode=${periodeSel}${etabId ? `&etab=${etabId}` : ""}`}
-              className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11"
             >
               <FileBarChart size={16} /> Voir le bulletin
             </Link>
@@ -184,29 +184,30 @@ export default async function NotesBulletinsPage({
       ) : (
         <>
           <Card>
-            <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
+            {/* Téléphone : grille 2 colonnes (Classe | Discipline, Période | Charger), champs en 16 px. */}
+            <form method="get" action={BASE} className="flex flex-wrap items-end gap-3 mobile:grid mobile:grid-cols-2">
               {etabId && <input type="hidden" name="etab" value={etabId} />}
-              <div className="min-w-[9rem] flex-1">
+              <div className="min-w-[9rem] flex-1 mobile:min-w-0">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Classe</label>
-                <select name="classe" defaultValue={classeSel?.id ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
+                <select name="classe" defaultValue={classeSel?.id ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base">
                   <option value="" disabled>Choisir…</option>
                   {classes.map((c) => <option key={c.id} value={c.id}>{c.nom}</option>)}
                 </select>
               </div>
-              <div className="min-w-[9rem] flex-1">
+              <div className="min-w-[9rem] flex-1 mobile:min-w-0">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Discipline</label>
-                <select name="discipline" defaultValue={disciplineSel?.id ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
+                <select name="discipline" defaultValue={disciplineSel?.id ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base">
                   <option value="" disabled>Choisir…</option>
                   {disciplines.map((d) => <option key={d.id} value={d.id}>{d.nom}</option>)}
                 </select>
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Période</label>
-                <select name="periode" defaultValue={periodeSel} className="h-11 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
+                <select name="periode" defaultValue={periodeSel} className="h-11 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:w-full mobile:text-base">
                   {periodes.map((p) => <option key={p} value={p}>{libellePeriode} {p}</option>)}
                 </select>
               </div>
-              <button type="submit" className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700">
+              <button type="submit" className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:w-full">
                 Charger
               </button>
             </form>
@@ -233,7 +234,7 @@ export default async function NotesBulletinsPage({
               </h2>
               <ul className="divide-y divide-cream-100 text-sm">
                 {notesRecentes.map((n) => (
-                  <li key={n.id} className="flex items-center justify-between py-2">
+                  <li key={n.id} className="flex items-center justify-between py-2 mobile:flex-col mobile:items-start mobile:gap-0.5">
                     <span className="text-forest-900">{n.eleveNom}</span>
                     <span className="text-ink-700/70">
                       {n.libelle} · <span className="font-semibold text-forest-800">{n.valeur}</span>/{n.sur}

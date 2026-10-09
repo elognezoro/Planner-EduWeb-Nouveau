@@ -84,8 +84,10 @@ export function OffrePremium({
                   actif ? "border-forest-500 bg-forest-50/40 ring-2 ring-forest-200" : "border-cream-200 bg-white hover:border-forest-300"
                 }`}
               >
+                {/* Téléphone : pastille remise dans le flux, au-dessus du titre (en position
+                    absolue, elle masquait la fin de « Grand établissement » entre 320 et 360 px). */}
                 {f.populaire && (
-                  <span className="absolute right-4 top-4 rounded-full bg-forest-800 px-2 py-0.5 text-[0.6rem] font-bold text-gold-300">
+                  <span className="absolute right-4 top-4 rounded-full bg-forest-800 px-2 py-0.5 text-[0.6rem] font-bold text-gold-300 mobile:text-xs mobile:static mobile:mb-1.5 mobile:inline-block">
                     Populaire
                   </span>
                 )}
@@ -124,11 +126,11 @@ export function OffrePremium({
                 }`}
               >
                 {c.partenaire && (
-                  <span className="text-[0.6rem] font-bold uppercase tracking-wide text-gold-700">Taux préférentiel</span>
+                  <span className="text-[0.6rem] font-bold uppercase tracking-wide text-gold-700 mobile:text-xs">Taux préférentiel</span>
                 )}
                 <p className="text-sm font-semibold text-forest-900">−{c.pourcentage}%</p>
                 <p className="truncate text-xs text-ink-700/60">{c.libelle}</p>
-                <p className="mt-0.5 font-mono text-[0.65rem] text-ink-700/45">{c.code}</p>
+                <p className="mt-0.5 font-mono text-[0.65rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">{c.code}</p>
               </button>
             ))}
           </div>
@@ -147,13 +149,13 @@ export function OffrePremium({
             value={codeInput}
             onChange={(e) => setCodeInput(e.target.value)}
             placeholder="Entrez votre code promo"
-            className="h-10 min-w-[12rem] flex-1 rounded-xl border border-cream-300 bg-white px-3 text-sm uppercase outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="h-10 min-w-[12rem] flex-1 rounded-xl border border-cream-300 bg-white px-3 text-sm uppercase outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11"
           />
           <button
             type="button"
             onClick={appliquer}
             disabled={pendingCode || !codeInput.trim()}
-            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:justify-center"
           >
             <Tag size={14} /> Appliquer
           </button>
@@ -203,7 +205,7 @@ export function OffrePremium({
             <select
               value={etabId}
               onChange={(e) => setEtabId(e.target.value)}
-              className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400"
+              className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 mobile:h-11"
             >
               {etablissements.map((e) => (
                 <option key={e.id} value={e.id}>
@@ -284,7 +286,7 @@ export function DemanderCodeForm() {
             required
             placeholder="Taux (%)"
             aria-label="Taux de rabais souhaité (%)"
-            className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 pr-7 text-sm outline-none focus:border-forest-400"
+            className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 pr-7 text-sm outline-none focus:border-forest-400 mobile:h-11"
           />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-ink-700/45">%</span>
         </div>
@@ -292,13 +294,13 @@ export function DemanderCodeForm() {
           name="motif"
           required
           placeholder="Motif de la demande (situation de l'établissement, effectifs…)"
-          className="h-10 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400"
+          className="h-10 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 mobile:h-11"
         />
       </div>
       <input
         name="etablissementNom"
         placeholder="Établissement (optionnel)"
-        className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400"
+        className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 mobile:h-11"
       />
       <SubmitButton className="w-auto px-6">
         <Crown size={15} /> Demander un rabais

@@ -148,6 +148,15 @@ export function NouvelleVisiteForm({
   // servent qu'aux visites sans grille (établissement, EDT indisponible, planification manuelle).
   const [principale, setPrincipale] = useState<SeancePrincipale | null>(null);
   const [supplementaires, setSupplementaires] = useState<SeanceSupplementaire[]>([]);
+  // Téléphone : jour affiché dans la vue « jour » de l'EDT (mémorisé par enseignant ; sinon le
+  // premier jour qui a des séances).
+  const [jourEdtMobile, setJourEdtMobile] = useState<{ ens: string; jour: number } | null>(null);
+  const jourEdt =
+    jourEdtMobile?.ens === enseignantId
+      ? jourEdtMobile.jour
+      : edt && edt.length > 0
+        ? Math.min(...edt.map((c) => c.jour))
+        : 0;
 
   // Les champs Enseignant + Classe n'apparaissent que pour les visites de CLASSE et de SUIVI.
   const besoinEnseignant = type === "classe" || type === "suivi";
@@ -437,7 +446,9 @@ export function NouvelleVisiteForm({
                 </p>
               ) : edt && edt.length > 0 ? (
                 <>
-                  <div className="overflow-x-auto">
+                  {/* Téléphone : la grille de la semaine (560 px) est remplacée, juste en dessous,
+                      par un sélecteur de jour et la liste des séances du jour. */}
+                  <div className="overflow-x-auto mobile:hidden">
                     <table className="w-full min-w-[560px] border-collapse text-xs">
                       <thead>
                         <tr>
@@ -487,7 +498,81 @@ export function NouvelleVisiteForm({
                       </tbody>
                     </table>
                   </div>
-                  <p className="mt-1.5 text-xs text-ink-700/50">
+                  <div className="lg:hidden print:hidden">
+                    <div className="grid grid-cols-6 gap-1" role="tablist" aria-label="Jour de la semaine">
+                      {JOURS_COURTS.map((j, i) => {
+                        // Une séance par période, comme la grille bureau (edt.find).
+                        const nb = new Set(edt.filter((c) => c.jour === i).map((c) => c.periode)).size;
+                        const actif = i === jourEdt;
+                        return (
+                          <button
+                            key={j}
+                            type="button"
+                            role="tab"
+                            aria-selected={actif}
+                            onClick={() => setJourEdtMobile({ ens: enseignantId, jour: i })}
+                            className={`flex h-12 flex-col items-center justify-center rounded-xl border text-sm font-semibold leading-tight ${
+                              actif ? "border-forest-700 bg-forest-700 text-cream-50" : "border-cream-200 bg-white text-forest-800"
+                            } ${nb === 0 && !actif ? "opacity-50" : ""}`}
+                          >
+                            {j}
+                            <span className={`text-xs font-normal ${actif ? "text-cream-50/80" : "text-ink-700/60"}`}>
+                              {nb}
+                              <span className="sr-only"> séance{nb > 1 ? "s" : ""}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <ul className="mt-2 space-y-2">
+                      {edt
+                        .filter((c) => c.jour === jourEdt)
+                        // Même règle que la grille bureau (edt.find) : le premier créneau de chaque
+                        // période, sans doublon (clés uniques, cases cochées une à une).
+                        .filter((c, i, t) => t.findIndex((x) => x.periode === c.periode) === i)
+                        .sort((a, b) => a.periode - b.periode)
+                        .map((c) => {
+                          const coche =
+                            (principale?.jour === c.jour && principale?.periode === c.periode) ||
+                            supplementaires.some((s) => s.jour === c.jour && s.periode === c.periode);
+                          const candidat = !coche && candidatsHeure.has(cleCreneau(c));
+                          return (
+                            <li key={cleCreneau(c)}>
+                              <button
+                                type="button"
+                                aria-pressed={coche}
+                                onClick={() => basculerCreneau(c)}
+                                className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 py-2 text-left ${
+                                  coche
+                                    ? "border-forest-700 bg-forest-700 text-cream-50"
+                                    : candidat
+                                      ? "border-forest-400 bg-forest-100 ring-2 ring-forest-400"
+                                      : "border-cream-200 bg-white text-forest-900"
+                                }`}
+                              >
+                                <span className="shrink-0 text-sm font-bold tabular-nums">{c.heure}</span>
+                                <span className="min-w-0 flex-1">
+                                  <span className="block text-sm font-semibold">{c.classeNom}</span>
+                                  <span className="block text-xs opacity-75">{c.disciplineNom}</span>
+                                </span>
+                                {coche ? (
+                                  <CheckCircle2 size={22} className="shrink-0" aria-hidden />
+                                ) : (
+                                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-cream-300" aria-hidden />
+                                )}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      {edt.every((c) => c.jour !== jourEdt) && (
+                        <li className="py-3 text-center text-sm text-ink-700/55">Aucune séance ce jour-là.</li>
+                      )}
+                    </ul>
+                    <p className="mt-2 text-xs text-ink-700/60">
+                      Touchez une ou plusieurs séances : une visite sera planifiée pour chacune.
+                    </p>
+                  </div>
+                  <p className="mt-1.5 text-xs text-ink-700/50 mobile:hidden">
                     Cliquez sur un ou plusieurs créneaux pour les cocher : chaque séance cochée apparaît
                     ci-dessous avec sa propre date (pré-remplie à la prochaine occurrence du jour) et son
                     heure. Une visite distincte sera planifiée pour chacune.
@@ -524,7 +609,7 @@ export function NouvelleVisiteForm({
                     required
                     value={dateManuelle}
                     onChange={(e) => setDateManuelle(e.target.value)}
-                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:text-base"
                   />
                 </div>
                 <div>
@@ -533,14 +618,14 @@ export function NouvelleVisiteForm({
                     type="time"
                     value={heureSeance}
                     onChange={(e) => setHeureSeance(e.target.value)}
-                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:text-base"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={decocherPrincipale}
                   title="Retirer cette séance"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -563,7 +648,7 @@ export function NouvelleVisiteForm({
                           const valeur = e.target.value;
                           setSupplementaires((prev) => prev.map((x) => (x.key === s.key ? { ...x, date: valeur } : x)));
                         }}
-                        className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                        className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:text-base"
                       />
                     </div>
                     {!memePlage && (
@@ -578,7 +663,7 @@ export function NouvelleVisiteForm({
                               prev.map((x) => (x.key === s.key ? { ...x, heureSeanceInput: valeur } : x)),
                             );
                           }}
-                          className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                          className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:text-base"
                         />
                       </div>
                     )}
@@ -586,7 +671,7 @@ export function NouvelleVisiteForm({
                       type="button"
                       onClick={() => setSupplementaires((prev) => prev.filter((x) => x.key !== s.key))}
                       title="Retirer cette séance"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -653,7 +738,7 @@ export function NouvelleVisiteForm({
           <input type="text" name="objet" required placeholder="Objet de la visite" className={inputCls} />
         </div>
       </div>
-      <SubmitButton className="w-auto px-8">Planifier la visite</SubmitButton>
+      <SubmitButton className="w-auto px-8 mobile:w-full">Planifier la visite</SubmitButton>
     </form>
   );
 }
@@ -741,7 +826,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
                 disabled={pending}
                 onClick={() => start(async () => void (await changerStatutVisite(visite.id, "annulee")))}
                 title="Annuler la visite"
-                className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:h-11 mobile:px-4"
               >
                 <XCircle size={13} /> Annuler
               </button>
@@ -751,7 +836,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
               disabled={pending}
               onClick={() => start(async () => void (await supprimerVisite(visite.id)))}
               title="Supprimer la visite"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:h-11 mobile:w-11"
             >
               <Trash2 size={14} />
             </button>
@@ -770,7 +855,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
       <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-cream-200 bg-cream-50/40 px-3 py-2">
         <Link
           href={`/app/inspection/visites/${visite.id}/grille`}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-4"
         >
           <ClipboardList size={13} /> Grille de supervision
         </Link>
@@ -781,7 +866,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
             </span>
             <Link
               href={`/app/inspection/visites/${visite.id}/grille/imprimer`}
-              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 text-xs font-semibold text-ink-700/80 hover:bg-cream-100"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 text-xs font-semibold text-ink-700/80 hover:bg-cream-100 mobile:h-11 mobile:px-4"
             >
               <Printer size={13} /> Fiche imprimable
             </Link>
@@ -796,7 +881,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
       {/* Compte-rendu (gérable) */}
       {gerable && visite.statut !== "annulee" && (
         <details className="mt-3 rounded-xl border border-cream-200 bg-cream-50/40 p-3">
-          <summary className="cursor-pointer text-sm font-semibold text-forest-800">
+          <summary className="cursor-pointer text-sm font-semibold text-forest-800 mobile:py-2.5">
             <ClipboardCheck size={14} className="mr-1 inline" /> Compte-rendu / appréciation
           </summary>
           <form action={actionCR} className="mt-3 space-y-3">
@@ -808,12 +893,14 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
               placeholder="Observations, constats, points forts et axes d'amélioration…"
-              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
             />
             <div className="flex flex-wrap items-end gap-3">
-              <div>
+              <div className="mobile:w-full">
                 <label className="mb-1.5 block text-xs font-medium text-forest-900">Appréciation /20</label>
-                <div className="flex items-center gap-2">
+                {/* Téléphone : la note et le bouton « Note indicative » passent à la ligne (la rangée
+                    de 370 px débordait de la carte et faisait défiler toute la page). */}
+                <div className="flex items-center gap-2 mobile:flex-wrap">
                   <input
                     type="number"
                     name="noteGlobale"
@@ -822,29 +909,31 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
                     step={0.5}
                     value={noteGlobale}
                     onChange={(e) => setNoteGlobale(e.target.value)}
-                    className="h-10 w-24 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                    className="h-10 w-24 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:text-base"
                   />
                   <button
                     type="button"
                     disabled={chargementSuggestion}
                     onClick={demanderNoteIndicative}
                     title="Proposer une note indicative à partir du compte-rendu rédigé ci-dessus (reste modifiable)"
-                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-3 text-xs font-semibold text-gold-800 hover:bg-gold-100 disabled:opacity-50"
+                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-3 text-xs font-semibold text-gold-800 hover:bg-gold-100 disabled:opacity-50 mobile:h-auto mobile:min-h-11 mobile:shrink mobile:whitespace-normal mobile:py-2 mobile:text-left"
                   >
                     {chargementSuggestion ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                    Note indicative (EduWeb Planner)
+                    <span>
+                      Note indicative<span className="mobile:hidden"> (EduWeb Planner)</span>
+                    </span>
                   </button>
                 </div>
-                {erreurSuggestion && <p className="mt-1 max-w-[16rem] text-xs text-red-600">{erreurSuggestion}</p>}
+                {erreurSuggestion && <p className="mt-1 max-w-[16rem] text-xs text-red-600 mobile:max-w-none">{erreurSuggestion}</p>}
                 {suggestion && (
-                  <p className="mt-1 max-w-[16rem] text-xs text-ink-700/60">
+                  <p className="mt-1 max-w-[16rem] text-xs text-ink-700/60 mobile:max-w-none">
                     <Sparkles size={11} className="mr-1 inline shrink-0" />
                     {suggestion.justification} (
                     {suggestion.source === "estimation" ? "estimation locale" : "suggestion EduWeb Planner"} — à ajuster)
                   </p>
                 )}
               </div>
-              <SubmitButton className="w-auto px-6">
+              <SubmitButton className="w-auto px-6 mobile:w-full">
                 <CheckCircle2 size={15} /> Enregistrer (réalisée)
               </SubmitButton>
             </div>
@@ -864,7 +953,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
               return (
                 <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-cream-200 bg-cream-50/40 px-3 py-2">
                   <span className="flex min-w-0 items-center gap-2 text-sm">
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${p.classe}`}>{p.texte}</span>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold mobile:text-xs ${p.classe}`}>{p.texte}</span>
                     <span className="text-ink-900">{r.texte}</span>
                   </span>
                   {gerable ? (
@@ -875,7 +964,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
                         start(async () =>
                           void (await changerStatutRecommandation(r.id, e.target.value as "ouverte" | "en_cours" | "traitee")))
                       }
-                      className="h-8 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                      className="h-8 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:text-base"
                     >
                       {STATUT_RECO.map((s) => (
                         <option key={s.v} value={s.v}>
@@ -906,16 +995,16 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
               name="texte"
               required
               placeholder="Nouvelle recommandation…"
-              className="h-9 min-w-[12rem] flex-1 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              className="h-9 min-w-[12rem] flex-1 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full mobile:min-w-0 mobile:basis-full mobile:text-base"
             />
-            <select name="priorite" defaultValue="moyenne" className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400">
+            <select name="priorite" defaultValue="moyenne" className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:flex-1 mobile:text-base">
               <option value="basse">Basse</option>
               <option value="moyenne">Moyenne</option>
               <option value="haute">Haute</option>
             </select>
             <button
               type="submit"
-              className="inline-flex h-9 items-center gap-1 rounded-full border border-forest-200 px-3.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-forest-200 px-3.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-5 mobile:text-sm"
             >
               <Plus size={13} /> Ajouter
             </button>

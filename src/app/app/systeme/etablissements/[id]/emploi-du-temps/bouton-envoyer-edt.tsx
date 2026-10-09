@@ -61,14 +61,16 @@ export function BoutonEnvoyerEdt({
           <button
             type="button"
             onClick={() => setConfirmation(false)}
-            className="text-sm font-medium text-ink-700/60 hover:text-ink-900"
+            className="text-sm font-medium text-ink-700/60 hover:text-ink-900 mobile:min-h-11 mobile:px-2"
           >
             Annuler
           </button>
         )}
       </div>
       {retour?.message && (
-        <p className={`mt-2 text-sm font-medium ${retour.ok ? "text-forest-700" : "text-red-600"}`}>
+        // Téléphone : le bouton vit dans une rangée qui défile ; le compte rendu y revient à la
+        // ligne au lieu de s'étirer sur une seule ligne hors de l'écran.
+        <p className={`mt-2 text-sm font-medium mobile:max-w-64 mobile:whitespace-normal ${retour.ok ? "text-forest-700" : "text-red-600"}`}>
           {retour.message}
         </p>
       )}

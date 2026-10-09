@@ -90,10 +90,10 @@ export function OngletImmobilisations({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 mobile:grid-cols-2 mobile:gap-2 mobile:[&>div]:p-3 mobile:[&_p+p]:tabular-nums mobile:[&_p+p]:wrap-anywhere">
         {stats.map((s) => (
           <div key={s.libelle} className="rounded-2xl border border-cream-200 bg-white p-3 shadow-soft">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55">{s.libelle}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/75">{s.libelle}</p>
             <p className={`mt-1 font-display text-sm font-bold ${s.alerte ? "text-amber-700" : "text-forest-900"}`}>{s.valeur}</p>
           </div>
         ))}
@@ -105,7 +105,7 @@ export function OngletImmobilisations({
             <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
               <Boxes size={16} className="text-forest-600" /> Valorisation par catégorie
             </h3>
-            <button type="button" onClick={() => setEtatImprime(true)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
+            <button type="button" onClick={() => setEtatImprime(true)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5 mobile:text-xs">
               <Printer size={11} /> État des amortissements
             </button>
           </div>
@@ -243,7 +243,7 @@ function FormImmobilisation({
       <div>
         <Label htmlFor="im-duree">Durée d&apos;utilisation (mois)</Label>
         <Input id="im-duree" name="dureeMois" type="number" min={1} max={1200} defaultValue={enEdition?.dureeMois ?? cat?.dureeMoisDefaut ?? 60} disabled={enService} placeholder={String(cat?.dureeMoisDefaut ?? 60)} />
-        {cat && !cat.amortissable && <p className="mt-1 text-[11px] text-ink-700/50">Catégorie non amortissable.</p>}
+        {cat && !cat.amortissable && <p className="mt-1 text-[11px] text-ink-700/50 mobile:text-xs">Catégorie non amortissable.</p>}
       </div>
       <div>
         <Label htmlFor="im-mode">Mode d&apos;acquisition</Label>
@@ -296,7 +296,7 @@ function FormImmobilisation({
       <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-4">
         <SubmitButton>{enEdition ? "Mettre à jour" : "Créer la fiche"}</SubmitButton>
         <button type="button" onClick={onFin} className="rounded-full border border-cream-300 px-4 py-2 text-xs font-semibold text-ink-700/70 hover:bg-cream-100">Abandonner</button>
-        {enService && <span className="text-[11px] text-ink-700/50">Actif en service : coût, durée et catégorie sont figés.</span>}
+        {enService && <span className="text-[11px] text-ink-700/50 mobile:text-xs">Actif en service : coût, durée et catégorie sont figés.</span>}
         {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       </div>
     </form>
@@ -385,8 +385,9 @@ function FicheActif({
     <li className="rounded-2xl border border-cream-200 bg-white p-3.5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900">
-            <button type="button" onClick={() => setOuverte((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50" aria-label="Fiche">
+          {/* Téléphone : pastilles d'état en 14 px, flèche d'ouverture de 44 px. */}
+          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900 mobile:[&>span]:text-xs">
+            <button type="button" onClick={() => setOuverte((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50 mobile:-my-2 mobile:-ml-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Fiche">
               {ouverte ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
             <span className="font-mono text-xs">{i.code}</span> {i.designation}
@@ -402,7 +403,7 @@ function FicheActif({
             {i.localisation ? ` · ${i.localisation}` : ""}{i.responsableNom ? ` · ${i.responsableNom}` : ""}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 mobile:w-full mobile:gap-2 mobile:[&_button]:min-h-11 mobile:[&_button]:px-3.5 mobile:[&_button]:text-xs">
           <button type="button" onClick={onImprimer} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
             <Printer size={11} /> Fiche
           </button>
@@ -433,7 +434,7 @@ function FicheActif({
 
       {ouverte && (
         <div className="mt-3 space-y-3 rounded-xl bg-cream-50/70 p-3">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 rangee-defilante-mobile">
             {([
               { cle: "identite", libelle: "Identité & cycle de vie", Icone: ClipboardList },
               { cle: "amortissement", libelle: `Amortissement (${i.dotations.length})`, Icone: Calculator },
@@ -444,7 +445,7 @@ function FicheActif({
                 key={v.cle}
                 type="button"
                 onClick={() => setVolet(v.cle)}
-                className={`inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[11px] font-semibold ${
+                className={`inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[11px] font-semibold mobile:h-11 mobile:text-xs ${
                   volet === v.cle ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-100"
                 }`}
               >
@@ -504,7 +505,7 @@ function FicheActif({
                 <p className="text-ink-700/60">{i.amortissable ? "Actif pas encore en service : plan indisponible (RM-1201)." : "Actif non amortissable."}</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[420px]">
+                  <table className="w-full min-w-[420px] tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
                     <thead>
                       <tr className="border-b border-cream-200 text-left text-[10px] font-semibold uppercase tracking-wide text-ink-700/50">
                         <th className="px-2 py-1">Exercice</th>
@@ -520,10 +521,10 @@ function FicheActif({
                         return (
                           <tr key={l.annee} className="border-b border-cream-100">
                             <td className="px-2 py-1">{l.annee}</td>
-                            <td className="px-2 py-1 text-right">{fcfa(l.dotation)}</td>
-                            <td className="px-2 py-1 text-right">{fcfa(l.cumul)}</td>
-                            <td className="px-2 py-1 text-right">{fcfa(l.vnc)}</td>
-                            <td className="px-2 py-1">{faite ? <span className="text-forest-800">✓ oui</span> : <span className="text-ink-700/40">non</span>}</td>
+                            <td data-label="Dotation" className="px-2 py-1 text-right">{fcfa(l.dotation)}</td>
+                            <td data-label="Cumul" className="px-2 py-1 text-right">{fcfa(l.cumul)}</td>
+                            <td data-label="VNC" className="px-2 py-1 text-right">{fcfa(l.vnc)}</td>
+                            <td data-label="Comptabilisé" className="px-2 py-1">{faite ? <span className="text-forest-800">✓ oui</span> : <span className="text-ink-700/40">non</span>}</td>
                           </tr>
                         );
                       })}
@@ -558,8 +559,8 @@ function FicheActif({
 function MiseEnService({ etablissementId, immo, onMessage }: { etablissementId: string; immo: ImmobilisationVue; onMessage: (m: string | null) => void }) {
   const [date, setDate] = useState(auj());
   return (
-    <span className="inline-flex items-center gap-1">
-      <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-36 text-xs" />
+    <span className="inline-flex items-center gap-1 mobile:w-full mobile:flex-wrap">
+      <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-36 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
       <BoutonActionConfirmee
         libelle="Mettre en service" icone={Check} ton="primaire" action={mettreEnServiceImmobilisation}
         champs={{ etablissementId, id: immo.id, version: String(immo.version), dateMiseEnService: date }}
@@ -573,9 +574,9 @@ function Reevaluation({ etablissementId, immo, onMessage }: { etablissementId: s
   const [valeur, setValeur] = useState("");
   const [justif, setJustif] = useState("");
   return (
-    <span className="inline-flex flex-wrap items-center gap-1">
-      <Input type="number" min={1} value={valeur} onChange={(e) => setValeur(e.target.value)} placeholder="Nouvelle valeur" className="h-8 w-32 text-xs" />
-      <Input value={justif} onChange={(e) => setJustif(e.target.value)} maxLength={300} placeholder="Justification" className="h-8 w-40 text-xs" />
+    <span className="inline-flex flex-wrap items-center gap-1 mobile:w-full">
+      <Input type="number" min={1} value={valeur} onChange={(e) => setValeur(e.target.value)} placeholder="Nouvelle valeur" className="h-8 w-32 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
+      <Input value={justif} onChange={(e) => setJustif(e.target.value)} maxLength={300} placeholder="Justification" className="h-8 w-40 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
       <BoutonActionConfirmee
         libelle="Réévaluer" icone={Coins} action={reevaluerImmobilisation}
         champs={{ etablissementId, id: immo.id, version: String(immo.version), nouvelleValeur: valeur, justification: justif }}
@@ -592,13 +593,13 @@ function SortieActif({ etablissementId, immo, onMessage }: { etablissementId: st
   const [piece, setPiece] = useState("");
   const [valeur, setValeur] = useState("");
   return (
-    <span className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-red-200 bg-red-50/40 p-1">
-      <Select value={type} onChange={(e) => setType(e.target.value)} className="h-8 w-28 text-xs">
+    <span className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-red-200 bg-red-50/40 p-1 mobile:w-full">
+      <Select value={type} onChange={(e) => setType(e.target.value)} className="h-8 w-28 text-xs mobile:h-11 mobile:w-full mobile:text-base">
         {TYPES_SORTIE_IMMO.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}
       </Select>
-      {type === "vente" && <Input type="number" min={0} value={valeur} onChange={(e) => setValeur(e.target.value)} placeholder="Produit cession" className="h-8 w-28 text-xs" />}
-      <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif *" className="h-8 w-32 text-xs" />
-      <Input value={piece} onChange={(e) => setPiece(e.target.value)} maxLength={120} placeholder="Pièce *" className="h-8 w-28 text-xs" />
+      {type === "vente" && <Input type="number" min={0} value={valeur} onChange={(e) => setValeur(e.target.value)} placeholder="Produit cession" className="h-8 w-28 text-xs mobile:h-11 mobile:w-full mobile:text-base" />}
+      <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif *" className="h-8 w-32 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
+      <Input value={piece} onChange={(e) => setPiece(e.target.value)} maxLength={120} placeholder="Pièce *" className="h-8 w-28 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
       <BoutonActionConfirmee
         libelle="Sortir" icone={Ban} ton="danger" action={sortirImmobilisation}
         champs={{ etablissementId, id: immo.id, version: String(immo.version), typeSortie: type, motif, pieceJustificative: piece, valeurCession: valeur }}
@@ -615,23 +616,23 @@ function Affectation({ etablissementId, immo, personnel, onMessage }: { etabliss
   useApresSucces(etat, () => { setOuvert(false); onMessage(etat.message ?? "Affectation mise à jour."); });
   if (!ouvert) {
     return (
-      <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
+      <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5 mobile:text-xs">
         <MapPin size={11} /> Affecter / déplacer
       </button>
     );
   }
   return (
-    <form action={action} className="inline-flex flex-wrap items-center gap-1">
+    <form action={action} className="inline-flex flex-wrap items-center gap-1 mobile:w-full">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       <input type="hidden" name="id" value={immo.id} />
       <input type="hidden" name="version" value={String(immo.version)} />
-      <Input name="localisation" maxLength={200} defaultValue={immo.localisation ?? ""} placeholder="Localisation" className="h-8 w-44 text-xs" />
-      <Select name="responsableId" defaultValue="" className="h-8 w-36 text-xs">
+      <Input name="localisation" maxLength={200} defaultValue={immo.localisation ?? ""} placeholder="Localisation" className="h-8 w-44 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
+      <Select name="responsableId" defaultValue="" className="h-8 w-36 text-xs mobile:h-11 mobile:w-full mobile:text-base">
         <option value="">Responsable…</option>
         {personnel.map((p) => <option key={p.id} value={p.id}>{p.nom}</option>)}
       </Select>
       <SubmitButton>Appliquer</SubmitButton>
-      <button type="button" onClick={() => setOuvert(false)} className="rounded-full border border-cream-300 px-2.5 py-1 text-[11px] text-ink-700/70 hover:bg-cream-100"><X size={12} /></button>
+      <button type="button" onClick={() => setOuvert(false)} className="rounded-full border border-cream-300 px-2.5 py-1 text-[11px] text-ink-700/70 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"><X size={12} /></button>
     </form>
   );
 }
@@ -649,7 +650,7 @@ function VoletMaintenance({ etablissementId, immo, droits, onMessage }: { etabli
             {m.prestataire ? ` · ${m.prestataire}` : ""}
             {m.datePrevue ? ` · prévue ${dateFr(m.datePrevue)}` : ""}{m.dateRealisee ? ` · réalisée ${dateFr(m.dateRealisee)}` : ""}
             {m.coutReel !== null ? ` · ${fcfa(m.coutReel)}` : m.coutPrevu !== null ? ` · prévu ${fcfa(m.coutPrevu)}` : ""}
-            <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${m.statut === "realisee" ? "bg-forest-50 text-forest-800" : "bg-amber-50 text-amber-700"}`}>
+            <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${m.statut === "realisee" ? "bg-forest-50 text-forest-800" : "bg-amber-50 text-amber-700"}`}>
               {m.statut === "realisee" ? "Réalisée" : "Planifiée"}
             </span>
           </span>
@@ -665,25 +666,25 @@ function VoletMaintenance({ etablissementId, immo, droits, onMessage }: { etabli
       {immo.maintenances.length === 0 && <p className="text-ink-700/60">Aucune maintenance.</p>}
       {droits.gerer && (
         !ouvert ? (
-          <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
+          <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5 mobile:text-xs">
             <Plus size={11} /> Planifier / enregistrer une maintenance
           </button>
         ) : (
           <form action={action} className="grid gap-2 rounded-lg border border-cream-200 bg-white p-2.5 sm:grid-cols-2 lg:grid-cols-4">
             <input type="hidden" name="etablissementId" value={etablissementId} />
             <input type="hidden" name="immobilisationId" value={immo.id} />
-            <Select name="type" defaultValue="preventive" className="h-8 text-xs">
+            <Select name="type" defaultValue="preventive" className="h-8 text-xs mobile:h-11 mobile:text-base">
               {TYPES_MAINTENANCE.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}
             </Select>
-            <Input name="prestataire" maxLength={120} placeholder="Prestataire" className="h-8 text-xs" />
-            <Input name="datePrevue" type="date" className="h-8 text-xs" />
-            <Input name="dateRealisee" type="date" className="h-8 text-xs" />
-            <Input name="coutPrevu" type="number" min={0} placeholder="Coût prévu" className="h-8 text-xs" />
-            <Input name="coutReel" type="number" min={0} placeholder="Coût réel" className="h-8 text-xs" />
-            <Input name="description" required maxLength={300} placeholder="Description *" className="h-8 text-xs sm:col-span-2" />
+            <Input name="prestataire" maxLength={120} placeholder="Prestataire" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="datePrevue" type="date" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="dateRealisee" type="date" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="coutPrevu" type="number" min={0} placeholder="Coût prévu" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="coutReel" type="number" min={0} placeholder="Coût réel" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="description" required maxLength={300} placeholder="Description *" className="h-8 text-xs sm:col-span-2 mobile:h-11 mobile:text-base" />
             <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-4">
               <SubmitButton>Enregistrer</SubmitButton>
-              <button type="button" onClick={() => setOuvert(false)} className="rounded-full border border-cream-300 px-3 py-1.5 text-[11px] text-ink-700/70 hover:bg-cream-100">Fermer</button>
+              <button type="button" onClick={() => setOuvert(false)} className="rounded-full border border-cream-300 px-3 py-1.5 text-[11px] text-ink-700/70 hover:bg-cream-100 mobile:min-h-11 mobile:px-4 mobile:text-xs">Fermer</button>
               {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
             </div>
           </form>
@@ -697,15 +698,15 @@ function VoletMaintenance({ etablissementId, immo, droits, onMessage }: { etabli
 
 function FicheActifImprimable({ immo: i, entete, onFermer }: { immo: ImmobilisationVue; entete: EnteteEtablissement; onFermer: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`@media print { body * { visibility: hidden; } #fiche-actif-impression, #fiche-actif-impression * { visibility: visible; } #fiche-actif-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; overflow: visible; } @page { size: A4 portrait; margin: 12mm; } }`}</style>
-      <div id="fiche-actif-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="fiche-actif-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Fiche d&apos;actif</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer"><X size={16} /></button>
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer"><X size={16} /></button>
         </div>
         <EnTeteOfficielDoc etab={entete} titre="FICHE D'IMMOBILISATION" sousTitre={`${i.code} — ${i.designation}`} />
-        <div className="mt-4 grid grid-cols-2 gap-1.5 text-sm">
+        <div className="mt-4 grid grid-cols-2 gap-1.5 text-sm mobile:grid-cols-1">
           {[
             ["Catégorie", LIBELLE_CATEGORIE_IMMO[i.categorie] ?? i.categorie],
             ["N° de série", i.numeroSerie ?? "—"],
@@ -726,26 +727,30 @@ function FicheActifImprimable({ immo: i, entete, onFermer }: { immo: Immobilisat
         {i.plan.length > 0 && (
           <>
             <h3 className="mt-5 font-display text-sm font-bold text-forest-900">Plan d&apos;amortissement</h3>
-            <table className="mt-2 w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-y-2 border-forest-800 text-left text-xs uppercase tracking-wide">
-                  <th className="py-1.5 pr-2">Exercice</th>
-                  <th className="py-1.5 pr-2 text-right">Dotation</th>
-                  <th className="py-1.5 pr-2 text-right">Cumul</th>
-                  <th className="py-1.5 text-right">VNC</th>
-                </tr>
-              </thead>
-              <tbody>
-                {i.plan.map((l) => (
-                  <tr key={l.annee} className="border-b border-cream-200">
-                    <td className="py-1 pr-2">{l.annee}</td>
-                    <td className="py-1 pr-2 text-right">{fcfa(l.dotation)}</td>
-                    <td className="py-1 pr-2 text-right">{fcfa(l.cumul)}</td>
-                    <td className="py-1 text-right">{fcfa(l.vnc)}</td>
+            {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+                (div sans style hors mobile : bureau et impression inchangés). */}
+            <div className="mobile:overflow-x-auto">
+              <table className="mt-2 w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-y-2 border-forest-800 text-left text-xs uppercase tracking-wide">
+                    <th className="py-1.5 pr-2">Exercice</th>
+                    <th className="py-1.5 pr-2 text-right">Dotation</th>
+                    <th className="py-1.5 pr-2 text-right">Cumul</th>
+                    <th className="py-1.5 text-right">VNC</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {i.plan.map((l) => (
+                    <tr key={l.annee} className="border-b border-cream-200">
+                      <td className="py-1 pr-2">{l.annee}</td>
+                      <td className="py-1 pr-2 text-right">{fcfa(l.dotation)}</td>
+                      <td className="py-1 pr-2 text-right">{fcfa(l.cumul)}</td>
+                      <td className="py-1 text-right">{fcfa(l.vnc)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
         <div className="mt-6 flex justify-center gap-2 print:hidden">
@@ -760,44 +765,48 @@ function FicheActifImprimable({ immo: i, entete, onFermer }: { immo: Immobilisat
 function EtatAmortissementsImprimable({ donnees, entete, onFermer }: { donnees: DonneesImmobilisationsVue; entete: EnteteEtablissement; onFermer: () => void }) {
   const actifs = donnees.immobilisations.filter((i) => !i.dateSortie && i.statut !== "archive");
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`@media print { body * { visibility: hidden; } #etat-amort-impression, #etat-amort-impression * { visibility: visible; } #etat-amort-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; overflow: visible; } @page { size: A4 landscape; margin: 12mm; } }`}</style>
-      <div id="etat-amort-impression" className="mx-auto my-8 w-full max-w-4xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="etat-amort-impression" className="mx-auto my-8 w-full max-w-4xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">État des amortissements</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer"><X size={16} /></button>
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer"><X size={16} /></button>
         </div>
         <EnTeteOfficielDoc etab={entete} titre="ÉTAT DES IMMOBILISATIONS ET AMORTISSEMENTS" sousTitre={`Arrêté au ${dateFr(new Date().toISOString())}`} />
-        <table className="mt-4 w-full border-collapse text-xs">
-          <thead>
-            <tr className="border-y-2 border-forest-800 text-left uppercase tracking-wide">
-              <th className="py-1.5 pr-2">Code</th>
-              <th className="py-1.5 pr-2">Désignation</th>
-              <th className="py-1.5 pr-2">Catégorie</th>
-              <th className="py-1.5 pr-2 text-right">Valeur brute</th>
-              <th className="py-1.5 pr-2 text-right">Amort. cumulé</th>
-              <th className="py-1.5 text-right">VNC</th>
-            </tr>
-          </thead>
-          <tbody>
-            {actifs.map((i) => (
-              <tr key={i.id} className="border-b border-cream-200">
-                <td className="py-1 pr-2 font-mono">{i.code}</td>
-                <td className="py-1 pr-2">{i.designation}</td>
-                <td className="py-1 pr-2">{LIBELLE_CATEGORIE_IMMO[i.categorie] ?? i.categorie}</td>
-                <td className="py-1 pr-2 text-right">{fcfa(i.valeurBrute)}</td>
-                <td className="py-1 pr-2 text-right">{fcfa(i.amortiComptabilise)}</td>
-                <td className="py-1 text-right">{fcfa(i.vncComptable)}</td>
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-xs">
+            <thead>
+              <tr className="border-y-2 border-forest-800 text-left uppercase tracking-wide">
+                <th className="py-1.5 pr-2">Code</th>
+                <th className="py-1.5 pr-2">Désignation</th>
+                <th className="py-1.5 pr-2">Catégorie</th>
+                <th className="py-1.5 pr-2 text-right">Valeur brute</th>
+                <th className="py-1.5 pr-2 text-right">Amort. cumulé</th>
+                <th className="py-1.5 text-right">VNC</th>
               </tr>
-            ))}
-            <tr className="border-t-2 border-forest-800 font-bold">
-              <td className="py-2" colSpan={3}>Totaux ({actifs.length} actifs)</td>
-              <td className="py-2 text-right">{fcfa(donnees.tableauBord.valeurBrute)}</td>
-              <td className="py-2 text-right">{fcfa(donnees.tableauBord.amortissementsCumules)}</td>
-              <td className="py-2 text-right">{fcfa(donnees.tableauBord.valeurNette)}</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {actifs.map((i) => (
+                <tr key={i.id} className="border-b border-cream-200">
+                  <td className="py-1 pr-2 font-mono">{i.code}</td>
+                  <td className="py-1 pr-2">{i.designation}</td>
+                  <td className="py-1 pr-2">{LIBELLE_CATEGORIE_IMMO[i.categorie] ?? i.categorie}</td>
+                  <td className="py-1 pr-2 text-right">{fcfa(i.valeurBrute)}</td>
+                  <td className="py-1 pr-2 text-right">{fcfa(i.amortiComptabilise)}</td>
+                  <td className="py-1 text-right">{fcfa(i.vncComptable)}</td>
+                </tr>
+              ))}
+              <tr className="border-t-2 border-forest-800 font-bold">
+                <td className="py-2" colSpan={3}>Totaux ({actifs.length} actifs)</td>
+                <td className="py-2 text-right">{fcfa(donnees.tableauBord.valeurBrute)}</td>
+                <td className="py-2 text-right">{fcfa(donnees.tableauBord.amortissementsCumules)}</td>
+                <td className="py-2 text-right">{fcfa(donnees.tableauBord.valeurNette)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div className="mt-6 flex justify-center gap-2 print:hidden">
           <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-full bg-forest-800 px-5 py-2.5 text-sm font-semibold text-cream-50 hover:bg-forest-700"><Printer size={16} /> Imprimer / PDF</button>
           <button type="button" onClick={onFermer} className="rounded-full border border-cream-300 px-5 py-2.5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">Fermer</button>

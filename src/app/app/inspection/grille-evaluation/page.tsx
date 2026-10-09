@@ -44,7 +44,7 @@ export default async function GrilleEvaluationPage() {
         <h2 className="mb-3 flex items-center gap-2 font-display text-base font-bold text-forest-900">
           <ListChecks size={18} /> Échelle d&apos;appréciation
         </h2>
-        <div className="grid gap-2 sm:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-4 mobile:grid-cols-2">
           {ECHELLE.map((e) => (
             <div key={e.code} className="rounded-xl border border-cream-200 bg-cream-50/50 p-3 text-center">
               <p className="font-display text-xl font-bold text-forest-800">{e.code}</p>
@@ -86,7 +86,9 @@ export default async function GrilleEvaluationPage() {
           <h2 className="mb-3 font-display text-base font-bold text-forest-900">
             {comp.numero} — {comp.titre}
           </h2>
-          <div className="overflow-x-auto">
+          {/* Téléphone : le tableau (760 px, rowSpan) est remplacé, juste en dessous, par une carte
+              par item ; l'impression garde le tableau. */}
+          <div className="overflow-x-auto masque-ecran-mobile">
             <table className="w-full min-w-[760px] border-collapse text-sm">
               <thead>
                 <tr className="bg-cream-50 text-left text-xs uppercase tracking-wide text-forest-800">
@@ -126,6 +128,21 @@ export default async function GrilleEvaluationPage() {
               </tbody>
             </table>
           </div>
+          <ol className="hidden space-y-3 mobile:block">
+            {comp.items.map((item) => (
+              <li key={item.numero} className="rounded-xl border border-cream-200 bg-cream-50/40 p-3">
+                <p className="text-sm text-ink-900">
+                  <span className="font-semibold text-forest-900">{item.numero}</span> {item.enonce}
+                </p>
+                <p className="mt-1 text-sm italic text-ink-700/75">{item.critere}</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-900">
+                  {item.indicateurs.map((indicateur, i) => (
+                    <li key={i}>{indicateur}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
         </Card>
       ))}
 

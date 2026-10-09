@@ -30,9 +30,10 @@ export function StatsAbsences({ resume }: { resume: ResumeAbsences }) {
   return (
     <div className="grid grid-cols-3 gap-2">
       {cases.map((c) => (
-        <div key={c.libelle} className="rounded-xl border border-cream-200 bg-cream-50/60 px-3 py-2 text-center">
+        <div key={c.libelle} className="rounded-xl border border-cream-200 bg-cream-50/60 px-3 py-2 text-center mobile:px-2">
           <p className={`font-display text-xl font-bold ${c.classe}`}>{c.valeur}</p>
-          <p className="text-[0.65rem] text-ink-700/60">{c.libelle}</p>
+          {/* Téléphone : libellé à 14 px (au lieu de 10). */}
+          <p className="text-[0.65rem] text-ink-700/60 mobile:text-xs mobile:leading-snug mobile:text-ink-700/70">{c.libelle}</p>
         </div>
       ))}
     </div>

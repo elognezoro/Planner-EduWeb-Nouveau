@@ -52,7 +52,7 @@ export default async function InscriptionsRolePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour à la gestion</Link>
+      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Retour à la gestion</Link>
       <PageHeader
         titre="Inscriptions par rôle"
         description="Sélectionnez une ou plusieurs formations, un statut (Élève / Apprenant ou Formateur / Tuteur), puis saisissez les participants (e-mails ou noms). Vous pouvez aussi générer des liens d'inscription directe scoppés au statut."

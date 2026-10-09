@@ -17,7 +17,7 @@ export default async function NotificationsPage() {
         titre="Notifications"
         description="Toutes vos notifications récentes, classées de la plus récente à la plus ancienne."
       />
-      <Card>
+      <Card className="mobile:p-3">
         <ListeNotifications initiales={notifications} />
       </Card>
     </div>

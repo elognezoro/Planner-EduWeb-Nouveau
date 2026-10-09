@@ -36,17 +36,19 @@ export default async function NiveauxAccesPage() {
         description="Matrice des droits par rôle (modifiable en un clic) et définition des 13 rôles de la plateforme."
       />
 
-      <Card className="mb-8">
+      <Card className="mb-8 mobile:p-4">
         <MatriceDroits sections={sections} editable={editable} terme={terme} termeApfc={termeApfc} />
       </Card>
 
       <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Les 13 rôles</h2>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 mobile:gap-3">
         {ROLES_ORDONNES.map((role) => (
-          <Card key={role.id} className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
+          <Card key={role.id} className="flex flex-col gap-2 mobile:p-4">
+            {/* Téléphone : l'identifiant technique (ex. « super_admin_etablissements », insécable)
+                passe sous le titre et se coupe au besoin, au lieu d'élargir la carte. */}
+            <div className="flex items-center justify-between mobile:flex-wrap mobile:gap-x-2 mobile:gap-y-1">
               <h3 className="font-semibold text-forest-900">{T(role.libelle)}</h3>
-              <code className="rounded bg-cream-100 px-2 py-0.5 text-xs text-forest-700">
+              <code className="rounded bg-cream-100 px-2 py-0.5 text-xs text-forest-700 mobile:min-w-0 mobile:break-all">
                 {role.id}
               </code>
             </div>

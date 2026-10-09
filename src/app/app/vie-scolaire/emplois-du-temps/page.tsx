@@ -9,6 +9,8 @@ import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement
 import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
 import { EnTeteOfficielEdt, type EtablissementEnTete } from "@/components/app/emplois-du-temps/en-tete-officiel-edt";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
+import { EdtJourMobile } from "@/components/app/mobile/edt-jour-mobile";
+import { COULEURS_GRAPHIQUE } from "@/lib/mobile/couleurs";
 import {
   creneauxHoraires,
   bandesPause,
@@ -58,9 +60,29 @@ function Grille({
   // Plusieurs cours par case = GROUPES SIMULTANÉS (ex. Allemand + Espagnol au même créneau).
   const map = new Map<string, CreneauVue[]>();
   for (const c of creneaux) map.set(`${c.jour}|${c.periode}`, [...(map.get(`${c.jour}|${c.periode}`) ?? []), c]);
+  // Téléphone : une couleur stable par discipline (palette de la charte) pour les cartes du jour.
+  const disciplines = [...new Set(creneaux.map((c) => c.disciplineNom))].sort((a, b) => a.localeCompare(b, "fr"));
+  const couleurs = Object.fromEntries(disciplines.map((d, i) => [d, COULEURS_GRAPHIQUE[i % COULEURS_GRAPHIQUE.length]]));
+  const jours = JOURS.slice(0, Math.max(5, ...creneaux.map((c) => c.jour + 1)));
 
   return (
-    <div className="edt-grille-wrap overflow-x-auto">
+    <>
+    {/* Téléphone : la journée en cartes (la grille reste celle de l'ordinateur et du papier). */}
+    <div className="lg:hidden print:hidden">
+      <EdtJourMobile
+        seances={creneaux.map((c, i) => ({
+          id: `${c.jour}-${c.periode}-${i}`, jour: c.jour, periode: c.periode, duree: c.duree, disciplineId: c.disciplineNom,
+          disciplineNom: c.disciplineNom, enseignantNom: c.enseignantNom, salleNom: c.salleNom, classeNom: c.classeNom,
+        }))}
+        jours={jours}
+        horaires={horaires}
+        bandes={bandes}
+        couleurs={couleurs}
+        creneauxParJour={horaires?.length ?? maxPeriode + 1}
+        vue={modeEnseignant ? "enseignant" : "classe"}
+      />
+    </div>
+    <div className="edt-grille-wrap overflow-x-auto mobile:hidden">
       <table className="w-full min-w-[680px] table-fixed border-collapse text-xs">
         <thead>
           <tr>
@@ -123,6 +145,7 @@ function Grille({
         </tbody>
       </table>
     </div>
+    </>
   );
 }
 
@@ -217,7 +240,7 @@ export default async function EmploisDuTempsPage({
             action={creneaux.length > 0 ? <BoutonImprimerEdt /> : undefined}
           />
         </div>
-        <Card>
+        <Card className="mobile:p-4">
           {ctx && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Enseignant : ${u.nomComplet}`} />}
           <Grille
             creneaux={creneaux}
@@ -248,7 +271,7 @@ export default async function EmploisDuTempsPage({
             action={creneaux.length > 0 ? <BoutonImprimerEdt /> : undefined}
           />
         </div>
-        <Card>
+        <Card className="mobile:p-4">
           {ctx && insc && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Classe ${insc.classe.nom}`} />}
           <Grille
             creneaux={creneaux}
@@ -283,9 +306,9 @@ export default async function EmploisDuTempsPage({
           />
         </div>
         {classes.length > 1 && (
-          <Card className="print:hidden">
+          <Card className="print:hidden mobile:p-4">
             <form method="get" action={BASE} className="flex items-end gap-3">
-              <select name="classe" defaultValue={classeSel?.id ?? ""} className="h-11 flex-1 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400">
+              <select name="classe" defaultValue={classeSel?.id ?? ""} className="h-11 flex-1 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 mobile:min-w-0 mobile:text-base">
                 {classes.map((c) => (
                   <option key={c.id} value={c.id}>{c.nom}</option>
                 ))}
@@ -294,7 +317,7 @@ export default async function EmploisDuTempsPage({
             </form>
           </Card>
         )}
-        <Card>
+        <Card className="mobile:p-4">
           {ctx && classeSel && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Classe ${classeSel.nom}`} />}
           <Grille
             creneaux={creneaux}
@@ -354,23 +377,24 @@ export default async function EmploisDuTempsPage({
           <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={etabId} />
         </div>
       )}
-      <Card className="print:hidden">
+      <Card className="print:hidden mobile:p-4">
         <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
           {etabId && <input type="hidden" name="etab" value={etabId} />}
-          <div className="min-w-[12rem] flex-1">
+          <div className="min-w-[12rem] flex-1 mobile:min-w-0 mobile:basis-full">
             <label className="mb-1.5 block text-sm font-medium text-forest-900">Classe</label>
-            <select name="classe" defaultValue={classeSel?.id ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400">
+            <select name="classe" defaultValue={classeSel?.id ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 mobile:text-base">
               {classes.length === 0 && <option value="">Aucune classe</option>}
               {classes.map((c) => (
                 <option key={c.id} value={c.id}>{c.nom}</option>
               ))}
             </select>
           </div>
-          <button type="submit" className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700">Afficher</button>
+          {/* Téléphone : bouton pleine largeur sous la liste (au lieu d'un bouton seul aligné à gauche). */}
+          <button type="submit" className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:w-full">Afficher</button>
         </form>
       </Card>
       {classeSel && (
-        <Card>
+        <Card className="mobile:p-4">
           {ctx && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Classe ${classeSel.nom}`} />}
           <h2 className="mb-3 font-display text-base font-bold text-forest-900 print:hidden">{classeSel.nom}</h2>
           <Grille

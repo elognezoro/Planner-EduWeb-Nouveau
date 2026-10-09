@@ -80,13 +80,14 @@ export function SousOngletEcritures({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-1.5 print:hidden">
+      {/* Téléphone : sous-onglets sur une ligne qui défile au doigt (au lieu de murs de pastilles). */}
+      <div className="flex flex-wrap gap-1.5 print:hidden rangee-defilante-mobile">
         {sections.map((s) => (
           <button
             key={s.cle}
             type="button"
             onClick={() => setSection(s.cle)}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors ${
+            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors mobile:h-11 mobile:text-sm ${
               section === s.cle
                 ? "border-forest-700 bg-forest-800 text-cream-50"
                 : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-100"
@@ -150,10 +151,10 @@ function TableauBordEcritures({ tb }: { tb: TableauBordComptaVue }) {
     { libelle: "Dernière période clôturée", valeur: tb.dernierePeriodeCloturee ?? "aucune" },
   ];
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-2 mobile:[&>div]:p-3 mobile:[&_p+p]:tabular-nums mobile:[&_p+p]:wrap-anywhere">
       {stats.map((s) => (
         <div key={s.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55">{s.libelle}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/75">{s.libelle}</p>
           <p className={`mt-1 font-display text-lg font-bold ${s.alerte ? "text-amber-700" : "text-forest-900"}`}>
             {s.valeur}
           </p>
@@ -339,7 +340,7 @@ function FormSaisieEcriture({
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-cream-200">
-            <table className="w-full min-w-[760px] text-sm">
+            <table className="w-full min-w-[760px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11 mobile:[&_td_input]:min-w-0 mobile:[&_td_select]:min-w-0">
               <thead>
                 <tr className="bg-cream-100 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
                   <th className="px-3 py-2">Compte</th>
@@ -353,30 +354,30 @@ function FormSaisieEcriture({
               <tbody>
                 {lignes.map((l) => (
                   <tr key={l.cle} className="border-t border-cream-200">
-                    <td className="px-3 py-1.5">
-                      <Select value={l.compteId} onChange={(e) => majLigne(l.cle, "compteId", e.target.value)} className="min-w-48">
+                    <td data-label="Compte" className="px-3 py-1.5">
+                      <Select value={l.compteId} onChange={(e) => majLigne(l.cle, "compteId", e.target.value)} className="min-w-48 mobile:min-w-0">
                         <option value="">Compte…</option>
                         {comptesActifs.map((c) => (
                           <option key={c.id} value={c.id}>{c.numero} — {c.intitule}</option>
                         ))}
                       </Select>
                     </td>
-                    <td className="px-3 py-1.5">
+                    <td data-label="Sens" className="px-3 py-1.5">
                       <Select value={l.sens} onChange={(e) => majLigne(l.cle, "sens", e.target.value)} className="w-28">
                         <option value="debit">Débit</option>
                         <option value="credit">Crédit</option>
                       </Select>
                     </td>
-                    <td className="px-3 py-1.5">
+                    <td data-label="Montant" className="px-3 py-1.5">
                       <Input
                         type="number" min={1} step={1} value={l.montant} className="w-36"
                         onChange={(e) => majLigne(l.cle, "montant", e.target.value)}
                       />
                     </td>
-                    <td className="px-3 py-1.5">
+                    <td data-label="Libellé" className="px-3 py-1.5">
                       <Input value={l.libelle} maxLength={120} onChange={(e) => majLigne(l.cle, "libelle", e.target.value)} />
                     </td>
-                    <td className="px-3 py-1.5">
+                    <td data-label="Centre analytique" className="px-3 py-1.5">
                       <Input
                         value={l.centreAnalytique} maxLength={60} list="centres-analytiques" className="w-40"
                         onChange={(e) => majLigne(l.cle, "centreAnalytique", e.target.value)}
@@ -467,12 +468,12 @@ function ListeEcritures({
         <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
           <ListChecks size={17} className="text-forest-600" /> Écritures récentes
         </h3>
-        <div className="flex flex-wrap gap-2">
-          <Select value={filtreJournal} onChange={(e) => setFiltreJournal(e.target.value)} className="h-9 w-44 text-xs">
+        <div className="flex flex-wrap gap-2 mobile:w-full">
+          <Select value={filtreJournal} onChange={(e) => setFiltreJournal(e.target.value)} className="h-9 w-44 text-xs mobile:h-11 mobile:w-full mobile:text-base">
             <option value="">Tous les journaux</option>
             {journaux.map((j) => <option key={j.id} value={j.id}>{j.code} — {j.libelle}</option>)}
           </Select>
-          <Select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)} className="h-9 w-36 text-xs">
+          <Select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)} className="h-9 w-36 text-xs mobile:h-11 mobile:w-full mobile:text-base">
             <option value="">Tous statuts</option>
             <option value="brouillon">Brouillons</option>
             <option value="validee">Validées</option>
@@ -488,7 +489,7 @@ function ListeEcritures({
         </p>
       ) : (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[820px] text-sm">
+          <table className="w-full min-w-[820px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
                 <th className="px-2 py-2" />
@@ -548,13 +549,13 @@ function LigneEcritureTableau({
             {ouverte ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </button>
         </td>
-        <td className="px-2 py-2 font-mono text-xs">{e.numero ?? "—"}</td>
-        <td className="px-2 py-2 text-xs font-semibold">{e.journalCode}</td>
-        <td className="px-2 py-2 whitespace-nowrap text-xs">{dateFr(e.date)}</td>
-        <td className="max-w-64 px-2 py-2 text-xs">{e.libelle}</td>
-        <td className="px-2 py-2 text-xs text-ink-700/70">{e.pieceJustificative}</td>
-        <td className="px-2 py-2 text-right font-semibold whitespace-nowrap">{fcfa(e.totalDebit)}</td>
-        <td className="px-2 py-2">
+        <td data-label="Numéro" className="px-2 py-2 font-mono text-xs">{e.numero ?? "—"}</td>
+        <td data-label="Journal" className="px-2 py-2 text-xs font-semibold">{e.journalCode}</td>
+        <td data-label="Date" className="px-2 py-2 whitespace-nowrap text-xs">{dateFr(e.date)}</td>
+        <td data-label="Libellé" className="max-w-64 px-2 py-2 text-xs mobile:max-w-none">{e.libelle}</td>
+        <td data-label="Pièce" className="px-2 py-2 text-xs text-ink-700/70">{e.pieceJustificative}</td>
+        <td data-label="Montant" className="px-2 py-2 text-right font-semibold whitespace-nowrap">{fcfa(e.totalDebit)}</td>
+        <td data-label="Statut" className="px-2 py-2">
           <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge}`}>
             {e.annulee ? "Annulée" : LIBELLE_STATUT_ECRITURE[e.statut] ?? e.statut}
             {e.origine === "automatique" ? " · auto" : ""}
@@ -589,7 +590,7 @@ function LigneEcritureTableau({
                 <Input
                   value={motif} maxLength={200} placeholder="Motif de contre-passation…"
                   onChange={(ev) => setMotif(ev.target.value)}
-                  className="h-8 w-52 text-xs"
+                  className="h-8 w-52 text-xs mobile:h-11 mobile:w-full mobile:text-base"
                 />
                 <BoutonActionConfirmee
                   libelle="Contre-passer" icone={RotateCcw} ton="danger" action={contrePasserEcriture}
@@ -606,7 +607,7 @@ function LigneEcritureTableau({
         <tr className="border-b border-cream-100 bg-cream-50/60">
           <td />
           <td colSpan={peutEcrire ? 8 : 7} className="px-2 py-2">
-            <table className="w-full text-xs">
+            <table className="w-full text-xs tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="text-left text-[10px] font-semibold uppercase tracking-wide text-ink-700/50">
                   <th className="px-2 py-1">Compte</th>
@@ -620,10 +621,10 @@ function LigneEcritureTableau({
                 {e.lignes.map((l) => (
                   <tr key={l.id} className="border-t border-cream-200/70">
                     <td className="px-2 py-1 font-mono">{l.compteNumero} — {l.compteIntitule}</td>
-                    <td className="px-2 py-1">{l.libelle ?? "—"}</td>
-                    <td className="px-2 py-1">{l.centreAnalytique ?? "—"}</td>
-                    <td className="px-2 py-1 text-right">{l.debit > 0 ? fcfa(l.debit) : ""}</td>
-                    <td className="px-2 py-1 text-right">{l.credit > 0 ? fcfa(l.credit) : ""}</td>
+                    <td data-label="Libellé" className="px-2 py-1">{l.libelle ?? "—"}</td>
+                    <td data-label="Centre analytique" className="px-2 py-1">{l.centreAnalytique ?? "—"}</td>
+                    <td data-label="Débit" className="px-2 py-1 text-right">{l.debit > 0 ? fcfa(l.debit) : ""}</td>
+                    <td data-label="Crédit" className="px-2 py-1 text-right">{l.credit > 0 ? fcfa(l.credit) : ""}</td>
                   </tr>
                 ))}
               </tbody>
@@ -655,7 +656,7 @@ function BalanceFormelle({ lignes }: { lignes: BalanceFormelleLigne[] }) {
         <p className="mt-3 text-sm text-ink-700/60">Aucune écriture validée pour l&apos;instant.</p>
       ) : (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[640px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
                 <th className="px-2 py-2">Compte</th>
@@ -669,19 +670,19 @@ function BalanceFormelle({ lignes }: { lignes: BalanceFormelleLigne[] }) {
             <tbody>
               {lignes.map((l) => (
                 <tr key={l.compteNumero} className="border-b border-cream-100">
-                  <td className="px-2 py-1.5 font-mono text-xs">{l.compteNumero}</td>
-                  <td className="px-2 py-1.5 text-xs">{l.compteIntitule}</td>
-                  <td className="px-2 py-1.5 text-right">{fcfa(l.totalDebit)}</td>
-                  <td className="px-2 py-1.5 text-right">{fcfa(l.totalCredit)}</td>
-                  <td className="px-2 py-1.5 text-right font-semibold">{l.solde > 0 ? fcfa(l.solde) : ""}</td>
-                  <td className="px-2 py-1.5 text-right font-semibold">{l.solde < 0 ? fcfa(-l.solde) : ""}</td>
+                  <td data-label="Compte" className="px-2 py-1.5 font-mono text-xs">{l.compteNumero}</td>
+                  <td data-label="Intitulé" className="px-2 py-1.5 text-xs">{l.compteIntitule}</td>
+                  <td data-label="Total débit" className="px-2 py-1.5 text-right">{fcfa(l.totalDebit)}</td>
+                  <td data-label="Total crédit" className="px-2 py-1.5 text-right">{fcfa(l.totalCredit)}</td>
+                  <td data-label="Solde débiteur" className="px-2 py-1.5 text-right font-semibold">{l.solde > 0 ? fcfa(l.solde) : ""}</td>
+                  <td data-label="Solde créditeur" className="px-2 py-1.5 text-right font-semibold">{l.solde < 0 ? fcfa(-l.solde) : ""}</td>
                 </tr>
               ))}
               <tr className="border-t-2 border-forest-200 font-bold">
                 <td className="px-2 py-2" colSpan={2}>Totaux (équilibre RM-700)</td>
-                <td className="px-2 py-2 text-right">{fcfa(totalDebit)}</td>
-                <td className="px-2 py-2 text-right">{fcfa(totalCredit)}</td>
-                <td className="px-2 py-2 text-right" colSpan={2}>
+                <td data-label="Total débit" className="px-2 py-2 text-right">{fcfa(totalDebit)}</td>
+                <td data-label="Total crédit" className="px-2 py-2 text-right">{fcfa(totalCredit)}</td>
+                <td data-label="Équilibre" className="px-2 py-2 text-right" colSpan={2}>
                   {totalDebit === totalCredit ? "Équilibrée" : "DÉSÉQUILIBRE !"}
                 </td>
               </tr>
@@ -703,7 +704,7 @@ function BalanceAgee({ vue }: { vue: BalanceAgeeVue }) {
         Restes dus de l&apos;exercice, classés par ancienneté d&apos;échéance — l&apos;outil du recouvrement.
       </p>
       <div className="mt-3 overflow-x-auto">
-        <table className="w-full min-w-[480px] text-sm">
+        <table className="w-full min-w-[480px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead>
             <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
               <th className="px-2 py-2">Tranche</th>
@@ -715,14 +716,14 @@ function BalanceAgee({ vue }: { vue: BalanceAgeeVue }) {
             {vue.tranches.map((t, i) => (
               <tr key={t.libelle} className="border-b border-cream-100">
                 <td className={`px-2 py-1.5 ${i >= 3 ? "font-semibold text-red-600" : ""}`}>{t.libelle}</td>
-                <td className="px-2 py-1.5 text-right">{t.nombre}</td>
-                <td className={`px-2 py-1.5 text-right font-semibold ${i >= 3 ? "text-red-600" : ""}`}>{fcfa(t.montant)}</td>
+                <td data-label="Créances" className="px-2 py-1.5 text-right">{t.nombre}</td>
+                <td data-label="Restant dû" className={`px-2 py-1.5 text-right font-semibold ${i >= 3 ? "text-red-600" : ""}`}>{fcfa(t.montant)}</td>
               </tr>
             ))}
             <tr className="border-t-2 border-forest-200 font-bold">
               <td className="px-2 py-2">Total restant dû</td>
-              <td className="px-2 py-2 text-right">{vue.tranches.reduce((s, t) => s + t.nombre, 0)}</td>
-              <td className="px-2 py-2 text-right">{fcfa(vue.total)}</td>
+              <td data-label="Créances" className="px-2 py-2 text-right">{vue.tranches.reduce((s, t) => s + t.nombre, 0)}</td>
+              <td data-label="Restant dû" className="px-2 py-2 text-right">{fcfa(vue.total)}</td>
             </tr>
           </tbody>
         </table>
@@ -807,8 +808,8 @@ function PlanComptable({
         </form>
       )}
 
-      <div className="mt-3 max-h-96 overflow-auto rounded-xl border border-cream-200">
-        <table className="w-full min-w-[560px] text-sm">
+      <div className="mt-3 max-h-96 overflow-auto rounded-xl border border-cream-200 mobile:max-h-none mobile:overflow-visible mobile:border-0">
+        <table className="w-full min-w-[560px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead className="sticky top-0 bg-cream-100">
             <tr className="text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
               <th className="px-3 py-2">Numéro</th>
@@ -821,10 +822,10 @@ function PlanComptable({
           <tbody>
             {comptes.map((c) => (
               <tr key={c.id} className={`border-t border-cream-100 ${c.statut === "ferme" ? "opacity-50" : ""}`}>
-                <td className="px-3 py-1.5 font-mono text-xs">{c.numero}</td>
-                <td className="px-3 py-1.5 text-xs">{c.intitule}</td>
-                <td className="px-3 py-1.5 text-xs text-ink-700/70">{LIBELLE_NATURE_COMPTE[c.nature] ?? c.nature}</td>
-                <td className="px-3 py-1.5 text-xs">{c.statut === "actif" ? "Actif" : "Fermé"}</td>
+                <td data-label="Numéro" className="px-3 py-1.5 font-mono text-xs">{c.numero}</td>
+                <td data-label="Intitulé" className="px-3 py-1.5 text-xs">{c.intitule}</td>
+                <td data-label="Nature" className="px-3 py-1.5 text-xs text-ink-700/70">{LIBELLE_NATURE_COMPTE[c.nature] ?? c.nature}</td>
+                <td data-label="Statut" className="px-3 py-1.5 text-xs">{c.statut === "actif" ? "Actif" : "Fermé"}</td>
                 {peutEcrire && (
                   <td className="px-3 py-1.5">
                     <div className="flex justify-end gap-1.5">
@@ -915,7 +916,7 @@ function Journaux({
       )}
 
       <div className="mt-3 overflow-x-auto rounded-xl border border-cream-200">
-        <table className="w-full min-w-[480px] text-sm">
+        <table className="w-full min-w-[480px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead className="bg-cream-100">
             <tr className="text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
               <th className="px-3 py-2">Code</th>
@@ -928,10 +929,10 @@ function Journaux({
           <tbody>
             {journaux.map((j) => (
               <tr key={j.id} className={`border-t border-cream-100 ${j.actif ? "" : "opacity-50"}`}>
-                <td className="px-3 py-1.5 font-mono text-xs font-bold">{j.code}</td>
-                <td className="px-3 py-1.5 text-xs">{j.libelle}</td>
-                <td className="px-3 py-1.5 text-xs text-ink-700/70">{LIBELLE_TYPE_JOURNAL[j.type] ?? j.type}</td>
-                <td className="px-3 py-1.5 text-xs">{j.actif ? "Actif" : "Suspendu"}</td>
+                <td data-label="Code" className="px-3 py-1.5 font-mono text-xs font-bold">{j.code}</td>
+                <td data-label="Libellé" className="px-3 py-1.5 text-xs">{j.libelle}</td>
+                <td data-label="Type" className="px-3 py-1.5 text-xs text-ink-700/70">{LIBELLE_TYPE_JOURNAL[j.type] ?? j.type}</td>
+                <td data-label="État" className="px-3 py-1.5 text-xs">{j.actif ? "Actif" : "Suspendu"}</td>
                 {peutEcrire && (
                   <td className="px-3 py-1.5 text-right">
                     <button
@@ -1023,10 +1024,10 @@ function LigneCloture({
         <span className="text-xs font-normal text-ink-700/55">clôturée le {dateFr(c.clotureLe)}</span>
       </span>
       {peutEcrire && (
-        <span className="flex flex-wrap items-center gap-1.5">
+        <span className="flex flex-wrap items-center gap-1.5 mobile:w-full">
           <Input
             value={justification} maxLength={200} placeholder="Justification de la réouverture…"
-            onChange={(e) => setJustification(e.target.value)} className="h-8 w-56 text-xs"
+            onChange={(e) => setJustification(e.target.value)} className="h-8 w-56 text-xs mobile:h-11 mobile:w-full mobile:text-base"
           />
           <BoutonActionConfirmee
             libelle="Rouvrir" icone={Unlock} ton="danger" action={rouvrirPeriode}

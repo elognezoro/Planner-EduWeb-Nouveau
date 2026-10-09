@@ -32,8 +32,8 @@ export default async function QuizEditeurPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/gestion/cours/${coursId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Édition du cours</Link>
-      <PageHeader titre={`Quiz — ${lecon.titre}`} description="Réglez le seuil de réussite et composez les questions. La leçon est validée quand l'apprenant atteint le seuil." />
+      <Link href={`${BASE}/gestion/cours/${coursId}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Édition du cours</Link>
+      <PageHeader titre={`Quiz — ${lecon.titre}`} titreMobile="Quiz" titreVisibleMobile description="Réglez le seuil de réussite et composez les questions. La leçon est validée quand l'apprenant atteint le seuil." />
 
       <section className="space-y-2">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink-700/55">Réglages</h2>
@@ -41,7 +41,7 @@ export default async function QuizEditeurPage({ params }: { params: Promise<{ id
       </section>
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mobile:flex-wrap mobile:gap-2">
           <h2 className="inline-flex items-center gap-2 font-display text-sm font-bold uppercase tracking-wide text-ink-700/55"><ListChecks size={16} /> Questions ({questions.length})</h2>
           <FormQuestion quizId={quizBase.id} />
         </div>
@@ -51,12 +51,12 @@ export default async function QuizEditeurPage({ params }: { params: Promise<{ id
           <div className="space-y-2">
             {questions.map((q, i) => (
               <Card key={q.id} className="py-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium text-forest-900"><span className="text-ink-700/40">{i + 1}.</span> {q.enonce}</p>
+                <div className="flex items-start justify-between gap-3 mobile:gap-1">
+                  <div className="min-w-0 mobile:flex-1">
+                    <p className="font-medium text-forest-900 mobile:[overflow-wrap:anywhere]"><span className="text-ink-700/40">{i + 1}.</span> {q.enonce}</p>
                     <p className="text-xs text-ink-700/55">{libelleType(q.type)} · {q.points} pt(s)</p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 mobile:shrink-0 mobile:gap-0">
                     <FormQuestion quizId={quizBase.id} question={{ id: q.id, enonce: q.enonce, type: q.type, points: q.points, explication: q.explication, choix: q.choix }} />
                     <SupprimerQuestionBtn id={q.id} />
                   </div>

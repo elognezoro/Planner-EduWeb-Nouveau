@@ -22,7 +22,7 @@ export function ViderEnseignants({ etablissementId, nb }: { etablissementId: str
       <button
         type="submit"
         disabled={nb === 0}
-        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-200 px-4 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-200 px-4 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 mobile:h-11"
       >
         <Users size={14} /> Vider les enseignants
       </button>
@@ -51,7 +51,7 @@ export function SupprimerUtilisateur({
       <input type="hidden" name="etablissementId" value={etablissementId} />
       <button
         type="submit"
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-red-50 hover:text-red-600"
+        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
         aria-label="Supprimer"
       >
         <Trash2 size={14} />

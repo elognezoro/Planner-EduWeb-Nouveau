@@ -2,8 +2,9 @@
 
 // Petits éléments de formulaire partagés par les deux blocs de la page « Convertisseur CSV ».
 
+// Téléphone : champs de 44 px de haut (cible tactile).
 export const champStyle =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-base outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-base outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 
 export function Champ({ label, children }: { label: string; children: React.ReactNode }) {
   return (

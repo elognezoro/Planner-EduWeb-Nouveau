@@ -90,22 +90,22 @@ export function SectionStocks({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 mobile:grid-cols-2 mobile:gap-2 mobile:[&>div]:p-3 mobile:[&_p+p]:tabular-nums mobile:[&_p+p]:wrap-anywhere">
         {stats.map((s) => (
           <div key={s.libelle} className="rounded-2xl border border-cream-200 bg-white p-3 shadow-soft">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55">{s.libelle}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/75">{s.libelle}</p>
             <p className={`mt-1 font-display text-sm font-bold ${s.alerte ? "text-amber-700" : "text-forest-900"}`}>{s.valeur}</p>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-1.5 rangee-defilante-mobile">
         {volets.map((v) => (
           <button
             key={v.cle}
             type="button"
             onClick={() => setVolet(v.cle)}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors ${
+            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors mobile:h-11 mobile:text-sm ${
               volet === v.cle ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-100"
             }`}
           >
@@ -211,7 +211,7 @@ function VoletSituations({
           <PackageSearch size={17} className="text-forest-600" /> Situation des articles ({donnees.situations.length})
         </h3>
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[780px] text-sm">
+          <table className="w-full min-w-[780px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
                 <th className="px-2 py-2">Article</th>
@@ -230,24 +230,24 @@ function VoletSituations({
                   <td className="px-2 py-1.5 text-xs">
                     <span className="font-semibold text-forest-900">{s.nom}</span>
                     <span className="text-ink-700/50"> · {s.unite}</span>
-                    {s.rupture && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600">RUPTURE</span>}
-                    {s.sousSeuil && <span className="ml-1.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">SOUS SEUIL — à réapprovisionner (onglet Achats)</span>}
-                    {s.surstock && <span className="ml-1.5 rounded-full bg-gold-100 px-1.5 py-0.5 text-[10px] font-bold text-gold-800">SURSTOCK</span>}
+                    {s.rupture && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600 mobile:text-xs">RUPTURE</span>}
+                    {s.sousSeuil && <span className="ml-1.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 mobile:text-xs">SOUS SEUIL — à réapprovisionner (onglet Achats)</span>}
+                    {s.surstock && <span className="ml-1.5 rounded-full bg-gold-100 px-1.5 py-0.5 text-[10px] font-bold text-gold-800 mobile:text-xs">SURSTOCK</span>}
                   </td>
-                  <td className="px-2 py-1.5 text-right">{s.stock}</td>
-                  <td className="px-2 py-1.5 text-right">{s.reserve || ""}</td>
-                  <td className={`px-2 py-1.5 text-right font-semibold ${s.disponible <= 0 ? "text-red-600" : "text-forest-800"}`}>{s.disponible}</td>
-                  <td className="px-2 py-1.5 text-right text-xs text-ink-700/60">{s.stockMin}{s.stockMax !== null ? ` / ${s.stockMax}` : ""}</td>
-                  <td className="px-2 py-1.5 text-right">{s.cump !== null ? fcfa(s.cump) : "—"}</td>
-                  <td className="px-2 py-1.5 text-right font-semibold">{fcfa(s.valeur)}</td>
-                  <td className="px-2 py-1.5 text-[11px] text-ink-700/60">
+                  <td data-label="Stock" className="px-2 py-1.5 text-right">{s.stock}</td>
+                  <td data-label="Réservé" className="px-2 py-1.5 text-right">{s.reserve || ""}</td>
+                  <td data-label="Disponible" className={`px-2 py-1.5 text-right font-semibold ${s.disponible <= 0 ? "text-red-600" : "text-forest-800"}`}>{s.disponible}</td>
+                  <td data-label="Min / Max" className="px-2 py-1.5 text-right text-xs text-ink-700/60">{s.stockMin}{s.stockMax !== null ? ` / ${s.stockMax}` : ""}</td>
+                  <td data-label="CUMP" className="px-2 py-1.5 text-right">{s.cump !== null ? fcfa(s.cump) : "—"}</td>
+                  <td data-label="Valeur" className="px-2 py-1.5 text-right font-semibold">{fcfa(s.valeur)}</td>
+                  <td data-label="Répartition" className="px-2 py-1.5 text-[11px] text-ink-700/60 mobile:text-xs">
                     {s.parMagasin.map((m) => `${m.magasinNom} : ${m.quantite}`).join(" · ") || "—"}
                   </td>
                 </tr>
               ))}
               <tr className="border-t-2 border-forest-200 font-bold">
                 <td className="px-2 py-2" colSpan={6}>Valorisation totale (CUMP)</td>
-                <td className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.valeurTotale)}</td>
+                <td data-label="Valeur" className="px-2 py-2 text-right">{fcfa(donnees.tableauBord.valeurTotale)}</td>
                 <td />
               </tr>
             </tbody>
@@ -381,8 +381,8 @@ function VoletMagasins({
               <span style={{ paddingLeft: `${m.profondeur * 16}px` }}>
                 <strong className="text-forest-900">{m.nom}</strong>
                 <span className="text-ink-700/55"> · {TYPES_MAGASIN.find((t) => t.code === m.type)?.libelle ?? m.type}</span>
-                {m.principal && <span className="ml-1.5 rounded-full bg-forest-50 px-1.5 py-0.5 text-[10px] font-bold text-forest-800">PRINCIPAL</span>}
-                {m.statut === "ferme" && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600">FERMÉ</span>}
+                {m.principal && <span className="ml-1.5 rounded-full bg-forest-50 px-1.5 py-0.5 text-[10px] font-bold text-forest-800 mobile:text-xs">PRINCIPAL</span>}
+                {m.statut === "ferme" && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600 mobile:text-xs">FERMÉ</span>}
                 <span className="ml-2 text-ink-700/55">{m.nbArticles} article(s) · {m.quantiteTotale} unité(s)</span>
               </span>
               {droits.gerer && (
@@ -390,7 +390,7 @@ function VoletMagasins({
                   <button
                     type="button"
                     onClick={() => { setEnEdition(m); setFormOuvert(true); }}
-                    className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50"
+                    className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5 mobile:text-xs"
                   >
                     <Pencil size={11} /> Modifier
                   </button>
@@ -437,9 +437,9 @@ function VoletLotsSeries({
               <span>
                 <strong>{l.numeroLot}</strong> — {l.articleNom} · {l.quantite} unité(s)
                 {l.datePeremption ? ` · périme le ${dateFr(l.datePeremption)}` : ""}
-                {l.perime && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600">PÉRIMÉ</span>}
+                {l.perime && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600 mobile:text-xs">PÉRIMÉ</span>}
                 {!l.perime && l.joursRestants !== null && l.joursRestants <= 90 && (
-                  <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${l.joursRestants <= 7 ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"}`}>
+                  <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${l.joursRestants <= 7 ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"}`}>
                     J−{l.joursRestants}
                   </span>
                 )}
@@ -481,7 +481,7 @@ function VoletLotsSeries({
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cream-200 bg-white px-2.5 py-1.5">
               <span>
                 <strong className="font-mono">{s.numeroSerie}</strong> — {s.articleNom}
-                <span className="ml-1.5 rounded-full bg-cream-100 px-1.5 py-0.5 text-[10px] font-bold text-forest-800">
+                <span className="ml-1.5 rounded-full bg-cream-100 px-1.5 py-0.5 text-[10px] font-bold text-forest-800 mobile:text-xs">
                   {STATUTS_SERIE.find((x) => x.code === s.statut)?.libelle ?? s.statut}
                 </span>
               </span>
@@ -517,8 +517,10 @@ function SelecteurStatutSerie({
 }) {
   const [statut, setStatut] = useState(serie.statut);
   return (
-    <span className="inline-flex items-center gap-1">
-      <Select value={statut} onChange={(e) => setStatut(e.target.value)} className="h-7 w-32 text-xs">
+    // Téléphone : la liste garde 176 px (« Sorti du stock » lisible) ; « Appliquer » et la
+    // confirmation passent à la ligne au lieu de déborder de la carte.
+    <span className="inline-flex items-center gap-1 mobile:w-full mobile:flex-wrap mobile:gap-2">
+      <Select value={statut} onChange={(e) => setStatut(e.target.value)} className="h-7 w-32 text-xs mobile:h-11 mobile:w-auto mobile:min-w-44 mobile:flex-1 mobile:text-sm">
         {STATUTS_SERIE.map((s) => <option key={s.code} value={s.code}>{s.libelle}</option>)}
       </Select>
       <BoutonActionConfirmee
@@ -578,7 +580,7 @@ function VoletReservations({
               {r.beneficiaire ? ` · ${r.beneficiaire}` : ""} · depuis le {dateFr(r.dateDebut)}
               {r.dateFin ? ` jusqu'au ${dateFr(r.dateFin)}` : ""}
               {r.demandeParNom ? ` · par ${r.demandeParNom}` : ""}
-              <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${r.statut === "active" ? "bg-forest-50 text-forest-800" : "bg-cream-200 text-ink-700/60"}`}>
+              <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${r.statut === "active" ? "bg-forest-50 text-forest-800" : "bg-cream-200 text-ink-700/60"}`}>
                 {r.statut === "active" ? "ACTIVE" : "Libérée"}
               </span>
             </span>
@@ -688,8 +690,8 @@ function CarteInventaire({
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900">
-          <button type="button" onClick={() => setOuvert((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50" aria-label="Détail">
+        <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900 mobile:[&>span]:text-xs">
+          <button type="button" onClick={() => setOuvert((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50 mobile:-my-2 mobile:-ml-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Détail">
             {ouvert ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </button>
           {i.reference} · {TYPES_INVENTAIRE.find((t) => t.code === i.type)?.libelle ?? i.type}
@@ -702,7 +704,7 @@ function CarteInventaire({
             {i.compteParNom ? ` · compté par ${i.compteParNom}` : ""}{i.valideParNom ? ` · validé par ${i.valideParNom}` : ""}
           </span>
         </p>
-        <span className="flex flex-wrap items-center gap-1.5">
+        <span className="flex flex-wrap items-center gap-1.5 mobile:w-full mobile:gap-2 mobile:[&_button]:min-h-11 mobile:[&_button]:px-3.5 mobile:[&_button]:text-xs">
           <button type="button" onClick={onImprimer} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
             <Printer size={11} /> Fiche d&apos;inventaire
           </button>
@@ -714,8 +716,9 @@ function CarteInventaire({
             />
           )}
           {i.statut === "en_cours" && droits.inventorier && (
-            <span className="inline-flex items-center gap-1">
-              <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-8 w-32 text-xs" />
+            // Téléphone : le motif garde 128 px ; la confirmation passe dessous au lieu de déborder.
+            <span className="inline-flex items-center gap-1 mobile:w-full mobile:flex-wrap mobile:gap-2">
+              <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-8 w-32 text-xs mobile:h-11 mobile:w-auto mobile:min-w-32 mobile:flex-1 mobile:text-sm" />
               <BoutonActionConfirmee
                 libelle="Annuler" icone={Ban} ton="danger" action={annulerInventaire}
                 champs={{ etablissementId, id: i.id, version: String(i.version), motif }}
@@ -733,7 +736,7 @@ function CarteInventaire({
             <input type="hidden" name="etablissementId" value={etablissementId} />
             <input type="hidden" name="inventaireId" value={i.id} />
             <input type="hidden" name="lignes" value={lignesJson} />
-            <table className="w-full min-w-[640px] text-xs">
+            <table className="w-full min-w-[640px] text-xs tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11 mobile:[&_td_input]:h-11 mobile:[&_td_input]:text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-[10px] font-semibold uppercase tracking-wide text-ink-700/50">
                   <th className="px-2 py-1.5">Article</th>
@@ -747,8 +750,8 @@ function CarteInventaire({
                 {i.lignes.map((l) => (
                   <tr key={l.id} className="border-b border-cream-100">
                     <td className="px-2 py-1">{l.articleNom}</td>
-                    <td className="px-2 py-1 text-right">{l.stockTheorique}</td>
-                    <td className="px-2 py-1 text-right">
+                    <td data-label="Théorique" className="px-2 py-1 text-right">{l.stockTheorique}</td>
+                    <td data-label="Physique" className="px-2 py-1 text-right">
                       {i.statut === "en_cours" && droits.inventorier ? (
                         <Input
                           type="number" min={0} step={1}
@@ -760,10 +763,10 @@ function CarteInventaire({
                         l.stockPhysique ?? "—"
                       )}
                     </td>
-                    <td className={`px-2 py-1 text-right font-semibold ${l.ecart !== null && l.ecart !== 0 ? "text-red-600" : "text-forest-800"}`}>
+                    <td data-label="Écart" className={`px-2 py-1 text-right font-semibold ${l.ecart !== null && l.ecart !== 0 ? "text-red-600" : "text-forest-800"}`}>
                       {l.ecart !== null ? (l.ecart > 0 ? `+${l.ecart}` : l.ecart) : ""}
                     </td>
-                    <td className="px-2 py-1">
+                    <td data-label="Observation" className="px-2 py-1">
                       {i.statut === "en_cours" && droits.inventorier ? (
                         <Input
                           value={comptages[l.id]?.observation ?? (l.observation ?? "")}
@@ -801,7 +804,7 @@ function BonTransfertImprimable({
   onFermer: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -810,10 +813,10 @@ function BonTransfertImprimable({
           @page { size: A4 portrait; margin: 12mm; }
         }
       `}</style>
-      <div id="bon-transfert-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="bon-transfert-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Bon de transfert</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer">
             <X size={16} />
           </button>
         </div>
@@ -855,7 +858,7 @@ function FicheInventaireImprimable({
   onFermer: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -864,10 +867,10 @@ function FicheInventaireImprimable({
           @page { size: A4 portrait; margin: 12mm; }
         }
       `}</style>
-      <div id="fiche-inventaire-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="fiche-inventaire-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Fiche d&apos;inventaire</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer">
             <X size={16} />
           </button>
         </div>
@@ -880,28 +883,32 @@ function FicheInventaireImprimable({
           Ouvert le {dateFr(i.date)}{i.compteParNom ? ` · Compté par ${i.compteParNom}` : ""}
           {i.statut === "valide" ? ` · Validé le ${dateFr(i.dateValidation)}${i.valideParNom ? ` par ${i.valideParNom}` : ""}` : " · EN COURS"}
         </p>
-        <table className="mt-4 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-y-2 border-forest-800 text-left text-xs uppercase tracking-wide">
-              <th className="py-1.5 pr-2">Article</th>
-              <th className="py-1.5 pr-2 text-right">Théorique</th>
-              <th className="py-1.5 pr-2 text-right">Physique</th>
-              <th className="py-1.5 pr-2 text-right">Écart</th>
-              <th className="py-1.5">Observation</th>
-            </tr>
-          </thead>
-          <tbody>
-            {i.lignes.map((l) => (
-              <tr key={l.id} className="border-b border-cream-200">
-                <td className="py-1 pr-2">{l.articleNom}</td>
-                <td className="py-1 pr-2 text-right">{l.stockTheorique}</td>
-                <td className="py-1 pr-2 text-right">{l.stockPhysique ?? ""}</td>
-                <td className="py-1 pr-2 text-right font-semibold">{l.ecart !== null && l.ecart !== 0 ? (l.ecart > 0 ? `+${l.ecart}` : l.ecart) : ""}</td>
-                <td className="py-1 text-xs">{l.observation ?? ""}</td>
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-y-2 border-forest-800 text-left text-xs uppercase tracking-wide">
+                <th className="py-1.5 pr-2">Article</th>
+                <th className="py-1.5 pr-2 text-right">Théorique</th>
+                <th className="py-1.5 pr-2 text-right">Physique</th>
+                <th className="py-1.5 pr-2 text-right">Écart</th>
+                <th className="py-1.5">Observation</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {i.lignes.map((l) => (
+                <tr key={l.id} className="border-b border-cream-200">
+                  <td className="py-1 pr-2">{l.articleNom}</td>
+                  <td className="py-1 pr-2 text-right">{l.stockTheorique}</td>
+                  <td className="py-1 pr-2 text-right">{l.stockPhysique ?? ""}</td>
+                  <td className="py-1 pr-2 text-right font-semibold">{l.ecart !== null && l.ecart !== 0 ? (l.ecart > 0 ? `+${l.ecart}` : l.ecart) : ""}</td>
+                  <td className="py-1 text-xs">{l.observation ?? ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         <div className="mt-8 grid grid-cols-2 gap-4 text-center text-xs">
           <div>
             <p className="font-semibold">Le Compteur</p>

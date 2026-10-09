@@ -142,7 +142,7 @@ export function VuePlanFormation({
             <button
               type="button"
               onClick={() => setEditeur(true)}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:h-11 mobile:w-full mobile:justify-center"
             >
               <Pencil size={15} /> Modifier le plan
             </button>
@@ -150,14 +150,14 @@ export function VuePlanFormation({
         }
       />
 
-      {/* Onglets Généralités / niveaux */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* Onglets Généralités / niveaux — téléphone : une ligne qui défile au doigt. */}
+      <div className="rangee-defilante-mobile flex flex-wrap gap-1.5">
         {ongletsDispo.map((o) => (
           <button
             key={o.cle}
             type="button"
             onClick={() => setOnglet(o.cle)}
-            className={`inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors ${
+            className={`inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors mobile:h-11 ${
               o.cle === ongletActif ? "bg-gold-500 text-white shadow-soft" : "border border-cream-300 bg-white text-ink-700/70 hover:bg-cream-100"
             }`}
           >
@@ -168,9 +168,9 @@ export function VuePlanFormation({
 
       {/* Présentation (onglet Généralités) */}
       {ongletActif === "gen" && plan.intro && (
-        <section className="rounded-2xl border border-gold-200 bg-gold-50/50 p-5">
+        <section className="rounded-2xl border border-gold-200 bg-gold-50/50 p-5 mobile:p-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gold-500 text-white">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gold-500 text-white mobile:hidden">
               <BookOpenCheck size={18} />
             </span>
             <p className="whitespace-pre-line text-sm leading-relaxed text-ink-700/80">{plan.intro}</p>
@@ -231,8 +231,8 @@ function Entete({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-cream-200 bg-white p-5 shadow-soft mobile:gap-3 mobile:p-4">
+      <div className="flex items-center gap-4 mobile:gap-3">
         {codePays ? (
           <Image src={armoiriesUrl(codePays)} alt={`Armoiries ${pays}`} width={52} height={52} unoptimized className="h-13 w-13 object-contain" />
         ) : (
@@ -299,7 +299,10 @@ export function TableauSection({ section }: { section: SectionVue }) {
 function CorpsTable({ section }: { section: SectionVue }) {
   const nbCol = section.colonnes.length || 1;
   return (
-    <div className="overflow-x-auto">
+    <>
+    {/* Téléphone : le tableau (colonnes de ≈ 60 px illisibles) est remplacé, juste en dessous,
+        par une carte par ligne. */}
+    <div className="overflow-x-auto mobile:hidden">
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b-2 border-forest-200 bg-forest-50/60 text-left text-xs font-bold uppercase tracking-wide text-forest-800">
@@ -360,6 +363,64 @@ function CorpsTable({ section }: { section: SectionVue }) {
         </tbody>
       </table>
     </div>
+    <CartesMobiles section={section} />
+    </>
+  );
+}
+
+/**
+ * Téléphone : une carte par ligne du tableau — la 1re colonne (ou la 2e après un « N° ») sert de
+ * titre, les autres colonnes deviennent des paires « libellé : valeur » (vides omises). Les
+ * bannières (congés, jalons) sont des bandeaux colorés pleine largeur, les totaux une carte accentuée.
+ */
+function CartesMobiles({ section }: { section: SectionVue }) {
+  const colNumero = (section.colonnes[0] ?? "").trim() === "N°";
+  const iTitre = colNumero && section.colonnes.length > 1 ? 1 : 0;
+  return (
+    <div className="lg:hidden print:hidden divide-y divide-cream-100">
+      {section.lignes.length === 0 ? (
+        <p className="px-4 py-6 text-center text-sm text-ink-700/50">Section vide.</p>
+      ) : (
+        section.lignes.map((l) => {
+          if (l.type === "banniere") {
+            const cls = tonBanniere[l.ton ?? "note"] ?? tonBanniere.note;
+            return (
+              <div key={l.id} className={`border-y px-4 py-3 text-center text-sm font-semibold ${cls}`}>
+                <Cellule valeur={l.texte ?? ""} className="italic" />
+              </div>
+            );
+          }
+          const emphase = l.type === "total";
+          const titre = l.cellules[iTitre] ?? "";
+          const numero = colNumero && iTitre === 1 ? (l.cellules[0] ?? "").trim() : "";
+          const paires = section.colonnes
+            .map((c, i) => ({ c, i, v: l.cellules[i] ?? "" }))
+            .filter((p) => p.i !== iTitre && !(numero && p.i === 0) && p.v.trim() !== "");
+          return (
+            <div key={l.id} className={`px-4 py-3 ${emphase ? "bg-forest-50/70" : ""}`}>
+              <div className="flex items-start gap-2 font-semibold text-forest-900">
+                {numero && (
+                  <span className="mt-0.5 shrink-0 rounded-full bg-forest-100 px-2 py-0.5 text-xs font-bold text-forest-800">{numero}</span>
+                )}
+                <Cellule valeur={titre} className="min-w-0" />
+              </div>
+              {paires.length > 0 && (
+                <dl className="mt-2 space-y-2">
+                  {paires.map((p) => (
+                    <div key={p.i}>
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">{p.c}</dt>
+                      <dd className={`text-sm ${emphase ? "font-bold text-forest-900" : "text-ink-700/85"}`}>
+                        <Cellule valeur={p.v} />
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </div>
+          );
+        })
+      )}
+    </div>
   );
 }
 
@@ -382,7 +443,7 @@ function CorpsAccordeon({ section }: { section: SectionVue }) {
               type="button"
               onClick={() => setOuvert(actif ? -1 : i)}
               aria-expanded={actif}
-              className={`flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors ${actif ? "bg-gold-50/70" : "hover:bg-cream-50/50"}`}
+              className={`flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors mobile:px-4 ${actif ? "bg-gold-50/70" : "hover:bg-cream-50/50"}`}
             >
               <span className="flex items-center gap-3">
                 <ChevronDown size={17} className={`shrink-0 text-gold-700 transition-transform ${actif ? "" : "-rotate-90"}`} />

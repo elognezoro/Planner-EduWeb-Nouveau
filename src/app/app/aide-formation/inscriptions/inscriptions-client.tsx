@@ -87,12 +87,12 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
         <input type="hidden" name="cours" value={actif.slug} />
         <label htmlFor="rech-user" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-forest-600">Rechercher un utilisateur</label>
         <div className="flex flex-wrap gap-2">
-          <div className="relative min-w-0 flex-1">
+          <div className="relative min-w-0 flex-1 mobile:basis-full">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-700/40" />
             <input id="rech-user" name="q" defaultValue={q} placeholder="Nom, e-mail…" className="h-11 w-full rounded-xl border border-cream-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
           </div>
-          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-forest-700 px-5 text-sm font-semibold text-white hover:bg-forest-800"><Search className="h-4 w-4" /> Rechercher</button>
-          {q && <a href={`${BASE}/inscriptions?cours=${encodeURIComponent(actif.slug)}`} className="inline-flex items-center rounded-xl border border-cream-300 px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100">Effacer</a>}
+          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-forest-700 px-5 text-sm font-semibold text-white hover:bg-forest-800 mobile:min-h-11 mobile:flex-1 mobile:justify-center"><Search className="h-4 w-4" /> Rechercher</button>
+          {q && <a href={`${BASE}/inscriptions?cours=${encodeURIComponent(actif.slug)}`} className="inline-flex items-center rounded-xl border border-cream-300 px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:min-h-11 mobile:flex-1 mobile:justify-center">Effacer</a>}
         </div>
       </form>
 
@@ -107,14 +107,14 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
               <li key={c.id} className="flex items-center gap-3 py-2.5">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-50 text-xs font-bold text-forest-700">{initiales(c.nom)}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-forest-900">{c.nom} <span className="ml-1 rounded-full bg-cream-100 px-2 py-0.5 text-[0.65rem] font-medium text-ink-700/70">{c.role}</span></p>
-                  <p className="truncate text-xs text-ink-700/55">{c.email}</p>
+                  <p className="truncate text-sm font-semibold text-forest-900 mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{c.nom} <span className="ml-1 rounded-full bg-cream-100 px-2 py-0.5 text-[0.65rem] font-medium text-ink-700/70 mobile:text-xs">{c.role}</span></p>
+                  <p className="truncate text-xs text-ink-700/55 mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{c.email}</p>
                 </div>
                 <button
                   type="button"
                   disabled={pending && busyId === c.id}
                   onClick={() => agir(() => inscrireUtilisateurCours(actif.id, c.id), c.id)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-forest-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-forest-700 disabled:opacity-60"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-forest-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-forest-700 disabled:opacity-60 mobile:min-h-11 mobile:px-4"
                 >
                   {pending && busyId === c.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />} Inscrire
                 </button>
@@ -133,7 +133,7 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
         {inscrits.length === 0 ? (
           <p className="text-sm text-ink-700/60">Personne n&apos;est encore inscrit à ce cours.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto masque-ecran-mobile">
             <table className="w-full min-w-[620px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-[0.7rem] uppercase tracking-wide text-ink-700/55">
@@ -173,6 +173,37 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
             </table>
           </div>
         )}
+        {/* Téléphone : liste compacte à la place du tableau de 620 px (défilement latéral pour
+            atteindre « Désinscrire », noms et e-mails coupés). Mêmes actions, en icônes de 44 px. */}
+        {inscrits.length > 0 && (
+          <ul className="divide-y divide-cream-100 lg:hidden print:hidden">
+            {inscrits.map((i) => (
+              <li key={i.inscriptionId} className="flex items-center gap-3 py-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-forest-50 text-xs font-bold text-forest-700">{initiales(i.nom)}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-forest-900 [overflow-wrap:anywhere]">{i.nom}</p>
+                  <p className="text-xs text-ink-700/55 [overflow-wrap:anywhere]">{i.email}</p>
+                  <p className="mt-0.5 text-xs text-ink-700/70">
+                    <span className="font-medium text-forest-700">{i.role}</span> · {SOURCES[i.source] ?? i.source} · {i.date}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <BoutonMessage destinataireId={i.userId} nom={i.nom} variante="icone" className="h-11 w-11 rounded-full" />
+                  <button
+                    type="button"
+                    disabled={pending && busyId === i.userId}
+                    onClick={() => agir(() => desinscrireUtilisateurCours(actif.id, i.userId), i.userId)}
+                    aria-label={`Désinscrire ${i.nom}`}
+                    title="Désinscrire"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-red-200 text-red-600 active:bg-red-50 disabled:opacity-60"
+                  >
+                    {pending && busyId === i.userId ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserMinus className="h-4 w-4" />}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Imprimer / télécharger la liste des inscrits */}
@@ -187,7 +218,7 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
 
         <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
           {coursListe.map((c) => (
-            <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded-xl border border-cream-200 bg-white px-3 py-2 text-sm hover:border-forest-300">
+            <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded-xl border border-cream-200 bg-white px-3 py-2 text-sm hover:border-forest-300 mobile:min-h-11">
               <input type="checkbox" checked={selection.has(c.slug)} onChange={() => toggleSel(c.slug)} className="accent-forest-600" />
               <BookOpen className="h-3.5 w-3.5 shrink-0 text-forest-500" />
               <span className="min-w-0 flex-1 truncate text-forest-900">{c.titre}</span>
@@ -196,7 +227,7 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
           ))}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2 mobile:grid mobile:grid-cols-2 mobile:[&>a]:min-h-11 mobile:[&>a]:justify-center">
           <a
             aria-disabled={slugsSel.length === 0}
             href={slugsSel.length ? `${BASE}/inscriptions/telecharger?format=csv&cours=${urlCours}` : undefined}
@@ -219,7 +250,7 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
             target="_blank" rel="noopener noreferrer"
             className={`inline-flex items-center gap-1.5 rounded-full bg-forest-700 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-800 ${slugsSel.length ? "" : "pointer-events-none opacity-50"}`}
           ><Printer className="h-4 w-4" /> Imprimer</a>
-          <span className="ml-auto inline-flex items-center gap-1.5 text-sm text-ink-700/70"><Check className="h-4 w-4 text-forest-600" /> {totalSel} inscrit{totalSel > 1 ? "s" : ""} au total sur la sélection</span>
+          <span className="ml-auto inline-flex items-center gap-1.5 text-sm text-ink-700/70 mobile:col-span-2 mobile:ml-0"><Check className="h-4 w-4 text-forest-600" /> {totalSel} inscrit{totalSel > 1 ? "s" : ""} au total sur la sélection</span>
         </div>
       </div>
     </div>

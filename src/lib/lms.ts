@@ -174,7 +174,14 @@ export const CLASSE_HTML_RICHE =
   "[&_a]:text-forest-700 [&_a]:underline [&_p]:my-1 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-forest-200 [&_blockquote]:pl-3 [&_blockquote]:italic " +
   "[&_table]:my-2 [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm " +
   "[&_th]:border [&_th]:border-cream-300 [&_th]:bg-cream-100 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_th]:font-semibold " +
-  "[&_td]:border [&_td]:border-cream-300 [&_td]:px-2 [&_td]:py-1 [&_caption]:mb-1 [&_caption]:text-xs [&_caption]:text-ink-700/60";
+  "[&_td]:border [&_td]:border-cream-300 [&_td]:px-2 [&_td]:py-1 [&_caption]:mb-1 [&_caption]:text-xs [&_caption]:text-ink-700/60 " +
+  // Téléphone (écran < 64rem seulement — ordinateur et papier inchangés) : un tableau large
+  // défile DANS son propre cadre au lieu de faire défiler toute la page ; colonnes d'au moins
+  // 7rem (sinon « overflow-wrap: anywhere » les écraserait) ; URL et mots longs coupés ;
+  // iframes, vidéos et blocs de code bornés à la largeur.
+  "mobile:[overflow-wrap:anywhere] mobile:[&_table]:block mobile:[&_table]:max-w-full mobile:[&_table]:overflow-x-auto " +
+  "mobile:[&_th]:min-w-[7rem] mobile:[&_td]:min-w-[7rem] mobile:[&_iframe]:max-w-full mobile:[&_video]:max-w-full " +
+  "mobile:[&_pre]:max-w-full mobile:[&_pre]:overflow-x-auto";
 
 /**
  * Rendu d'un sous-ensemble Markdown SÛR (le contenu est saisi par l'admin, mais on échappe

@@ -5,6 +5,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
   AreaChart, Area,
 } from "recharts";
+import { useEcranMobile, useImpressionDepuisEcranMobile } from "@/lib/mobile/appareil";
+import { ClassementBarres, SerieCompacte } from "@/components/app/mobile/graphiques-mobiles";
 
 const axisStyle = { fontSize: 12, fill: "#2b3a33" } as const;
 const tooltipStyle = { borderRadius: 12, border: "1px solid #e9dcbe", fontSize: 13, boxShadow: "0 8px 24px rgba(15,53,39,0.08)" } as const;
@@ -16,6 +18,19 @@ function Vide({ message = "Aucune donnée pour l'instant." }: { message?: string
 
 /** Inscriptions par catégorie de formation. */
 export function ChartInscriptionsCategorie({ data }: { data: { categorie: string; inscriptions: number }[] }) {
+  // Téléphone : noms de catégories horizontaux et superposés à 280 px → classement horizontal,
+  // nom complet et nombre d'inscriptions affichés, mêmes couleurs que l'ordinateur.
+  const mobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
+  if (mobile && data.length > 0) {
+    return (
+      <ClassementBarres
+        donnees={data.map((d, i) => ({ libelle: d.categorie, valeur: d.inscriptions, couleur: MIXTE[i % MIXTE.length] }))}
+        unite="inscriptions"
+      />
+    );
+  }
   if (data.length === 0) return <Vide message="Aucune inscription à un cours." />;
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -24,7 +39,7 @@ export function ChartInscriptionsCategorie({ data }: { data: { categorie: string
         <XAxis dataKey="categorie" tick={axisStyle} tickLine={false} axisLine={{ stroke: "#e9dcbe" }} interval={0} />
         <YAxis tick={axisStyle} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#f0f8f3" }} formatter={(v) => [`${v}`, "Inscriptions"]} />
-        <Bar dataKey="inscriptions" name="Inscriptions" radius={[6, 6, 0, 0]} maxBarSize={54}>
+        <Bar isAnimationActive={impression ? false : undefined} dataKey="inscriptions" name="Inscriptions" radius={[6, 6, 0, 0]} maxBarSize={54}>
           {data.map((_, i) => <Cell key={i} fill={MIXTE[i % MIXTE.length]} />)}
         </Bar>
       </BarChart>
@@ -34,6 +49,13 @@ export function ChartInscriptionsCategorie({ data }: { data: { categorie: string
 
 /** Flux d'inscriptions dans le temps (courbe d'adoption). */
 export function ChartInscriptionsTemps({ data }: { data: { label: string; inscriptions: number }[] }) {
+  // Téléphone : une pastille chiffrée par mois (12 mois), lisible sans toucher la courbe.
+  const mobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
+  if (mobile && !data.every((d) => d.inscriptions === 0)) {
+    return <SerieCompacte donnees={data.map((d) => ({ libelle: d.label, valeur: d.inscriptions }))} />;
+  }
   if (data.every((d) => d.inscriptions === 0)) return <Vide message="Pas encore d'inscription enregistrée." />;
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -48,7 +70,7 @@ export function ChartInscriptionsTemps({ data }: { data: { label: string; inscri
         <XAxis dataKey="label" tick={axisStyle} tickLine={false} axisLine={{ stroke: "#e9dcbe" }} interval="preserveStartEnd" />
         <YAxis tick={axisStyle} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#f0f8f3" }} formatter={(v) => [`${v}`, "Inscriptions"]} />
-        <Area type="monotone" dataKey="inscriptions" stroke="#246a48" strokeWidth={2} fill="url(#aireSuivi)" />
+        <Area isAnimationActive={impression ? false : undefined} type="monotone" dataKey="inscriptions" stroke="#246a48" strokeWidth={2} fill="url(#aireSuivi)" />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -56,6 +78,19 @@ export function ChartInscriptionsTemps({ data }: { data: { label: string; inscri
 
 /** Répartition des inscriptions par tranche d'avancement (une inscription = un cours suivi). */
 export function ChartAvancement({ data }: { data: { tranche: string; inscriptions: number }[] }) {
+  // Téléphone : une ligne par tranche (ordre conservé), nombre d'inscriptions affiché.
+  const mobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
+  if (mobile && !data.every((d) => d.inscriptions === 0)) {
+    return (
+      <ClassementBarres
+        donnees={data.map((d) => ({ libelle: d.tranche.includes("%") ? d.tranche : `${d.tranche} %`, valeur: d.inscriptions }))}
+        unite="inscriptions"
+        trier={false}
+      />
+    );
+  }
   if (data.every((d) => d.inscriptions === 0)) return <Vide message="Pas encore d'avancement à afficher." />;
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -64,7 +99,7 @@ export function ChartAvancement({ data }: { data: { tranche: string; inscription
         <XAxis dataKey="tranche" tick={axisStyle} tickLine={false} axisLine={{ stroke: "#e9dcbe" }} interval={0} />
         <YAxis tick={axisStyle} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#f0f8f3" }} formatter={(v) => [`${v}`, "Inscriptions"]} />
-        <Bar dataKey="inscriptions" name="Inscriptions" fill="#246a48" radius={[6, 6, 0, 0]} maxBarSize={48} />
+        <Bar isAnimationActive={impression ? false : undefined} dataKey="inscriptions" name="Inscriptions" fill="#246a48" radius={[6, 6, 0, 0]} maxBarSize={48} />
       </BarChart>
     </ResponsiveContainer>
   );

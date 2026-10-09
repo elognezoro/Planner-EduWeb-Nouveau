@@ -149,8 +149,9 @@ export function BoutonEcouter({ texte, compact, label = "Écouter" }: { texte: s
 
   const actif = parle || charge;
   const cls = compact
-    ? "inline-flex items-center gap-1 rounded-full border border-cream-300 px-2 py-0.5 text-[11px] font-semibold text-forest-700 hover:bg-cream-100 disabled:opacity-60"
-    : "inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-60";
+    ? "inline-flex items-center gap-1 rounded-full border border-cream-300 px-2 py-0.5 text-[11px] font-semibold text-forest-700 hover:bg-cream-100 disabled:opacity-60 mobile:min-h-11 mobile:shrink-0 mobile:px-3 mobile:py-1.5 mobile:text-xs"
+    : "inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-60 mobile:min-h-11 mobile:px-4";
+  // Téléphone (classes « mobile: » ci-dessus) : cible tactile agrandie et texte en 14 px.
   const taille = compact ? 11 : 13;
 
   return (

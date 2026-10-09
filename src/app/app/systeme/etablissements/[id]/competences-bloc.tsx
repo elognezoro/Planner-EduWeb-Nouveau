@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Check, ChevronDown, Loader2, Save, Search, Users } from "lucide-react";
 import { enregistrerCompetencesLot } from "./enseignants/actions";
 import { ouvrirVersLeHaut } from "@/components/ui/direction-deroulante";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 import { estParentAOptions, optionsDe, optionCanonique } from "@/lib/disciplines/options-disciplines";
 
 export interface EnseignantCompetences {
@@ -98,6 +100,12 @@ export function CompetencesBloc({
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
   const [enregistrement, demarrer] = useTransition();
   const conteneurOuvert = useRef<HTMLDivElement | null>(null);
+  // Téléphone : le choix des disciplines se fait dans une feuille montante (le menu déroulant
+  // s'ouvrait dans une zone qui défile, avec des lignes de 36 px). Faux sur ordinateur, au rendu
+  // serveur et à l'impression : le menu déroulant y reste inchangé.
+  const ecranMobile = useEcranMobile();
+  const [feuillePour, setFeuillePour] = useState<string | null>(null);
+  const [rechercheFeuille, setRechercheFeuille] = useState("");
 
   // Fermeture de la liste déroulante au clic extérieur / Échap.
   useEffect(() => {
@@ -332,7 +340,7 @@ export function CompetencesBloc({
         </div>
         <Link
           href={`/app/systeme/etablissements/${etablissementId}/enseignants`}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:w-full mobile:justify-center"
         >
           <Users size={15} /> Réglage fin niveau par niveau
         </Link>
@@ -363,7 +371,7 @@ export function CompetencesBloc({
               key={v}
               type="button"
               onClick={() => setFiltreCours(v)}
-              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors mobile:min-h-10 ${
                 filtreCours === v ? "bg-forest-700 text-cream-50" : "bg-white text-ink-700/65 hover:bg-forest-50"
               }`}
             >
@@ -383,7 +391,7 @@ export function CompetencesBloc({
               key={v}
               type="button"
               onClick={() => setFiltreCycle(v)}
-              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors mobile:min-h-10 ${
                 filtreCycle === v ? "bg-forest-700 text-cream-50" : "bg-white text-ink-700/65 hover:bg-forest-50"
               }`}
             >
@@ -395,7 +403,7 @@ export function CompetencesBloc({
           value={filtreDiscipline}
           onChange={(e) => setFiltreDiscipline(e.target.value)}
           aria-label="Filtrer par discipline"
-          className="h-9 rounded-full border border-cream-300 bg-white px-3 text-xs font-medium text-ink-800 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-9 rounded-full border border-cream-300 bg-white px-3 text-xs font-medium text-ink-800 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-10 mobile:min-w-0 mobile:max-w-full mobile:text-sm"
         >
           <option value="">Toutes les disciplines</option>
           {disciplines.map((d) => (
@@ -412,7 +420,7 @@ export function CompetencesBloc({
               setFiltreCycle("tous");
               setFiltreDiscipline("");
             }}
-            className="text-xs font-medium text-forest-700 underline underline-offset-2 hover:text-forest-900"
+            className="text-xs font-medium text-forest-700 underline underline-offset-2 hover:text-forest-900 mobile:min-h-10 mobile:px-1"
           >
             Réinitialiser
           </button>
@@ -431,7 +439,7 @@ export function CompetencesBloc({
           Aucun enseignant ne correspond à « {q} ».
         </p>
       ) : (
-        <ul className="max-h-[28rem] divide-y divide-cream-100 overflow-y-auto pr-1">
+        <ul className="max-h-[28rem] divide-y divide-cream-100 overflow-y-auto pr-1 mobile:max-h-none mobile:overflow-visible mobile:pr-0">
           {visibles.map((e) => {
             const actives = attributions.get(e.id) ?? new Set<string>();
             const c = cycles.get(e.id) ?? { premier: false, second: false };
@@ -439,7 +447,7 @@ export function CompetencesBloc({
             const ouvert = ouvertPour === e.id;
             return (
               <li key={e.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
-                <span className="flex w-52 min-w-0 shrink-0 items-center gap-2">
+                <span className="flex w-52 min-w-0 shrink-0 items-center gap-2 mobile:w-full">
                   <span className="truncate font-medium text-forest-900">{e.nom}</span>
                   {modifies.has(e.id) && (
                     <span
@@ -450,16 +458,20 @@ export function CompetencesBloc({
                 </span>
 
                 {/* Disciplines : liste déroulante à choix multiples */}
-                <div ref={ouvert ? conteneurOuvert : undefined} className="relative w-72 min-w-0">
+                <div ref={ouvert ? conteneurOuvert : undefined} className="relative w-72 min-w-0 mobile:w-full">
                   <button
                     type="button"
                     onClick={(ev) => {
+                      if (ecranMobile) {
+                        setFeuillePour(e.id);
+                        return;
+                      }
                       if (!ouvert) setVersLeHaut(ouvrirVersLeHaut(ev.currentTarget));
                       setOuvertPour(ouvert ? null : e.id);
                     }}
                     aria-haspopup="listbox"
                     aria-expanded={ouvert}
-                    className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-cream-300 bg-white px-3 text-left text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                    className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-cream-300 bg-white px-3 text-left text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11"
                   >
                     <span className={`truncate ${nomsActifs.length ? "text-ink-900" : "text-ink-700/50"}`}>
                       {nomsActifs.length ? nomsActifs.join(", ") : "Choisir les disciplines…"}
@@ -515,7 +527,7 @@ export function CompetencesBloc({
                         type="button"
                         onClick={() => basculerCycle(e.id, cle)}
                         aria-pressed={actif}
-                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors mobile:min-h-10 mobile:px-4 ${
                           actif
                             ? "border-transparent bg-forest-700 text-cream-50"
                             : "border-cream-300 bg-white text-ink-700/65 hover:border-forest-300 hover:text-forest-800"
@@ -533,13 +545,96 @@ export function CompetencesBloc({
         </ul>
       )}
 
-      {/* Enregistrement explicite du bloc : applique toutes les modifications d'un coup. */}
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-cream-100 pt-4">
+      {(() => {
+        const ens = feuillePour ? enseignants.find((x) => x.id === feuillePour) : undefined;
+        const actives = (feuillePour && attributions.get(feuillePour)) || new Set<string>();
+        const termes = plat(rechercheFeuille).split(/\s+/).filter(Boolean);
+        const liste = termes.length
+          ? disciplines.filter((d) => termes.every((t) => plat(d.nom).includes(t)))
+          : disciplines;
+        const fermer = () => {
+          setFeuillePour(null);
+          setRechercheFeuille("");
+        };
+        return (
+          <FeuilleBas ouvert={!!ens} onFermer={fermer} titre={ens ? `Disciplines — ${ens.nom}` : "Disciplines"}>
+            {ens && (
+              <div className="pb-2">
+                {disciplines.length > 8 && (
+                  <div className="sticky top-0 z-10 bg-cream-50 px-2 pb-2">
+                    <div className="relative">
+                      <Search aria-hidden size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/50" />
+                      <input
+                        type="search"
+                        value={rechercheFeuille}
+                        onChange={(ev) => setRechercheFeuille(ev.target.value)}
+                        placeholder="Rechercher une discipline…"
+                        aria-label="Rechercher une discipline"
+                        className="h-11 w-full rounded-xl border border-cream-300 bg-white pl-9 pr-3 text-base text-ink-900 outline-none placeholder:text-ink-700/50 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                      />
+                    </div>
+                  </div>
+                )}
+                <ul className="px-1">
+                  {liste.map((d) => {
+                    const active = actives.has(d.id);
+                    return (
+                      <li key={d.id}>
+                        <button
+                          type="button"
+                          role="checkbox"
+                          aria-checked={active}
+                          onClick={() => basculerDiscipline(ens.id, d.id)}
+                          className={`flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left ${
+                            active ? "font-semibold text-forest-900" : "text-ink-800"
+                          } active:bg-cream-100`}
+                        >
+                          <span
+                            aria-hidden
+                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${
+                              active ? "border-forest-600 bg-forest-600 text-white" : "border-cream-300 bg-white"
+                            }`}
+                          >
+                            {active && <Check size={15} />}
+                          </span>
+                          <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: d.couleur ?? "#999" }} />
+                          <span className="min-w-0 flex-1">{d.nom}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {liste.length === 0 && <p className="px-3 py-6 text-center text-sm text-ink-700/60">Aucune discipline.</p>}
+                <div className="sticky bottom-0 bg-cream-50 px-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={fermer}
+                    className="min-h-12 w-full rounded-full bg-forest-800 font-semibold text-cream-50 active:bg-forest-700"
+                  >
+                    Valider ({actives.size})
+                  </button>
+                </div>
+              </div>
+            )}
+          </FeuilleBas>
+        );
+      })()}
+
+      {/* Enregistrement explicite du bloc : applique toutes les modifications d'un coup.
+          Téléphone : barre collante tant que des modifications attendent (au-dessus de la barre
+          « Enregistrer toute la configuration », qui n'enregistre pas les compétences). */}
+      <div
+        className={`mt-4 flex flex-wrap items-center gap-3 border-t border-cream-100 pt-4 ${
+          modifies.size > 0
+            ? "mobile:sticky mobile:bottom-[calc(var(--hauteur-barre-onglets,0px)+5.25rem)] mobile:z-20 mobile:mr-16 mobile:gap-2 mobile:rounded-2xl mobile:border mobile:border-cream-200 mobile:bg-white mobile:p-2 mobile:shadow-lg"
+            : ""
+        }`}
+      >
         <button
           type="button"
           onClick={enregistrer}
           disabled={enregistrement || modifies.size === 0}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:w-full mobile:justify-center"
         >
           {enregistrement ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
           Enregistrer les compétences
@@ -602,7 +697,7 @@ export function CompetencesBloc({
                 <p className="mt-2 text-sm text-ink-700/50">Aucun enseignant.</p>
               ) : (
                 <>
-                  <div className="mt-2.5 grid grid-cols-[1fr_3.5rem_3.5rem] gap-x-2 text-[11px] font-semibold uppercase tracking-wide text-ink-700/45">
+                  <div className="mt-2.5 grid grid-cols-[1fr_3.5rem_3.5rem] gap-x-2 text-[11px] font-semibold uppercase tracking-wide text-ink-700/45 mobile:grid-cols-[1fr_4.5rem_4.5rem] mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/70">
                     <span />
                     <span className="text-right">Comptes</span>
                     <span className="text-right">Déclarés</span>
@@ -611,7 +706,7 @@ export function CompetencesBloc({
                     {lignes.map(({ cle, libelle, comptes, declares }) => {
                       const vide = comptes === 0 && declares === 0;
                       return (
-                        <li key={cle} className="grid grid-cols-[1fr_3.5rem_3.5rem] items-baseline gap-x-2 text-sm">
+                        <li key={cle} className="grid grid-cols-[1fr_3.5rem_3.5rem] items-baseline gap-x-2 text-sm mobile:grid-cols-[1fr_4.5rem_4.5rem]">
                           <span className={`min-w-0 ${vide ? "text-ink-700/45" : "text-ink-800"}`}>
                             {libelle}
                           </span>

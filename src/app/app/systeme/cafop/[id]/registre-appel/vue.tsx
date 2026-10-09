@@ -6,7 +6,10 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   Users, UserCheck, UserX, Clock, ThumbsUp, Eye, HeartPulse, MessageSquareWarning,
   Download, Loader2, Save, Search, Send, MessageCircle, Sparkles, History, X, Printer, ChevronDown,
+  MoreHorizontal,
 } from "lucide-react";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
+import { FiltresMobiles } from "@/components/app/mobile/filtres-mobiles";
 import {
   enregistrerAppelCafop,
   justifierAbsenceCafop,
@@ -61,9 +64,18 @@ type TypeAction = "encouragement" | "observation" | "infirmerie" | "sms" | "just
 
 const initial: EtatForm = { ok: false };
 const champ =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
-const labelCls = "mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60";
-const chip = "rounded-full border border-cream-300 px-3 py-1.5 text-xs font-medium text-forest-800 hover:bg-forest-50";
+  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
+const labelCls = "mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs";
+const chip = "rounded-full border border-cream-300 px-3 py-1.5 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:min-h-11";
+
+/** Téléphone : actions par élève-maître proposées dans la feuille « ⋯ » (mêmes actions que la
+ *  colonne ACTIONS du tableau de l'ordinateur). */
+const ACTIONS_ELEVE_MOBILE = [
+  { t: "encouragement" as const, Icone: ThumbsUp, titre: "Encouragement", pastille: "bg-forest-50 text-forest-600" },
+  { t: "observation" as const, Icone: Eye, titre: "Observation", pastille: "bg-orange-50 text-orange-500" },
+  { t: "infirmerie" as const, Icone: HeartPulse, titre: "Infirmerie", pastille: "bg-pink-50 text-pink-500" },
+  { t: "sms" as const, Icone: MessageCircle, titre: "SMS à l'élève-maître", pastille: "bg-sky-50 text-sky-600" },
+];
 
 const nomComplet = (e: EleveAppel) => [e.nom, e.prenoms].filter(Boolean).join(" ");
 
@@ -133,14 +145,16 @@ function SelecteurMultiple({
                 <ul className="space-y-0.5">
                   {s.options.map((o) => (
                     <li key={o}>
-                      <label className={`flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-forest-800 hover:bg-cream-100 ${s.titre ? "ml-2" : ""}`}>
+                      {/* Téléphone (feuille « Filtres ») : la case garde 16 px malgré le « [&_input]:w-full »
+                          de la feuille, le libellé passe à la ligne au lieu d'être coupé, cible de 44 px. */}
+                      <label className={`flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-forest-800 hover:bg-cream-100 mobile:min-h-11 ${s.titre ? "ml-2" : ""}`}>
                         <input
                           type="checkbox"
                           checked={selection.has(o)}
                           onChange={() => onToggle(o)}
-                          className="h-4 w-4 shrink-0 rounded border-cream-300 text-forest-700 focus:ring-forest-300"
+                          className="h-4 w-4 shrink-0 rounded border-cream-300 text-forest-700 focus:ring-forest-300 mobile:w-4!"
                         />
-                        <span className="truncate">{o}</span>
+                        <span className="truncate mobile:whitespace-normal">{o}</span>
                       </label>
                     </li>
                   ))}
@@ -291,6 +305,12 @@ export function RegistreAppelCafop({
   const selectionner = (ids: string[]) => setSelection(new Set(ids));
 
   const [action, setAction] = useState<{ type: TypeAction; eleve: EleveAppel } | null>(null);
+  // Téléphone : élève-maître dont la feuille d'actions « ⋯ » est ouverte.
+  const [actionsPour, setActionsPour] = useState<EleveAppel | null>(null);
+  // Téléphone : nombre de filtres modifiés (pastille du bouton « Filtres »).
+  const filtresActifs =
+    (groupeSel ? 1 : 0) + (anneeSel !== "" ? 1 : 0) + (disciplineSel ? 1 : 0) + (moduleSel ? 1 : 0) +
+    (composantesSel.size > 0 ? 1 : 0) + (themesSel.size > 0 ? 1 : 0) + (enseignantSel ? 1 : 0) + (recherche.trim() ? 1 : 0);
 
   const toutMettre = (s: StatutAppelCafop) => {
     setMessage(null);
@@ -399,28 +419,29 @@ export function RegistreAppelCafop({
       </div>
 
       {/* Barre d'actions : export / impression */}
-      <div className="flex flex-wrap items-center justify-end gap-2 print:hidden">
+      <div className="flex flex-wrap items-center justify-end gap-2 print:hidden mobile:flex-nowrap">
         <button
           onClick={() => window.print()}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:h-11 mobile:flex-1 mobile:justify-center mobile:px-3"
         >
           <Printer size={15} /> Imprimer / PDF
         </button>
         <button
           onClick={exporter}
           disabled={pending}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-60"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-60 mobile:h-11 mobile:flex-1 mobile:justify-center mobile:px-3"
         >
           {pending ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />} Exporter
         </button>
       </div>
 
       {/* Navigation rapide */}
-      <section className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft print:hidden">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-semibold uppercase tracking-wide text-ink-700/50">Aller à</span>
+      <section className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft print:hidden mobile:p-2">
+        {/* Téléphone : pastilles sur une ligne qui défile au doigt. */}
+        <div className="rangee-defilante-mobile flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-semibold uppercase tracking-wide text-ink-700/50 mobile:hidden">Aller à</span>
           {[["#bilan", "Bilan de l'appel"], ["#liste", "Liste des élèves"], ["#heatmap", "Heatmap de présence"]].map(([href, l]) => (
-            <a key={href} href={href} className="rounded-full border border-cream-300 px-3 py-1.5 font-medium text-forest-800 hover:bg-forest-50">
+            <a key={href} href={href} className="rounded-full border border-cream-300 px-3 py-1.5 font-medium text-forest-800 hover:bg-forest-50 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:px-4 mobile:text-sm">
               {l}
             </a>
           ))}
@@ -428,7 +449,32 @@ export function RegistreAppelCafop({
       </section>
 
       {/* Filtres */}
-      <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft print:hidden">
+      <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft print:hidden mobile:border-0 mobile:bg-transparent mobile:p-0 mobile:shadow-none">
+        {/* Téléphone : la date, le groupe-classe et le créneau horaire (identité de la séance :
+            un créneau oublié écraserait l'appel de 07:30) restent sous la main ; les autres
+            filtres (jusqu'à 12 listes empilées) passent dans la feuille « Filtres ». */}
+        <div className="lg:hidden print:hidden mb-3 grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>Date</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={champ} />
+          </div>
+          <div>
+            <label className={labelCls}>Groupe-classe</label>
+            <select value={groupeSel} onChange={(e) => setGroupeSel(e.target.value)} className={champ}>
+              <option value="">Tous</option>
+              {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Début de séance</label>
+            <input type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} className={champ} />
+          </div>
+          <div>
+            <label className={labelCls}>Fin de séance</label>
+            <input type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} className={champ} />
+          </div>
+        </div>
+        <FiltresMobiles actifs={filtresActifs}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <div>
             <label className={labelCls}>Promotion</label>
@@ -521,25 +567,28 @@ export function RegistreAppelCafop({
             </div>
           </div>
         </div>
+        </FiltresMobiles>
       </section>
 
       {/* Bilan de l'appel */}
-      <section id="bilan" className="scroll-mt-24 rounded-3xl border border-cream-200 bg-white p-6 shadow-soft">
-        <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Bilan de l&apos;appel</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
+      <section id="bilan" className="scroll-mt-24 rounded-3xl border border-cream-200 bg-white p-6 shadow-soft mobile:p-4">
+        <h2 className="mb-4 font-display text-lg font-bold text-forest-900 mobile:mb-3">Bilan de l&apos;appel</h2>
+        {/* Téléphone : les 8 tuiles sur une ligne qui défile (au lieu de 4 rangées avant la liste). */}
+        <div className="rangee-defilante-mobile grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8 mobile:flex mobile:snap-x">
           {bilan.map((k) => (
-            <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-cream-50/50 p-3 text-center">
+            <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-cream-50/50 p-3 text-center mobile:w-[8.5rem] mobile:snap-start">
               <span className={`mx-auto flex h-8 w-8 items-center justify-center ${accents[k.accent]}`}>{k.icone}</span>
               <p className={`font-display text-xl font-bold ${accents[k.accent]}`}>{k.valeur}</p>
-              <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-700/60">{k.libelle}</p>
+              <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-700/60 mobile:text-xs">{k.libelle}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Liste des élèves-maîtres */}
-      <section id="liste" className="scroll-mt-24 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-100 px-5 py-3.5">
+      {/* Téléphone : « overflow-visible », sinon la barre d'enregistrement ne pourrait pas coller. */}
+      <section id="liste" className="scroll-mt-24 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft mobile:overflow-visible">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-100 px-5 py-3.5 mobile:px-4">
           <h2 className="font-display text-lg font-bold text-forest-900">
             Liste des élèves-maîtres
             <span className="ml-2 text-xs font-normal text-ink-700/55">({elevesFiltres.length})</span>
@@ -551,10 +600,11 @@ export function RegistreAppelCafop({
         </div>
 
         {/* Barre de sélection */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-100 bg-cream-50/50 px-5 py-2.5 print:hidden">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-ink-700/65">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-100 bg-cream-50/50 px-5 py-2.5 print:hidden mobile:px-4">
+          {/* Téléphone : pastilles de sélection rapide sur une ligne qui défile. */}
+          <div className="rangee-defilante-mobile flex flex-wrap items-center gap-2 text-xs text-ink-700/65 mobile:w-full">
             <span className="font-semibold">{selection.size} sélectionné(s)</span>
-            <span className="text-ink-700/40">· Sélection rapide :</span>
+            <span className="text-ink-700/40 mobile:hidden">· Sélection rapide :</span>
             <button onClick={() => selectionner(elevesFiltres.filter((e) => statutDe(e.id) === "absent").map((e) => e.id))} className={chip}>Absents</button>
             <button onClick={() => selectionner(elevesFiltres.filter((e) => statutDe(e.id) === "retard").map((e) => e.id))} className={chip}>Retards</button>
             <button onClick={() => selectionner(enAlerte.map((e) => e.id))} className={chip}>Alerte SMS (≥{SEUIL_ALERTE_SMS})</button>
@@ -562,7 +612,7 @@ export function RegistreAppelCafop({
           <button
             onClick={() => envoyerSms([...selection])}
             disabled={pending}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-700 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-600 disabled:opacity-60"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-700 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-600 disabled:opacity-60 mobile:h-11 mobile:w-full mobile:justify-center mobile:text-sm"
           >
             <Send size={13} /> SMS aux élèves-maîtres
           </button>
@@ -571,7 +621,9 @@ export function RegistreAppelCafop({
         {elevesFiltres.length === 0 ? (
           <p className="px-5 py-8 text-center text-sm text-ink-700/60">Aucun élève-maître ne correspond aux filtres.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Téléphone : le tableau (900 px) est remplacé par une carte par élève-maître, juste en dessous. */}
+          <div className="overflow-x-auto mobile:hidden">
             <table className="w-full min-w-[900px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-[0.65rem] uppercase tracking-wide text-ink-700/55">
@@ -708,12 +760,111 @@ export function RegistreAppelCafop({
               </tbody>
             </table>
           </div>
+          {/* Téléphone : une carte par élève-maître — contrôle P / A / R pleine largeur (cibles de
+              44 px), motif sous la carte, actions regroupées derrière « ⋯ ». Mêmes états que le
+              tableau : rien ne change à l'enregistrement. */}
+          <ul className="lg:hidden print:hidden divide-y divide-cream-100">
+            {elevesFiltres.map((e, idx) => {
+              const s = statutDe(e.id);
+              return (
+                <li key={e.id} className="px-4 py-3">
+                  <div className="flex items-start gap-1">
+                    <label className="-ml-2 flex h-11 w-11 shrink-0 items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={selection.has(e.id)}
+                        onChange={() => basculer(e.id)}
+                        aria-label={`Sélectionner ${nomComplet(e)}`}
+                        className="h-5 w-5"
+                      />
+                    </label>
+                    <div className="min-w-0 flex-1 pt-1">
+                      <p className="font-semibold leading-snug text-forest-900">
+                        <span className="mr-1 text-xs font-normal text-ink-700/55">{idx + 1}.</span>
+                        {nomComplet(e)}
+                      </p>
+                      <p className="text-xs text-ink-700/60">
+                        {e.matricule ?? "—"}
+                        {e.sexe ? ` · ${e.sexe}` : ""}
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+                        {e.cumulA > 0 && (
+                          <span className={`rounded-full px-2 py-0.5 font-semibold ${e.alerte ? "bg-red-100 text-red-700" : "bg-cream-200 text-forest-800"}`}>
+                            {e.cumulA} abs.
+                          </span>
+                        )}
+                        {e.cumulR > 0 && <span className="rounded-full bg-gold-100 px-2 py-0.5 font-semibold text-gold-800">{e.cumulR} ret.</span>}
+                        <span
+                          className={`rounded-full px-2 py-0.5 font-bold ${
+                            e.conduite >= 16 ? "bg-forest-100 text-forest-800" : e.conduite >= 12 ? "bg-gold-100 text-gold-800" : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          Conduite {e.conduite.toLocaleString("fr-FR")}/20
+                        </span>
+                      </div>
+                    </div>
+                    {!lectureSeule && (
+                      <button
+                        type="button"
+                        onClick={() => setActionsPour(e)}
+                        aria-label={`Actions pour ${nomComplet(e)}`}
+                        className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-forest-800 active:bg-cream-100"
+                      >
+                        <MoreHorizontal size={20} />
+                        {e.aNj > 0 && <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-blue-600" aria-hidden />}
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label={`Statut de ${nomComplet(e)}`}>
+                    {STATUTS_CAFOP.map((o) => (
+                      <button
+                        key={o.v}
+                        type="button"
+                        aria-pressed={s === o.v}
+                        onClick={() => poserStatut(e.id, o.v)}
+                        className={`h-11 rounded-xl border text-sm font-bold transition-colors ${
+                          s === o.v ? STYLE_STATUT[o.v] : "border-cream-300 bg-white text-ink-700/60"
+                        }`}
+                      >
+                        {o.libelle}
+                      </button>
+                    ))}
+                  </div>
+                  {s !== "present" && (
+                    <input
+                      value={motifDe(e.id)}
+                      onChange={(ev) => poserMotif(e.id, ev.target.value)}
+                      placeholder="Motif…"
+                      aria-label={`Motif — ${nomComplet(e)}`}
+                      className="mt-2 h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-base outline-none focus:border-forest-400"
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          </>
         )}
 
         {/* Pied : seuil + SMS groupé + Enregistrer — masqué en lecture seule (adc/delc). */}
         {!lectureSeule && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-cream-100 px-5 py-3.5 print:hidden">
-          <div className="flex flex-wrap items-center gap-2">
+        <>
+        {/* Téléphone : seuil et SMS groupé restent en fin de liste ; seule « Enregistrer l'appel »
+            colle au bas de l'écran (à gauche du bouton de l'assistant). */}
+        <div className="lg:hidden print:hidden flex flex-wrap items-center gap-2 border-t border-cream-100 px-4 py-3">
+          <span className="rounded-full bg-gold-100 px-3 py-1.5 text-xs font-semibold text-gold-800">
+            Seuil d&apos;alerte SMS : {SEUIL_ALERTE_SMS} absences
+          </span>
+          <button
+            onClick={() => envoyerSms(enAlerte.map((e) => e.id))}
+            disabled={pending || enAlerte.length === 0}
+            className="inline-flex h-11 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-sm font-semibold text-forest-800 active:bg-forest-50 disabled:opacity-50"
+          >
+            <Send size={15} /> SMS groupé ({enAlerte.length})
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-cream-100 px-5 py-3.5 print:hidden mobile:sticky mobile:bottom-[calc(var(--hauteur-barre-onglets,0px)+1.25rem)] mobile:z-30 mobile:mb-3 mobile:ml-2 mobile:mr-16 mobile:gap-1 mobile:rounded-3xl mobile:border mobile:border-cream-200 mobile:bg-white mobile:p-1.5 mobile:shadow-lg">
+          <div className="flex flex-wrap items-center gap-2 mobile:hidden">
             <span className="rounded-full bg-gold-100 px-3 py-1.5 text-xs font-semibold text-gold-800">
               Seuil d&apos;alerte SMS : {SEUIL_ALERTE_SMS} absences
             </span>
@@ -725,24 +876,69 @@ export function RegistreAppelCafop({
               <Send size={13} /> SMS groupé ({enAlerte.length})
             </button>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 mobile:w-full mobile:gap-1">
             {message && (
-              <span className={`min-w-0 text-xs font-medium ${message.ok ? "text-forest-700" : "text-red-600"}`}>{message.texte}</span>
+              <span className={`min-w-0 text-xs font-medium ${message.ok ? "text-forest-700" : "text-red-600"} mobile:w-full mobile:px-3 mobile:py-1`}>{message.texte}</span>
             )}
             <button
               onClick={enregistrer}
               disabled={pending || elevesFiltres.length === 0}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-7 text-sm font-semibold text-cream-50 transition-transform hover:-translate-y-0.5 hover:bg-forest-700 disabled:opacity-60"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-7 text-sm font-semibold text-cream-50 transition-transform hover:-translate-y-0.5 hover:bg-forest-700 disabled:opacity-60 mobile:w-full mobile:justify-center"
             >
               {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Enregistrer l&apos;appel
             </button>
           </div>
         </div>
+        </>
         )}
       </section>
 
+      {/* Téléphone : actions d'un élève-maître (colonne ACTIONS du tableau de l'ordinateur). */}
+      <FeuilleBas ouvert={actionsPour !== null} onFermer={() => setActionsPour(null)} titre={actionsPour ? nomComplet(actionsPour) : "Actions"}>
+        {actionsPour && (
+          <ul className="space-y-1 px-2 pb-2">
+            {ACTIONS_ELEVE_MOBILE.map(({ t, Icone, titre, pastille }) => (
+              <li key={t}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const eleve = actionsPour;
+                    setActionsPour(null);
+                    setAction({ type: t, eleve });
+                  }}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 text-left font-semibold text-forest-900 active:bg-cream-100"
+                >
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${pastille}`}>
+                    <Icone size={18} />
+                  </span>
+                  {titre}
+                </button>
+              </li>
+            ))}
+            {actionsPour.aNj > 0 && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const eleve = actionsPour;
+                    setActionsPour(null);
+                    setAction({ type: "justifier", eleve });
+                  }}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 text-left font-semibold text-forest-900 active:bg-cream-100"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                    <History size={18} />
+                  </span>
+                  Justifier les absences / retards ({actionsPour.aNj})
+                </button>
+              </li>
+            )}
+          </ul>
+        )}
+      </FeuilleBas>
+
       {/* Heatmap de présence */}
-      <section id="heatmap" className="scroll-mt-24 rounded-3xl border border-cream-200 bg-white p-6 shadow-soft print:hidden">
+      <section id="heatmap" className="scroll-mt-24 rounded-3xl border border-cream-200 bg-white p-6 shadow-soft print:hidden mobile:p-4">
         <h2 className="font-display text-lg font-bold text-forest-900">Heatmap de présence</h2>
         <p className="mb-4 mt-1 text-xs text-ink-700/60">Taux de présence par jour et créneau (toutes les séances horodatées du centre).</p>
         {heatmapVide ? (
@@ -754,7 +950,7 @@ export function RegistreAppelCafop({
             <table className="border-separate border-spacing-1 text-xs">
               <thead>
                 <tr>
-                  <th className="pr-2" />
+                  <th className="pr-2 mobile:sticky mobile:left-0 mobile:z-10 mobile:bg-white" />
                   {heures.map((h) => (
                     <th key={h} className="px-1 pb-1 text-center font-medium text-ink-700/60">{h.split(" - ")[0]}</th>
                   ))}
@@ -763,13 +959,14 @@ export function RegistreAppelCafop({
               <tbody>
                 {[...new Set(heatmap.map((c) => c.jour))].map((jour) => (
                   <tr key={jour}>
-                    <td className="pr-2 font-medium text-ink-700/70">{jour}</td>
+                    {/* Téléphone : colonne des jours figée pendant le défilement horizontal. */}
+                    <td className="pr-2 font-medium text-ink-700/70 mobile:sticky mobile:left-0 mobile:z-10 mobile:bg-white">{jour}</td>
                     {heures.map((h) => {
                       const cell = heatmap.find((c) => c.jour === jour && c.heure === h);
                       const taux = cell?.taux ?? null;
                       return (
                         <td key={h}>
-                          <div className={`flex h-9 w-12 items-center justify-center rounded-lg font-semibold ${taux === null ? "bg-cream-100 text-ink-700/30" : couleurTaux(taux)}`}>
+                          <div className={`flex h-9 w-12 items-center justify-center rounded-lg font-semibold mobile:w-10 ${taux === null ? "bg-cream-100 text-ink-700/30" : couleurTaux(taux)}`}>
                             {taux === null ? "—" : `${taux}`}
                           </div>
                         </td>
@@ -946,9 +1143,11 @@ function ModalAction({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={{ duration: 0.2 }}
-        className="fixed left-1/2 top-1/2 z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
+        // Téléphone : feuille ancrée en bas (100vh dépassait la zone visible d'iOS, les boutons
+        // passaient sous la barre du navigateur).
+        className="fixed left-1/2 top-1/2 z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft mobile:bottom-0 mobile:left-0 mobile:top-auto mobile:w-full mobile:translate-x-0 mobile:translate-y-0 mobile:rounded-b-none mobile:pb-[var(--marge-sure-bas)]"
       >
-        <div className="flex items-start justify-between px-6 pt-5">
+        <div className="flex items-start justify-between px-6 pt-5 mobile:px-4">
           <div className="flex items-center gap-3">
             {theme ? (
               <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${theme.pastille}`}>
@@ -968,14 +1167,14 @@ function ModalAction({
           </div>
           <button
             onClick={onClose}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11"
             aria-label="Fermer"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="max-h-[75vh] space-y-4 overflow-y-auto p-6">
+        <div className="max-h-[75vh] space-y-4 overflow-y-auto p-6 mobile:max-h-[80dvh] mobile:p-4">
           {/* Fiche élève-maître */}
           <div className="rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-3">
             <p className="font-semibold text-forest-900">{nom}</p>
@@ -1019,7 +1218,7 @@ function ModalAction({
             <>
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <label className="text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+                  <label className="text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">
                     {type === "sms" ? "Message" : "Description"}
                   </label>
                   {evenement && (
@@ -1027,7 +1226,7 @@ function ModalAction({
                       type="button"
                       onClick={regenerer}
                       disabled={chargement}
-                      className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-1 text-[0.7rem] font-semibold text-purple-700 hover:bg-purple-100 disabled:opacity-60"
+                      className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-1 text-[0.7rem] font-semibold text-purple-700 hover:bg-purple-100 disabled:opacity-60 mobile:min-h-11 mobile:px-4 mobile:text-sm"
                     >
                       {chargement ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} Suggestion
                     </button>
@@ -1041,7 +1240,7 @@ function ModalAction({
                   className="w-full rounded-2xl border border-cream-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
                 />
                 {evenement && (
-                  <p className="mt-1 text-[0.68rem] text-ink-700/50">
+                  <p className="mt-1 text-[0.68rem] text-ink-700/50 mobile:text-xs">
                     Suggestion générée selon le profil de l&apos;élève-maître — librement modifiable.
                   </p>
                 )}

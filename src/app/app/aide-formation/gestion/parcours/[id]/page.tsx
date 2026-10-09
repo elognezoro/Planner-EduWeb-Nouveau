@@ -38,11 +38,14 @@ export default async function EditionParcoursPage({ params }: { params: Promise<
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/gestion/parcours`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Parcours & badges</Link>
+      {/* Téléphone : doublon du bouton retour de l'en-tête mobile → masqué. */}
+      <Link href={`${BASE}/gestion/parcours`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Parcours & badges</Link>
       <PageHeader
         titre={parcours.titre}
+        titreMobile="Parcours"
+        titreVisibleMobile
         description={parcours.description ?? undefined}
-        action={<div className="flex items-center gap-2"><FormParcours opts={opts} parcours={parcours} /><BoutonPublierParcours id={parcours.id} publie={parcours.statut === "publie"} /></div>}
+        action={<div className="flex items-center gap-2 mobile:grid mobile:grid-cols-2"><FormParcours opts={opts} parcours={parcours} /><BoutonPublierParcours id={parcours.id} publie={parcours.statut === "publie"} /></div>}
       />
       <div className="flex flex-wrap items-center gap-2">
         <Badge ton={parcours.statut === "publie" ? "succes" : "attente"}>{parcours.statut === "publie" ? "Publié" : "Brouillon"}</Badge>
@@ -58,15 +61,19 @@ export default async function EditionParcoursPage({ params }: { params: Promise<
         ) : (
           <div className="space-y-2">
             {parcours.etapes.map((e, i) => (
-              <Card key={e.id} className="flex items-center gap-3 py-3">
+              // Téléphone : 1re ligne = icône + titre ; 2e ligne = flèches d'ordre (order-1), pastille
+              // et poubelle alignées à droite (order-2, groupe en « display: contents » sur ordinateur).
+              <Card key={e.id} className="flex items-center gap-3 py-3 mobile:flex-wrap mobile:gap-2 mobile:px-4">
                 <BoutonsOrdreEtape id={e.id} />
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-700"><BookOpen size={15} /></span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-forest-900"><span className="text-ink-700/40">{i + 1}.</span> {e.cours.titre}</p>
+                <div className="min-w-0 flex-1 mobile:basis-[calc(100%-2.5rem)]">
+                  <p className="truncate font-medium text-forest-900 mobile:line-clamp-2 mobile:whitespace-normal"><span className="text-ink-700/40">{i + 1}.</span> {e.cours.titre}</p>
                   <p className="text-xs text-ink-700/55">{e.cours._count.modules} leçon(s) · {e.cours.statut === "publie" ? "publié" : "brouillon"}</p>
                 </div>
-                {e.cours.statut !== "publie" && <span className="rounded-full bg-gold-100 px-2 py-0.5 text-[10px] font-semibold text-gold-800">Cours non publié</span>}
-                <SupprimerEtapeBtn id={e.id} />
+                <div className="contents mobile:order-2 mobile:flex mobile:flex-1 mobile:items-center mobile:justify-end mobile:gap-1">
+                  {e.cours.statut !== "publie" && <span className="rounded-full bg-gold-100 px-2 py-0.5 text-[10px] font-semibold text-gold-800 mobile:px-2.5 mobile:py-1 mobile:text-xs">Cours non publié</span>}
+                  <SupprimerEtapeBtn id={e.id} />
+                </div>
               </Card>
             ))}
           </div>

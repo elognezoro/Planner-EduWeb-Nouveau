@@ -12,7 +12,12 @@ import { Save, Loader2 } from "lucide-react";
  * Les onglets à sauvegarde propre (Volumes horaires, Compétences enseignants) ne sont
  * pas concernés : ils s'enregistrent onglet par onglet / à la volée.
  */
-export function EnregistrerTouteLaConfig() {
+export function EnregistrerTouteLaConfig({
+  className,
+}: {
+  /** Classes AJOUTÉES au bouton (variantes « mobile: » seulement). */
+  className?: string;
+} = {}) {
   const [enCours, setEnCours] = useState(false);
 
   const enregistrer = () => {
@@ -29,10 +34,18 @@ export function EnregistrerTouteLaConfig() {
       type="button"
       onClick={enregistrer}
       disabled={enCours}
-      className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-forest-800 px-7 text-sm font-semibold text-cream-50 shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-forest-700 disabled:opacity-60"
+      className={`inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-forest-800 px-7 text-sm font-semibold text-cream-50 shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-forest-700 disabled:opacity-60 ${className ?? ""}`}
     >
       {enCours ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-      {enCours ? "Enregistrement…" : "Enregistrer toute la configuration"}
+      {/* Téléphone : libellé court (barre collante étroite, à côté du bouton de l'assistant). */}
+      {enCours ? (
+        "Enregistrement…"
+      ) : (
+        <>
+          <span className="mobile:hidden">Enregistrer toute la configuration</span>
+          <span className="hidden mobile:inline">Tout enregistrer</span>
+        </>
+      )}
     </button>
   );
 }

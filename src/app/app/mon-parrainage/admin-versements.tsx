@@ -59,18 +59,18 @@ function LigneVersement({ c, onFait }: { c: Ligne; onFait: (m: string) => void }
           Pour <strong>{c.parrain}</strong> · filleul {c.filleul} · {c.creeLe}
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mobile:w-full">
         <input
           value={reference}
           onChange={(e) => setReference(e.target.value)}
           placeholder="Réf. de transaction"
-          className="h-9 w-40 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+          className="h-9 w-40 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:w-auto mobile:min-w-0 mobile:flex-1"
         />
         <button
           type="button"
           onClick={verser}
           disabled={pending}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-3.5 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-3.5 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-11 mobile:shrink-0"
         >
           {pending ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} Marquer versé
         </button>

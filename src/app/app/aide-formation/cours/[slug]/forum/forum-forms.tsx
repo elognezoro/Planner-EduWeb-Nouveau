@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, X, Trash2, Loader2, Sparkles, Pin, PinOff, Lock, LockOpen, Pencil, Send } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { EditeurRiche } from "@/components/ui/editeur-riche";
+import { useConfirmationMobile } from "@/app/app/aide-formation/outils-mobiles";
 import {
   creerSujetForum,
   posterMessageForum,
@@ -32,7 +33,7 @@ export function FormNouveauSujet({ coursId }: { coursId: string }) {
 
   if (!ouvert) {
     return (
-      <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700">
+      <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 mobile:h-11">
         <Plus size={16} /> Nouveau fil
       </button>
     );
@@ -79,7 +80,7 @@ export function FormModifierMessage({ message }: { message: { id: string; conten
   useSucces(etat, () => { setOuvert(false); router.refresh(); });
   if (!ouvert) {
     return (
-      <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1 text-xs font-medium text-forest-700 hover:underline">
+      <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1 text-xs font-medium text-forest-700 hover:underline mobile:min-h-11 mobile:px-2">
         <Pencil size={12} /> Modifier
       </button>
     );
@@ -90,7 +91,7 @@ export function FormModifierMessage({ message }: { message: { id: string; conten
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <EditeurRiche name="contenu" initial={message.contenu} minHauteur={100} />
       <div className="flex justify-end gap-2">
-        <button type="button" onClick={() => setOuvert(false)} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-ink-700/70">Annuler</button>
+        <button type="button" onClick={() => setOuvert(false)} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-ink-700/70 mobile:min-h-11 mobile:px-4 mobile:text-sm">Annuler</button>
         <SubmitButton className="w-auto px-4">Enregistrer</SubmitButton>
       </div>
     </form>
@@ -100,30 +101,40 @@ export function FormModifierMessage({ message }: { message: { id: string; conten
 export function BoutonSupprimerMessage({ messageId }: { messageId: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  // Téléphone : confirmation dans une feuille montante (window.confirm conservé sur ordinateur).
+  const { confirmer, feuille } = useConfirmationMobile();
   return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={() => { if (window.confirm("Supprimer ce message ?")) start(async () => { await supprimerMessageForum(messageId); router.refresh(); }); }}
-      className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:underline disabled:opacity-50"
-    >
-      {pending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} Supprimer
-    </button>
+    <>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => confirmer("Supprimer ce message ?", () => start(async () => { await supprimerMessageForum(messageId); router.refresh(); }))}
+        className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:underline disabled:opacity-50 mobile:min-h-11"
+      >
+        {pending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} Supprimer
+      </button>
+      {feuille}
+    </>
   );
 }
 
 export function BoutonSupprimerSujet({ sujetId }: { sujetId: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  // Téléphone : confirmation dans une feuille montante (window.confirm conservé sur ordinateur).
+  const { confirmer, feuille } = useConfirmationMobile();
   return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={() => { if (window.confirm("Supprimer ce fil et tous ses messages ?")) start(async () => { await supprimerSujetForum(sujetId); router.push("../"); router.refresh(); }); }}
-      className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-4 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"
-    >
-      {pending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />} Supprimer le fil
-    </button>
+    <>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => confirmer("Supprimer ce fil et tous ses messages ?", () => start(async () => { await supprimerSujetForum(sujetId); router.push("../"); router.refresh(); }), { libelle: "Supprimer le fil" })}
+        className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-4 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50 mobile:min-h-11"
+      >
+        {pending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />} Supprimer le fil
+      </button>
+      {feuille}
+    </>
   );
 }
 
@@ -132,7 +143,7 @@ export function BoutonsModerationSujet({ sujetId, epingle, ferme }: { sujetId: s
   const router = useRouter();
   const [pending, start] = useTransition();
   const toggle = (champ: "epingle" | "ferme", valeur: boolean) => start(async () => { await moderationSujetForum(sujetId, champ, valeur); router.refresh(); });
-  const cls = "inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50";
+  const cls = "inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:min-h-11 mobile:px-4";
   return (
     <div className="flex flex-wrap gap-2">
       <button type="button" disabled={pending} onClick={() => toggle("epingle", !epingle)} className={cls}>
@@ -156,7 +167,7 @@ export function BoutonSyntheseForum({ sujetId, nbMessages }: { sujetId: string; 
         type="button"
         disabled={pending || nbMessages === 0}
         onClick={() => start(async () => { const r = await genererSyntheseForum(sujetId); setMsg(r.message ?? null); router.refresh(); })}
-        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-5 py-2 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-5 py-2 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5 disabled:opacity-60 mobile:min-h-11 mobile:w-full mobile:justify-center"
       >
         {pending ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />} Synthèse des échanges par EduWeb Planner
       </button>

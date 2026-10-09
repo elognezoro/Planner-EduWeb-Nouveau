@@ -30,7 +30,7 @@ import { libelleNiveau } from "./vue-plan-formation";
 type Resultat = { ok: boolean; message?: string };
 type Agir = (fn: () => Promise<Resultat>, apres?: () => void) => void;
 
-const champ = "h-9 w-full rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+const champ = "h-9 w-full rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 const zone = "w-full rounded-lg border border-cream-300 bg-white px-2.5 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 
 export function EditeurPlanFormation({ plan, onFerme }: { plan: PlanVue; onFerme: () => void }) {
@@ -79,7 +79,7 @@ export function EditeurPlanFormation({ plan, onFerme }: { plan: PlanVue; onFerme
 
 function Bloc({ titre, children, actions }: { titre: string; children: React.ReactNode; actions?: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
+    <section className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft mobile:p-3">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-display text-sm font-bold text-forest-900">{titre}</h3>
         {actions}
@@ -107,7 +107,7 @@ function MetaForm({ plan, pending, agir }: { plan: PlanVue; pending: boolean; ag
           type="button"
           disabled={pending}
           onClick={() => agir(() => enregistrerPlanMeta(plan.id, f))}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60 mobile:h-11"
         >
           <Save size={14} /> Enregistrer l&apos;en-tête
         </button>
@@ -302,10 +302,10 @@ function SectionEditeur({
       actions={
         <div className="flex items-center gap-1.5">
           <span className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">{badge}</span>
-          <button type="button" disabled={pending || index === 0} onClick={() => agir(() => deplacerSection(section.id, -1))} title="Monter" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30">
+          <button type="button" disabled={pending || index === 0} onClick={() => agir(() => deplacerSection(section.id, -1))} title="Monter" aria-label="Monter la section" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30 mobile:h-11 mobile:w-11">
             <ArrowUp size={15} />
           </button>
-          <button type="button" disabled={pending || index === total - 1} onClick={() => agir(() => deplacerSection(section.id, 1))} title="Descendre" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30">
+          <button type="button" disabled={pending || index === total - 1} onClick={() => agir(() => deplacerSection(section.id, 1))} title="Descendre" aria-label="Descendre la section" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30 mobile:h-11 mobile:w-11">
             <ArrowDown size={15} />
           </button>
           <button
@@ -313,7 +313,8 @@ function SectionEditeur({
             disabled={pending}
             onClick={() => { if (window.confirm(`Supprimer la section « ${section.titre} » et toutes ses lignes ?`)) agir(() => supprimerSection(section.id)); }}
             title="Supprimer la section"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+            aria-label="Supprimer la section"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:h-11 mobile:w-11"
           >
             <Trash2 size={15} />
           </button>
@@ -347,26 +348,26 @@ function SectionEditeur({
           <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink-700/50">Colonnes du tableau</p>
           <div className="flex flex-wrap items-center gap-2">
             {section.colonnes.map((c, i) => (
-              <span key={i} className="inline-flex items-center gap-1 rounded-lg border border-cream-300 bg-cream-50/50 pl-2">
+              <span key={i} className="inline-flex items-center gap-1 rounded-lg border border-cream-300 bg-cream-50/50 pl-2 mobile:w-full">
                 <input
                   defaultValue={c}
                   disabled={pending}
                   onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== c) agir(() => renommerColonneSection(section.id, i, v)); }}
-                  className="h-8 w-36 bg-transparent text-sm outline-none"
+                  className="h-8 w-36 bg-transparent text-sm outline-none mobile:h-11 mobile:min-w-0 mobile:flex-1"
                 />
-                <button type="button" disabled={pending || section.colonnes.length <= 1} onClick={() => { if (window.confirm(`Retirer la colonne « ${c} » et les cellules correspondantes de toutes les lignes ?`)) agir(() => retirerColonneSection(section.id, i)); }} className="px-1.5 text-ink-700/40 hover:text-red-600 disabled:opacity-30" title="Retirer la colonne">
+                <button type="button" disabled={pending || section.colonnes.length <= 1} onClick={() => { if (window.confirm(`Retirer la colonne « ${c} » et les cellules correspondantes de toutes les lignes ?`)) agir(() => retirerColonneSection(section.id, i)); }} className="px-1.5 text-ink-700/40 hover:text-red-600 disabled:opacity-30 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:px-0" title="Retirer la colonne" aria-label={`Retirer la colonne ${c}`}>
                   <Trash2 size={13} />
                 </button>
               </span>
             ))}
-            <button type="button" disabled={pending || section.colonnes.length >= 12} onClick={() => agir(() => ajouterColonneSection(section.id))} className="inline-flex h-8 items-center gap-1 rounded-lg border border-dashed border-cream-400 px-2.5 text-xs font-semibold text-ink-700/70 hover:bg-cream-100 disabled:opacity-40">
+            <button type="button" disabled={pending || section.colonnes.length >= 12} onClick={() => agir(() => ajouterColonneSection(section.id))} className="inline-flex h-8 items-center gap-1 rounded-lg border border-dashed border-cream-400 px-2.5 text-xs font-semibold text-ink-700/70 hover:bg-cream-100 disabled:opacity-40 mobile:h-11 mobile:px-4 mobile:text-sm">
               <Plus size={13} /> Colonne
             </button>
           </div>
         </div>
 
         <div className="flex justify-end">
-          <button type="button" disabled={pending} onClick={enregistrer} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60">
+          <button type="button" disabled={pending} onClick={enregistrer} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60 mobile:h-11 mobile:w-full mobile:justify-center">
             <Save size={14} /> Enregistrer titre & options
           </button>
         </div>
@@ -398,7 +399,7 @@ function SectionEditeur({
               type="button"
               disabled={pending}
               onClick={() => agir(() => ajouterLigne(section.id, { type: "donnee", cellules: section.colonnes.map(() => "") }))}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-60"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-60 mobile:h-11 mobile:w-full mobile:justify-center"
             >
               <Rows3 size={14} /> Ajouter une ligne
             </button>
@@ -406,7 +407,7 @@ function SectionEditeur({
               type="button"
               disabled={pending}
               onClick={() => agir(() => ajouterLigne(section.id, { type: "banniere", ton: "conges", texte: "" }))}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/75 hover:bg-cream-100 disabled:opacity-60"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/75 hover:bg-cream-100 disabled:opacity-60 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:justify-center mobile:py-2"
             >
               <Flag size={14} /> Ajouter une bannière (congés / jalon)
             </button>
@@ -452,21 +453,23 @@ function LigneEditeur({
     );
 
   return (
-    <div className="flex items-start gap-2 px-3 py-3">
+    // Téléphone : champs pleine largeur, puis la rangée d'actions dessous (côte à côte, il ne
+    // restait qu'environ 90 px aux champs ; la zone de bannière de 16rem débordait).
+    <div className="flex items-start gap-2 px-3 py-3 mobile:flex-col mobile:items-stretch">
       <div className="min-w-0 flex-1">
         {banniere ? (
           <div className="flex flex-wrap items-start gap-2">
-            <select value={ton} onChange={(e) => setTon(e.target.value)} className={`${champ} w-40`}>
+            <select value={ton} onChange={(e) => setTon(e.target.value)} className={`${champ} w-40 mobile:w-full`}>
               {TON_OPTIONS.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
             </select>
-            <textarea value={texte} onChange={(e) => setTexte(e.target.value)} rows={1} placeholder="Texte de la bannière (ex. Congés de Toussaint)" className={`${zone} min-w-[16rem] flex-1`} />
+            <textarea value={texte} onChange={(e) => setTexte(e.target.value)} rows={1} placeholder="Texte de la bannière (ex. Congés de Toussaint)" className={`${zone} min-w-[16rem] flex-1 mobile:min-w-0 mobile:basis-full`} />
           </div>
         ) : (
           <div className="space-y-2">
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {colonnes.map((c, i) => (
                 <label key={i} className="block">
-                  <span className="mb-0.5 block text-[0.7rem] font-medium text-ink-700/55">{c || `Colonne ${i + 1}`}</span>
+                  <span className="mb-0.5 block text-[0.7rem] font-medium text-ink-700/55 mobile:text-xs">{c || `Colonne ${i + 1}`}</span>
                   <textarea
                     value={cellules[i] ?? ""}
                     onChange={(e) => setCellules((prev) => prev.map((x, j) => (j === i ? e.target.value : x)))}
@@ -476,24 +479,24 @@ function LigneEditeur({
                 </label>
               ))}
             </div>
-            <label className="inline-flex items-center gap-1.5 text-xs text-ink-700/60">
-              <input type="checkbox" checked={type === "total"} onChange={(e) => setType(e.target.checked ? "total" : "donnee")} />
+            <label className="inline-flex items-center gap-1.5 text-xs text-ink-700/60 mobile:min-h-11 mobile:gap-2.5">
+              <input type="checkbox" checked={type === "total"} onChange={(e) => setType(e.target.checked ? "total" : "donnee")} className="mobile:h-5 mobile:w-5" />
               Ligne de total (mise en avant)
             </label>
           </div>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-1">
-        <button type="button" disabled={pending} onClick={enregistrer} title="Enregistrer la ligne" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-forest-600 text-white hover:bg-forest-700 disabled:opacity-50">
+      <div className="flex shrink-0 items-center gap-1 mobile:self-end mobile:gap-1.5">
+        <button type="button" disabled={pending} onClick={enregistrer} title="Enregistrer la ligne" aria-label="Enregistrer la ligne" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-forest-600 text-white hover:bg-forest-700 disabled:opacity-50 mobile:h-11 mobile:w-11">
           <Save size={13} />
         </button>
-        <button type="button" disabled={pending || index === 0} onClick={() => agir(() => deplacerLigne(ligne.id, -1))} title="Monter" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30">
+        <button type="button" disabled={pending || index === 0} onClick={() => agir(() => deplacerLigne(ligne.id, -1))} title="Monter" aria-label="Monter la ligne" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30 mobile:h-11 mobile:w-11">
           <ArrowUp size={14} />
         </button>
-        <button type="button" disabled={pending || index === total - 1} onClick={() => agir(() => deplacerLigne(ligne.id, 1))} title="Descendre" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30">
+        <button type="button" disabled={pending || index === total - 1} onClick={() => agir(() => deplacerLigne(ligne.id, 1))} title="Descendre" aria-label="Descendre la ligne" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 disabled:opacity-30 mobile:h-11 mobile:w-11">
           <ArrowDown size={14} />
         </button>
-        <button type="button" disabled={pending} onClick={() => { if (window.confirm("Supprimer cette ligne ?")) agir(() => supprimerLigne(ligne.id)); }} title="Supprimer" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+        <button type="button" disabled={pending} onClick={() => { if (window.confirm("Supprimer cette ligne ?")) agir(() => supprimerLigne(ligne.id)); }} title="Supprimer" aria-label="Supprimer la ligne" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:h-11 mobile:w-11">
           <Trash2 size={14} />
         </button>
       </div>
@@ -529,7 +532,7 @@ function AjouterSection({ planId, pending, agir }: { planId: string; pending: bo
           {NIVEAU_OPTIONS.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
         </select>
         <input value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Titre de la section" className={champ} />
-        <button type="button" disabled={pending || !titre.trim()} onClick={ajouter} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-5 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-50">
+        <button type="button" disabled={pending || !titre.trim()} onClick={ajouter} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-5 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-50 mobile:h-11 mobile:justify-center">
           <Plus size={15} /> Ajouter
         </button>
       </div>

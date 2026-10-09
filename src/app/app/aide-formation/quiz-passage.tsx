@@ -87,7 +87,7 @@ export function QuizPassage({
     return (
       <div className="flex items-center justify-between gap-3 rounded-xl border border-forest-200 bg-forest-50/60 px-4 py-3">
         <p className="inline-flex items-center gap-2 text-sm font-semibold text-forest-800"><CheckCircle2 size={16} /> Quiz réussi</p>
-        <button type="button" onClick={() => setOuvert(true)} className="text-sm font-semibold text-forest-700 hover:text-forest-900">Refaire le quiz</button>
+        <button type="button" onClick={() => setOuvert(true)} className="text-sm font-semibold text-forest-700 hover:text-forest-900 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:px-2">Refaire le quiz</button>
       </div>
     );
   }
@@ -106,7 +106,7 @@ export function QuizPassage({
             Score : <strong>{resultat.pourcentage}%</strong> ({resultat.score}/{resultat.scoreMax} pt) · Seuil requis : {resultat.seuil}%
           </p>
           {!ok && (
-            <button type="button" onClick={reessayer} className="mt-3 inline-flex items-center gap-2 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50">
+            <button type="button" onClick={reessayer} className="mt-3 inline-flex items-center gap-2 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:w-full mobile:justify-center">
               <RotateCcw size={15} /> Réessayer
             </button>
           )}
@@ -117,7 +117,7 @@ export function QuizPassage({
             {questions.map((q, i) => <RevueQuestion key={q.id} q={q} index={i} sel={reponses[q.id] ?? []} correction={mapResultat.get(q.id)} />)}
           </div>
         )}
-        {ok && <button type="button" onClick={reessayer} className="inline-flex items-center gap-2 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50"><RotateCcw size={15} /> Refaire</button>}
+        {ok && <button type="button" onClick={reessayer} className="inline-flex items-center gap-2 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:w-full mobile:justify-center"><RotateCcw size={15} /> Refaire</button>}
       </div>
     );
   }
@@ -133,7 +133,7 @@ export function QuizPassage({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-700/60"><HelpCircle size={14} /> {questions.length} question(s) · seuil de réussite {seuil}%</p>
         {solutions && solutions.length > 0 && (
-          <button type="button" onClick={() => setRevision((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-cream-100">
+          <button type="button" onClick={() => setRevision((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:min-h-11 mobile:px-4">
             {revision ? <EyeOff size={13} /> : <Eye size={13} />} {revision ? "Masquer" : "Voir"} les solutions
           </button>
         )}
@@ -165,7 +165,7 @@ export function QuizPassage({
                   {q.choix.map((c) => {
                     const coche = sel.includes(c.id);
                     return (
-                      <label key={c.id} className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors ${coche ? "border-forest-300 bg-forest-50" : "border-cream-200 hover:bg-cream-50"}`}>
+                      <label key={c.id} className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors mobile:min-h-11 ${coche ? "border-forest-300 bg-forest-50" : "border-cream-200 hover:bg-cream-50"}`}>
                         <input type={multiple ? "checkbox" : "radio"} name={q.id} checked={coche} onChange={() => choisir(q.id, c.id, multiple)} className="accent-forest-600" />
                         <span className="text-ink-800">{c.texte}</span>
                       </label>
@@ -180,7 +180,7 @@ export function QuizPassage({
                   type="button"
                   onClick={() => verifier(q.id)}
                   disabled={verifEnCours === q.id || (reponses[q.id]?.length ?? 0) === 0}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:min-h-11 mobile:px-4"
                 >
                   <BadgeCheck size={13} /> {verifEnCours === q.id ? "Vérification…" : "Vérifier"}
                 </button>
@@ -192,7 +192,7 @@ export function QuizPassage({
       })}
 
       {erreur && <p className="text-sm font-medium text-red-600">{erreur}</p>}
-      <button type="button" onClick={soumettre} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-forest-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 disabled:opacity-50">
+      <button type="button" onClick={soumettre} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-forest-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 disabled:opacity-50 mobile:min-h-12 mobile:w-full mobile:justify-center">
         <Send size={15} /> {pending ? "Correction…" : "Valider mes réponses"}
       </button>
     </div>
@@ -237,7 +237,7 @@ function RevueQuestion({ q, index, sel, correction }: { q: QuestionPublique; ind
               <div key={c.id} className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm ${ton}`}>
                 {bon ? <CheckCircle2 size={15} className="shrink-0 text-forest-600" /> : choisi ? <XCircle size={15} className="shrink-0 text-red-500" /> : <Circle size={14} className="shrink-0 text-ink-700/30" />}
                 <span>{c.texte}</span>
-                {choisi && <span className="ml-auto text-[11px] font-semibold uppercase tracking-wide opacity-70">votre réponse</span>}
+                {choisi && <span className="ml-auto text-[11px] font-semibold uppercase tracking-wide opacity-70 mobile:shrink-0 mobile:text-xs">votre réponse</span>}
               </div>
             );
           })}
@@ -245,12 +245,12 @@ function RevueQuestion({ q, index, sel, correction }: { q: QuestionPublique; ind
       ) : (
         <div className="space-y-1.5 text-sm">
           <div className="rounded-lg border border-cream-200 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/45">Votre réponse</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/45 mobile:text-xs">Votre réponse</p>
             <p className="text-ink-800">{resumeReponse(q, sel)}</p>
           </div>
           {correction?.solution && (
             <div className="rounded-lg border border-forest-200 bg-forest-50 px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-forest-700/60">Réponse correcte</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-forest-700/60 mobile:text-xs">Réponse correcte</p>
               <p className="text-forest-800">{correction.solution}</p>
               <div className="mt-1"><BoutonEcouter texte={correction.solution} compact label="Écouter la réponse" /></div>
             </div>

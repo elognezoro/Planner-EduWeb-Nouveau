@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import { Card } from "@/components/app/ui";
+import { FiltresMobiles } from "@/components/app/mobile/filtres-mobiles";
 
 export interface ValeursFiltres {
   q: string;
@@ -76,10 +77,46 @@ export function FiltresComptes({
       valeurs.app || valeurs.emisDu || valeurs.emisAu,
   );
 
+  // Téléphone : les filtres se replient derrière un bouton « Filtres (n) » (feuille montante).
+  const nbActifs = [valeurs.role, valeurs.statut, valeurs.pays, valeurs.etab, valeurs.cohorte, valeurs.app, valeurs.emisDu || valeurs.emisAu].filter(Boolean).length;
+
+  // Téléphone : une fois les filtres repliés, plus rien ne dit lesquels sont actifs — d'où une
+  // rangée de puces retirables (un appui retire le filtre ; la recherche reste dans son champ).
+  const puces: { cle: string; libelle: string; retirer: Partial<ValeursFiltres> }[] = [];
+  if (valeurs.role) puces.push({ cle: "role", libelle: options.roles.find((r) => r.v === valeurs.role)?.l ?? valeurs.role, retirer: { role: "" } });
+  if (valeurs.statut) puces.push({ cle: "statut", libelle: LIBELLE_STATUT_FILTRE[valeurs.statut] ?? valeurs.statut, retirer: { statut: "" } });
+  if (valeurs.pays)
+    puces.push({
+      cle: "pays",
+      libelle: valeurs.pays === "national" ? "National (mon pays)" : valeurs.pays === "international" ? "International" : valeurs.pays,
+      retirer: { pays: "" },
+    });
+  if (valeurs.etab) puces.push({ cle: "etab", libelle: options.etablissements.find((e) => e.id === valeurs.etab)?.nom ?? "Établissement", retirer: { etab: "" } });
+  if (valeurs.cohorte) puces.push({ cle: "cohorte", libelle: `Cohorte ${valeurs.cohorte}`, retirer: { cohorte: "" } });
+  if (valeurs.app)
+    puces.push({
+      cle: "app",
+      libelle:
+        valeurs.app === "date"
+          ? `Approuvés le ${valeurs.appDu ? dateCourteFr(valeurs.appDu) : "…"}`
+          : valeurs.app === "periode"
+            ? `Approuvés du ${valeurs.appDu ? dateCourteFr(valeurs.appDu) : "…"} au ${valeurs.appAu ? dateCourteFr(valeurs.appAu) : "…"}`
+            : LIBELLE_APPROBATION_FILTRE[valeurs.app] ?? "Approbations",
+      retirer: { app: "", appDu: "", appAu: "" },
+    });
+  if (valeurs.emisDu || valeurs.emisAu)
+    puces.push({
+      cle: "emis",
+      libelle: `Émises ${valeurs.emisDu ? `du ${dateCourteFr(valeurs.emisDu)}` : ""}${valeurs.emisAu ? ` au ${dateCourteFr(valeurs.emisAu)}` : ""}`,
+      retirer: { emisDu: "", emisAu: "" },
+    });
+
   return (
-    <Card className="p-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="inline-flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55">
+    <>
+    <FiltresMobiles actifs={nbActifs}>
+    <Card className="p-4 mobile:border-0 mobile:bg-transparent mobile:p-0 mobile:shadow-none">
+      <div className="flex flex-wrap items-center gap-3 mobile:flex-col mobile:items-stretch">
+        <span className="inline-flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55 mobile:hidden">
           <SlidersHorizontal size={14} /> Filtres
         </span>
         <select value={valeurs.role} onChange={(e) => appliquer({ role: e.target.value })} className={classeSelect} aria-label="Filtrer par rôle">
@@ -170,7 +207,7 @@ export function FiltresComptes({
           className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-3 text-sm text-forest-900"
           title="Filtrer les comptes selon leur date d'inscription (demandes émises entre deux dates)"
         >
-          <span className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55">Émises</span>
+          <span className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs">Émises</span>
           <input
             type="date"
             value={valeurs.emisDu}
@@ -193,14 +230,51 @@ export function FiltresComptes({
           <button
             type="button"
             onClick={() => router.push(base)}
-            className="inline-flex h-9 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-medium text-ink-700/60 hover:bg-red-50 hover:text-red-600"
+            className="inline-flex h-9 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-medium text-ink-700/60 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:justify-center mobile:text-sm"
           >
             <X size={13} /> Réinitialiser
           </button>
         )}
       </div>
     </Card>
+    </FiltresMobiles>
+    {puces.length > 0 && (
+      <div className="lg:hidden print:hidden">
+        <div role="group" className="rangee-defilante-mobile -mx-4 flex gap-2 px-4" aria-label="Filtres actifs">
+          {puces.map((p) => (
+            <button
+              key={p.cle}
+              type="button"
+              onClick={() => appliquer(p.retirer)}
+              aria-label={`Retirer le filtre « ${p.libelle} »`}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-forest-200 bg-forest-50 pl-3.5 pr-2.5 text-sm font-medium text-forest-900 active:bg-forest-100"
+            >
+              {p.libelle}
+              <X size={15} className="shrink-0 text-forest-700/70" />
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+    </>
   );
+}
+
+const LIBELLE_STATUT_FILTRE: Record<string, string> = {
+  actif: "Actif",
+  en_attente_verification: "E-mail non confirmé",
+  suspendu: "Suspendu",
+  archive: "Archivé",
+};
+const LIBELLE_APPROBATION_FILTRE: Record<string, string> = {
+  approuves: "Comptes approuvés",
+  "7j": "Approuvés (7 jours)",
+  "30j": "Approuvés (30 jours)",
+};
+/** « 2026-10-08 » → « 08/10/2026 » (libellé de puce ; aucune conversion de fuseau). */
+function dateCourteFr(iso: string): string {
+  const [a, m, j] = iso.split("-");
+  return a && m && j ? `${j}/${m}/${a}` : iso;
 }
 
 /**
@@ -242,7 +316,7 @@ export function RechercheComptes({ base, valeurs }: { base: string; valeurs: Val
   }, [q]);
 
   return (
-    <div className="relative w-full max-w-sm">
+    <div className="relative w-full max-w-sm mobile:order-first mobile:max-w-none">
       {enCours ? (
         <Loader2 size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 animate-spin text-forest-600" />
       ) : (
@@ -255,7 +329,7 @@ export function RechercheComptes({ base, valeurs }: { base: string; valeurs: Val
           if (e.key === "Enter") appliquer(q.trim(), true);
         }}
         placeholder="Rechercher un utilisateur..."
-        className="h-12 w-full rounded-full border border-cream-300 bg-white pl-10 pr-9 text-sm shadow-sm outline-none placeholder:text-ink-700/45 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="h-12 w-full rounded-full border border-cream-300 bg-white pl-10 pr-9 text-sm shadow-sm outline-none placeholder:text-ink-700/45 focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:pr-12"
       />
       {q && (
         <button
@@ -265,7 +339,7 @@ export function RechercheComptes({ base, valeurs }: { base: string; valeurs: Val
             appliquer("");
           }}
           aria-label="Effacer la recherche"
-          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700/70"
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700/70 mobile:right-0.5 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
         >
           <X size={14} />
         </button>
@@ -299,13 +373,13 @@ export function PaginationComptes({
     "inline-flex h-9 min-w-9 items-center justify-center rounded-full border border-cream-300 bg-white px-2 text-sm text-forest-900 transition-colors hover:bg-forest-50 disabled:opacity-40 disabled:hover:bg-white";
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-1 py-3">
-      <p className="flex items-center gap-2 text-sm text-ink-700/65">
+    <div className="flex flex-wrap items-center justify-between gap-3 px-1 py-3 mobile:flex-col mobile:items-stretch">
+      <p className="flex items-center gap-2 text-sm text-ink-700/65 mobile:flex-wrap">
         Afficher
         <select
           value={valeurs.taille}
           onChange={(e) => router.push(construireUrl(base, { ...valeurs, taille: Number(e.target.value), page: 1 }))}
-          className="h-9 rounded-full border border-cream-300 bg-white px-3 pr-7 text-sm outline-none focus:border-forest-400"
+          className="h-9 rounded-full border border-cream-300 bg-white px-3 pr-7 text-sm outline-none focus:border-forest-400 mobile:h-11"
           aria-label="Taille de page"
         >
           {[10, 25, 50, 100].map((t) => (
@@ -318,11 +392,13 @@ export function PaginationComptes({
       </p>
 
       {pages > 1 && (
-        <nav className="flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
-          <button onClick={() => aller(1)} disabled={page === 1} className={bouton} aria-label="Première page">
+        // Téléphone : précédente · « Page x / y » · suivante, en cibles de 44 px (les numéros et
+        // première/dernière, 10 boutons de 36 px sur deux rangées, sont masqués).
+        <nav className="flex flex-wrap items-center justify-center gap-1.5 mobile:flex-nowrap mobile:justify-between" aria-label="Pagination">
+          <button onClick={() => aller(1)} disabled={page === 1} className={`${bouton} mobile:hidden`} aria-label="Première page">
             <ChevronsLeft size={15} />
           </button>
-          <button onClick={() => aller(page - 1)} disabled={page === 1} className={bouton} aria-label="Page précédente">
+          <button onClick={() => aller(page - 1)} disabled={page === 1} className={`${bouton} mobile:h-11 mobile:w-11`} aria-label="Page précédente">
             <ChevronLeft size={15} />
           </button>
           {numeros.map((n) => (
@@ -330,19 +406,22 @@ export function PaginationComptes({
               key={n}
               onClick={() => aller(n)}
               aria-current={n === page ? "page" : undefined}
-              className={
+              className={`${
                 n === page
                   ? "inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-forest-800 px-2 text-sm font-semibold text-cream-50"
                   : bouton
-              }
+              } mobile:hidden`}
             >
               {n}
             </button>
           ))}
-          <button onClick={() => aller(page + 1)} disabled={page === pages} className={bouton} aria-label="Page suivante">
+          <span className="lg:hidden print:hidden text-sm font-semibold text-forest-900 tabular-nums" aria-live="polite">
+            Page {page} / {pages}
+          </span>
+          <button onClick={() => aller(page + 1)} disabled={page === pages} className={`${bouton} mobile:h-11 mobile:w-11`} aria-label="Page suivante">
             <ChevronRight size={15} />
           </button>
-          <button onClick={() => aller(pages)} disabled={page === pages} className={bouton} aria-label="Dernière page">
+          <button onClick={() => aller(pages)} disabled={page === pages} className={`${bouton} mobile:hidden`} aria-label="Dernière page">
             <ChevronsRight size={15} />
           </button>
         </nav>

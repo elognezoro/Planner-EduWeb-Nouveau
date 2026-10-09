@@ -24,7 +24,7 @@ export default async function SeminairesConfigPage() {
         titre="Paramétrage des séminaires"
         description="Déposez l'image de couverture de chaque séminaire et configurez le certificat (logo, formateur, signataire, cachet, QR, modèle). Ces réglages alimentent les cartes des séminaires et le pré-remplissage des certificats."
         action={
-          <Link href={`${BASE}/formations`} className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300">
+          <Link href={`${BASE}/formations`} className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300 mobile:hidden">
             <ArrowLeft className="h-4 w-4" /> Formations
           </Link>
         }

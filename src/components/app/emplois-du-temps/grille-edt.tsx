@@ -10,6 +10,8 @@ import {
   type BandePause,
 } from "@/lib/emploi-du-temps/horaires";
 import type { EtablissementEnTete } from "./en-tete-officiel-edt";
+import { EdtJourMobile } from "@/components/app/mobile/edt-jour-mobile";
+import { COULEURS_GRAPHIQUE } from "@/lib/mobile/couleurs";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 
@@ -95,9 +97,30 @@ export function GrilleEDT({
   // Plusieurs cours par case = GROUPES SIMULTANÉS (ex. Allemand + Espagnol au même créneau).
   const map = new Map<string, CreneauVue[]>();
   for (const c of creneaux) map.set(`${c.jour}|${c.periode}`, [...(map.get(`${c.jour}|${c.periode}`) ?? []), c]);
+  // Téléphone : une couleur stable par discipline (palette de la charte) pour les cartes du jour.
+  const disciplines = [...new Set(creneaux.map((c) => c.disciplineNom))].sort((a, b) => a.localeCompare(b, "fr"));
+  const couleurs = Object.fromEntries(disciplines.map((d, i) => [d, COULEURS_GRAPHIQUE[i % COULEURS_GRAPHIQUE.length]]));
+  const jours = JOURS.slice(0, Math.max(5, ...creneaux.map((c) => c.jour + 1)));
 
   return (
-    <div className="edt-grille-wrap overflow-x-auto">
+    <>
+    {/* Téléphone : la journée en cartes — FRÈRE de la grille (qui reste celle de l'ordinateur et
+        du papier, masquée à l'écran mobile par « mobile:hidden »). */}
+    <div className="lg:hidden print:hidden">
+      <EdtJourMobile
+        seances={creneaux.map((c, i) => ({
+          id: `${c.jour}-${c.periode}-${i}`, jour: c.jour, periode: c.periode, duree: c.duree, disciplineId: c.disciplineNom,
+          disciplineNom: c.disciplineNom, enseignantNom: c.enseignantNom, salleNom: c.salleNom, classeNom: c.classeNom,
+        }))}
+        jours={jours}
+        horaires={horaires ?? undefined}
+        bandes={bandes ?? undefined}
+        couleurs={couleurs}
+        creneauxParJour={horaires?.length ?? maxPeriode + 1}
+        vue={modeEnseignant ? "enseignant" : "classe"}
+      />
+    </div>
+    <div className="edt-grille-wrap overflow-x-auto mobile:hidden">
       <table className="w-full min-w-[680px] table-fixed border-collapse text-xs">
         <thead>
           <tr>
@@ -158,5 +181,6 @@ export function GrilleEDT({
         </tbody>
       </table>
     </div>
+    </>
   );
 }

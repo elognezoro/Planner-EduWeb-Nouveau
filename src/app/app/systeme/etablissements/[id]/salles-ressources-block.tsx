@@ -80,10 +80,10 @@ export function SallesRessourcesBlock({
           const manqueSalle = !typesDispo.has(r.type);
           return (
             <div key={r.disciplineId} className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-cream-50/50 px-3 py-2">
-              <FlaskConical size={15} className="shrink-0 text-forest-700/70" />
-              <span className="min-w-[8rem] flex-1 font-medium text-forest-900">{nomDisc.get(r.disciplineId) ?? "?"}</span>
-              <span className="text-xs text-ink-700/50">→</span>
-              <div className="w-52">
+              <FlaskConical size={15} className="shrink-0 text-forest-700/70 mobile:order-1" />
+              <span className="min-w-[8rem] flex-1 font-medium text-forest-900 mobile:order-2 mobile:min-w-0">{nomDisc.get(r.disciplineId) ?? "?"}</span>
+              <span className="text-xs text-ink-700/50 mobile:hidden">→</span>
+              <div className="w-52 mobile:order-4 mobile:w-full">
                 <Select value={r.type} onChange={(e) => majType(r.disciplineId, e.target.value)}>
                   {TYPES_SALLE.map((t) => (
                     <option key={t.v} value={t.v}>
@@ -94,7 +94,7 @@ export function SallesRessourcesBlock({
               </div>
               {manqueSalle && (
                 <span
-                  className="inline-flex items-center gap-1 rounded-full bg-gold-50 px-2 py-0.5 text-[0.65rem] font-medium text-gold-800"
+                  className="inline-flex items-center gap-1 rounded-full bg-gold-50 px-2 py-0.5 text-[0.65rem] font-medium text-gold-800 mobile:order-5 mobile:text-xs"
                   title={`Aucune salle de type « ${LIBELLE.get(r.type)} » n'est encore nommée dans « Désignation des salles ». Le générateur en synthétisera une par défaut.`}
                 >
                   <TriangleAlert size={12} /> aucune salle nommée de ce type
@@ -104,7 +104,7 @@ export function SallesRessourcesBlock({
                 type="button"
                 onClick={() => retirer(r.disciplineId)}
                 aria-label="Retirer cette exigence"
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cream-300 text-ink-700/60 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cream-300 text-ink-700/60 hover:border-red-200 hover:bg-red-50 hover:text-red-600 mobile:order-3 mobile:h-11 mobile:w-11"
               >
                 <Trash2 size={15} />
               </button>
@@ -115,9 +115,9 @@ export function SallesRessourcesBlock({
 
       {/* Ajout d'une exigence */}
       <div className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3">
-        <label className="block">
+        <label className="block mobile:w-full">
           <span className="mb-1 block text-xs font-medium text-forest-900">Discipline</span>
-          <div className="w-56">
+          <div className="w-56 mobile:w-full">
             <Select value={nouvelleDisc} onChange={(e) => setNouvelleDisc(e.target.value)} disabled={dispoAjout.length === 0}>
               <option value="">— choisir —</option>
               {dispoAjout.map((d) => (
@@ -128,9 +128,9 @@ export function SallesRessourcesBlock({
             </Select>
           </div>
         </label>
-        <label className="block">
+        <label className="block mobile:w-full">
           <span className="mb-1 block text-xs font-medium text-forest-900">Type de salle requis</span>
-          <div className="w-52">
+          <div className="w-52 mobile:w-full">
             <Select value={nouveauType} onChange={(e) => setNouveauType(e.target.value)}>
               {TYPES_SALLE.map((t) => (
                 <option key={t.v} value={t.v}>
@@ -144,7 +144,7 @@ export function SallesRessourcesBlock({
           type="button"
           onClick={ajouter}
           disabled={!nouvelleDisc}
-          className="inline-flex h-11 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+          className="inline-flex h-11 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:w-full mobile:justify-center"
         >
           <Plus size={15} /> Ajouter
         </button>
@@ -153,7 +153,7 @@ export function SallesRessourcesBlock({
       <form action={action} className="flex flex-wrap items-center gap-3 border-t border-cream-200 pt-4">
         <input type="hidden" name="etablissementId" value={etablissementId} />
         <input type="hidden" name="mapping" value={mapping} />
-        <SubmitButton className="w-auto px-6">
+        <SubmitButton className="w-auto px-6 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:py-2">
           <Save size={16} /> Enregistrer les salles ressources
         </SubmitButton>
         <span className="text-xs text-ink-700/55">{regles.length} discipline(s) à salle spécialisée</span>

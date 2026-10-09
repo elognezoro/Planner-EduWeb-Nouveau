@@ -24,16 +24,18 @@ export function EnTeteOfficielDoc({
 
   return (
     <div className="doc-entete-officiel">
-      <div className="grid grid-cols-3 items-start gap-2">
-        <div className="text-[0.7rem] font-semibold uppercase leading-tight text-forest-900">
+      {/* Téléphone (écran seulement — le papier garde ses 3 colonnes) : le titre passe en tête sur
+          toute la largeur, ministère et République se partagent la ligne suivante. */}
+      <div className="grid grid-cols-3 items-start gap-2 mobile:grid-cols-2 mobile:gap-x-3 mobile:gap-y-2">
+        <div className="text-[0.7rem] font-semibold uppercase leading-tight text-forest-900 mobile:min-w-0 mobile:text-xs mobile:leading-snug mobile:wrap-break-word">
           <p>{ministere}</p>
           <p className="mt-2 font-bold">{etab.nom}</p>
         </div>
-        <div className="text-center">
-          <p className="font-display text-lg font-bold uppercase tracking-wide text-forest-900">{titre}</p>
+        <div className="text-center mobile:order-first mobile:col-span-2 mobile:mb-1">
+          <p className="font-display text-lg font-bold uppercase tracking-wide text-forest-900 mobile:text-base mobile:leading-snug mobile:tracking-normal mobile:wrap-break-word">{titre}</p>
           {sousTitre && <p className="text-sm font-semibold text-ink-800">{sousTitre}</p>}
         </div>
-        <div className="text-center text-[0.7rem] leading-tight text-ink-700/80">
+        <div className="text-center text-[0.7rem] leading-tight text-ink-700/80 mobile:min-w-0 mobile:text-xs mobile:leading-snug mobile:wrap-break-word">
           <p className="font-semibold text-forest-900">
             {pays ? (infoPays?.intitule ?? `RÉPUBLIQUE DE ${pays}`).toUpperCase() : ""}
           </p>
@@ -45,7 +47,7 @@ export function EnTeteOfficielDoc({
               height={48}
               unoptimized
               priority
-              className="mx-auto mt-1 h-12 w-[4.5rem] object-contain"
+              className="mx-auto mt-1 h-12 w-[4.5rem] object-contain mobile:h-10 mobile:w-15"
             />
           )}
           {slogan && <p className="mt-1 italic">{slogan}</p>}

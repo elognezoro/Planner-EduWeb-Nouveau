@@ -66,7 +66,7 @@ export default async function StatistiquesReseauPage() {
           // eslint-disable-next-line @next/next/no-html-link-for-pages
           <a
             href="/app/systeme/etablissements/reseau/rapport-senec"
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:h-11 mobile:w-full mobile:justify-center"
           >
             <Download size={15} /> Rapport du SENEC (Word)
           </a>
@@ -88,7 +88,9 @@ export default async function StatistiquesReseauPage() {
             <Church size={17} className="text-forest-600" /> Par diocèse (SEDEC)
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            {/* Téléphone : une carte par diocèse (tableau-cartes-mobile), bouton Word étiqueté
+                « Rapport de SEDEC » en pied. */}
+            <table className="tableau-cartes-mobile w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-2 pr-2">Diocèse</th>
@@ -110,17 +112,17 @@ export default async function StatistiquesReseauPage() {
                           <Link href={`/app/systeme/etablissements?diocese=${encodeURIComponent(d)}`} className="hover:underline">{d}</Link>
                         )}
                       </td>
-                      <td className="py-2 pr-2 text-right">{ls.length}</td>
-                      <td className="py-2 pr-2 text-right">{t.eleves.toLocaleString("fr-FR")}</td>
-                      <td className="py-2 pr-2 text-right">{t.ens.toLocaleString("fr-FR")}</td>
-                      <td className="py-2 pr-2 text-right">{t.cls}</td>
-                      <td className="py-2 text-right">
+                      <td data-label="Établissements" className="py-2 pr-2 text-right">{ls.length}</td>
+                      <td data-label="Élèves" className="py-2 pr-2 text-right">{t.eleves.toLocaleString("fr-FR")}</td>
+                      <td data-label="Enseignants" className="py-2 pr-2 text-right">{t.ens.toLocaleString("fr-FR")}</td>
+                      <td data-label="Classes" className="py-2 pr-2 text-right">{t.cls}</td>
+                      <td data-label="Rapport de SEDEC" className="py-2 text-right">
                         {sansDiocese ? (
                           <span className="text-xs text-ink-700/45">—</span>
                         ) : (
                           <a
                             href={`/app/systeme/etablissements/reseau/rapport-sedec?diocese=${encodeURIComponent(d)}`}
-                            className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                            className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:flex mobile:min-h-10 mobile:justify-center mobile:text-sm"
                           >
                             <Download size={13} /> Word
                           </a>
@@ -142,7 +144,7 @@ export default async function StatistiquesReseauPage() {
             <Church size={17} className="text-forest-600" /> Établissements du diocèse
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-sm">
+            <table className="tableau-cartes-mobile w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-2 pr-2">Établissement</th>
@@ -158,10 +160,10 @@ export default async function StatistiquesReseauPage() {
                     <td className="py-2 pr-2 font-medium text-forest-900">
                       <Link href={`/app/systeme/etablissements/${l.id}`} className="hover:underline">{l.nom}</Link>
                     </td>
-                    <td className="py-2 pr-2">{l.ville ?? "—"}</td>
-                    <td className="py-2 pr-2 text-right">{l.eleves.toLocaleString("fr-FR")}</td>
-                    <td className="py-2 pr-2 text-right">{l.enseignants.toLocaleString("fr-FR")}</td>
-                    <td className="py-2 text-right">{l.classes}</td>
+                    <td data-label="Localité" className="py-2 pr-2">{l.ville ?? "—"}</td>
+                    <td data-label="Élèves" className="py-2 pr-2 text-right">{l.eleves.toLocaleString("fr-FR")}</td>
+                    <td data-label="Enseignants" className="py-2 pr-2 text-right">{l.enseignants.toLocaleString("fr-FR")}</td>
+                    <td data-label="Classes" className="py-2 text-right">{l.classes}</td>
                   </tr>
                 ))}
               </tbody>
@@ -194,7 +196,7 @@ export default async function StatistiquesReseauPage() {
           <p className="mt-3 text-sm text-ink-700/60">Aucune autorisation d&apos;absence enregistrée dans le périmètre.</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[560px] text-sm">
+            <table className="tableau-cartes-mobile w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Établissement</th>
@@ -211,11 +213,11 @@ export default async function StatistiquesReseauPage() {
                     <td className="py-1.5 pr-2 font-medium text-forest-900">
                       <Link href={`/app/systeme/etablissements/${e.etablissementId}`} className="hover:underline">{e.nom}</Link>
                     </td>
-                    {u.roleActif === "senec" && <td className="py-1.5 pr-2 text-ink-700/70">{e.diocese ?? "—"}</td>}
-                    <td className="py-1.5 pr-2 text-right text-forest-700">{e.stats.approuvees}</td>
-                    <td className="py-1.5 pr-2 text-right">{e.stats.joursAbsence}</td>
-                    <td className="py-1.5 pr-2 text-right">{e.stats.seancesAffectees}</td>
-                    <td className="py-1.5 text-right text-red-600">{e.stats.seancesARattraper}</td>
+                    {u.roleActif === "senec" && <td data-label="Diocèse" className="py-1.5 pr-2 text-ink-700/70">{e.diocese ?? "—"}</td>}
+                    <td data-label="Approuvées" className="py-1.5 pr-2 text-right text-forest-700">{e.stats.approuvees}</td>
+                    <td data-label="Jours" className="py-1.5 pr-2 text-right">{e.stats.joursAbsence}</td>
+                    <td data-label="Séances" className="py-1.5 pr-2 text-right">{e.stats.seancesAffectees}</td>
+                    <td data-label="À rattraper" className="py-1.5 text-right text-red-600">{e.stats.seancesARattraper}</td>
                   </tr>
                 ))}
               </tbody>

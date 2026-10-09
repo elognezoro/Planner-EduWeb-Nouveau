@@ -87,31 +87,52 @@ export default async function CompetencesPage({ params }: { params: Promise<{ id
             const nivAcquis = new Set(ens.niveauxIntervention.map((n) => n.niveauId));
             return (
               <li key={ens.id}>
-                <Card>
+                <Card className="mobile:p-4">
                   <form action={enregistrerCompetences}>
                     <input type="hidden" name="etablissementId" value={id} />
                     <input type="hidden" name="enseignantId" value={ens.id} />
+                    {/* Téléphone : bascule « Modifier » (case sans nom, jamais envoyée) — la carte
+                        repliée ne montre que les choix enregistrés ; absente de l'ordinateur. */}
+                    <input
+                      id={`modifier-${ens.id}`}
+                      type="checkbox"
+                      className="peer hidden mobile:block mobile:sr-only"
+                    />
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <div>
+                      <div className="mobile:min-w-0 mobile:flex-1">
                         <p className="font-medium text-forest-900">{nomComplet(ens)}</p>
-                        <p className="text-xs text-ink-700/55">{ens.email}</p>
+                        <p className="text-xs text-ink-700/55 mobile:wrap-anywhere">{ens.email}</p>
                       </div>
-                      <button type="submit" className="inline-flex h-9 items-center rounded-full bg-forest-700 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-600">Enregistrer</button>
+                      <button type="submit" className="inline-flex h-9 items-center rounded-full bg-forest-700 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-600 mobile:h-11 mobile:shrink-0 mobile:text-sm">Enregistrer</button>
                     </div>
-                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50">Disciplines</p>
-                    <div className="mb-3 flex flex-wrap gap-2">
+                    <p className="hidden text-sm text-ink-800 mobile:block mobile:peer-checked:hidden">
+                      <span className="font-semibold text-forest-900">Disciplines : </span>
+                      {disciplines.filter((d) => acquis.has(d.id)).map((d) => d.nom).join(", ") || "aucune"}
+                    </p>
+                    <p className="mt-1 hidden text-sm text-ink-800 mobile:block mobile:peer-checked:hidden">
+                      <span className="font-semibold text-forest-900">Niveaux : </span>
+                      {niveaux.filter((n) => nivAcquis.has(n.id)).map((n) => n.nom).join(", ") || "aucun"}
+                    </p>
+                    <label
+                      htmlFor={`modifier-${ens.id}`}
+                      className="mt-3 hidden min-h-11 cursor-pointer items-center justify-center rounded-full border border-forest-200 px-4 text-sm font-semibold text-forest-800 active:bg-forest-50 mobile:flex mobile:peer-checked:mb-3"
+                    >
+                      Modifier les disciplines et niveaux
+                    </label>
+                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50 mobile:hidden mobile:text-xs mobile:peer-checked:block">Disciplines</p>
+                    <div className="mb-3 flex flex-wrap gap-2 mobile:hidden mobile:peer-checked:flex">
                       {disciplines.map((d) => (
-                        <label key={d.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800">
-                          <input type="checkbox" name={`disc_${d.id}`} defaultChecked={acquis.has(d.id)} className="h-3.5 w-3.5" />
+                        <label key={d.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800 mobile:min-h-11 mobile:px-3 mobile:text-sm">
+                          <input type="checkbox" name={`disc_${d.id}`} defaultChecked={acquis.has(d.id)} className="h-3.5 w-3.5 mobile:h-5 mobile:w-5" />
                           {d.nom}
                         </label>
                       ))}
                     </div>
-                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50">Niveaux d&apos;intervention</p>
-                    <div className="flex flex-wrap gap-2">
+                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50 mobile:hidden mobile:text-xs mobile:peer-checked:block">Niveaux d&apos;intervention</p>
+                    <div className="flex flex-wrap gap-2 mobile:hidden mobile:peer-checked:flex">
                       {niveaux.map((n) => (
-                        <label key={n.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800">
-                          <input type="checkbox" name={`niveau_${n.id}`} defaultChecked={nivAcquis.has(n.id)} className="h-3.5 w-3.5" />
+                        <label key={n.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800 mobile:min-h-11 mobile:px-3 mobile:text-sm">
+                          <input type="checkbox" name={`niveau_${n.id}`} defaultChecked={nivAcquis.has(n.id)} className="h-3.5 w-3.5 mobile:h-5 mobile:w-5" />
                           {n.nom}
                         </label>
                       ))}

@@ -37,6 +37,7 @@ import type { EnteteEtablissement } from "./finances-vue";
 import { BoutonActionConfirmee } from "./scolarite-plus";
 import { useApresSucces } from "./scolarite-onglets";
 import { fcfa } from "./types";
+import { MontantTuile } from "./montant-mobile";
 
 const INITIAL: EtatForm = { ok: false };
 
@@ -147,22 +148,22 @@ export function OngletBanques({
 }
 
 function TableauBordBanque({ tableauBord: t }: { tableauBord: TableauBordBanqueVue }) {
-  const cartes: { libelle: string; valeur: string; Icone: typeof Wallet; ton?: "gold" | "rouge" }[] = [
-    { libelle: "Solde bancaire global", valeur: fcfa(t.soldeGlobal), Icone: Landmark, ton: t.soldeGlobal < 0 ? "rouge" : undefined },
+  const cartes: { libelle: string; valeur: string; montant?: number; Icone: typeof Wallet; ton?: "gold" | "rouge" }[] = [
+    { libelle: "Solde bancaire global", valeur: fcfa(t.soldeGlobal), montant: t.soldeGlobal, Icone: Landmark, ton: t.soldeGlobal < 0 ? "rouge" : undefined },
     { libelle: "Comptes actifs", valeur: String(t.comptesActifs), Icone: CheckCircle2 },
-    { libelle: "Dépôts en attente (caisses)", valeur: fcfa(t.depotsEnAttente), Icone: Banknote, ton: t.depotsEnAttente > 0 ? "gold" : undefined },
-    { libelle: "Virements du jour", valeur: fcfa(t.virementsDuJour), Icone: ArrowLeftRight },
-    { libelle: "Frais bancaires (année)", valeur: fcfa(t.fraisAnnee), Icone: Wallet, ton: "gold" },
+    { libelle: "Dépôts en attente (caisses)", valeur: fcfa(t.depotsEnAttente), montant: t.depotsEnAttente, Icone: Banknote, ton: t.depotsEnAttente > 0 ? "gold" : undefined },
+    { libelle: "Virements du jour", valeur: fcfa(t.virementsDuJour), montant: t.virementsDuJour, Icone: ArrowLeftRight },
+    { libelle: "Frais bancaires (année)", valeur: fcfa(t.fraisAnnee), montant: t.fraisAnnee, Icone: Wallet, ton: "gold" },
     { libelle: "Chèques en circulation", valeur: String(t.chequesEnCirculation), Icone: FileCheck2 },
   ];
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       {cartes.map((c) => (
-        <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
+        <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft mobile:p-3">
           <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${c.ton === "rouge" ? "bg-red-50 text-red-600" : c.ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700"}`}>
             <c.Icone size={15} />
           </span>
-          <p className="mt-1.5 font-display text-base font-bold text-forest-900">{c.valeur}</p>
+          <p className="mt-1.5 font-display text-base font-bold text-forest-900 mobile:tabular-nums mobile:wrap-anywhere">{c.montant !== undefined ? <MontantTuile montant={c.montant} /> : c.valeur}</p>
           <p className="text-xs text-ink-700/60">{c.libelle}</p>
         </div>
       ))}
@@ -203,14 +204,14 @@ function LigneVersement({ versement: v, comptes }: { versement: VersementEnAtten
         ({v.caissierNom}) · {dateFr(v.date)}{v.motif ? ` · ${v.motif}` : ""}
       </span>
       <span className="inline-flex flex-wrap items-center gap-1.5">
-        <Select value={compteId} onChange={(e) => setCompteId(e.target.value)} className="h-8 w-auto text-xs">
+        <Select value={compteId} onChange={(e) => setCompteId(e.target.value)} className="h-8 w-auto text-xs mobile:h-11 mobile:text-base">
           {comptes.map((c) => (
             <option key={c.id} value={c.id}>{c.nom}</option>
           ))}
         </Select>
         <Input
           value={piece} onChange={(e) => setPiece(e.target.value)} maxLength={120}
-          placeholder="Bordereau (obligatoire)" className="h-8 w-44 text-xs"
+          placeholder="Bordereau (obligatoire)" className="h-8 w-44 text-xs mobile:h-11 mobile:w-full mobile:text-base"
         />
         <BoutonActionConfirmee
           libelle="Confirmer la réception" icone={CheckCircle2} ton="primaire"
@@ -548,7 +549,7 @@ function MouvementsRecents({ mouvements, peutEcrire }: { mouvements: MouvementBa
         <p className="text-sm text-ink-700/60">Aucun mouvement bancaire.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[880px] text-sm">
+          <table className="w-full min-w-[880px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Date</th>
@@ -566,18 +567,18 @@ function MouvementsRecents({ mouvements, peutEcrire }: { mouvements: MouvementBa
                 const sens = sensMouvementBancaire(m.type);
                 return (
                   <tr key={m.id} className={m.annule ? "opacity-50" : ""}>
-                    <td className="py-2 pr-2 whitespace-nowrap">{dateFr(m.dateOperation)}</td>
-                    <td className="py-2 pr-2 font-medium text-forest-900">{m.compteNom}</td>
-                    <td className="py-2 pr-2 text-xs text-ink-700/70">{LIBELLE_MOUVEMENT_BANCAIRE[m.type] ?? m.type}</td>
-                    <td className="py-2 pr-2">
+                    <td data-label="Date" className="py-2 pr-2 whitespace-nowrap">{dateFr(m.dateOperation)}</td>
+                    <td data-label="Compte" className="py-2 pr-2 font-medium text-forest-900">{m.compteNom}</td>
+                    <td data-label="Type" className="py-2 pr-2 text-xs text-ink-700/70">{LIBELLE_MOUVEMENT_BANCAIRE[m.type] ?? m.type}</td>
+                    <td data-label="Libellé" className="py-2 pr-2">
                       {m.libelle}
                       {m.annule && <span className="ml-1 rounded-full bg-red-50 px-1.5 text-[10px] font-semibold text-red-600">Annulé</span>}
                     </td>
-                    <td className={`py-2 pr-2 text-right font-medium ${sens > 0 ? "text-forest-700" : "text-red-700"}`}>
+                    <td data-label="Montant" className={`py-2 pr-2 text-right font-medium ${sens > 0 ? "text-forest-700" : "text-red-700"}`}>
                       {sens > 0 ? "+" : "−"}{fcfa(m.montant)}
                     </td>
-                    <td className="py-2 pr-2 font-mono text-xs text-ink-700/60">{m.pieceJustificative}</td>
-                    <td className="py-2 pr-2 text-center">
+                    <td data-label="Pièce" className="py-2 pr-2 font-mono text-xs text-ink-700/60">{m.pieceJustificative}</td>
+                    <td data-label="Pointé" className="py-2 pr-2 text-center">
                       {peutEcrire && !m.annule ? <BoutonPointage mouvement={m} /> : m.pointe ? "✔" : "—"}
                     </td>
                     {peutEcrire && (
@@ -637,7 +638,7 @@ function RegistreCheques({
         <p className="text-sm text-ink-700/60">Aucun chèque au registre.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[880px] text-sm">
+          <table className="w-full min-w-[880px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Sens</th>
@@ -667,16 +668,16 @@ function LigneCheque({ cheque: c, comptes, peutEcrire }: { cheque: ChequeVue; co
   const enCirculation = c.statut === "en_circulation";
   return (
     <tr className={c.statut === "annule" ? "opacity-50" : ""}>
-      <td className="py-2 pr-2">
+      <td data-label="Sens" className="py-2 pr-2">
         <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${c.sens === "recu" ? "bg-forest-100 text-forest-800" : "bg-gold-100 text-gold-800"}`}>
           {c.sens === "recu" ? "Reçu" : "Émis"}
         </span>
       </td>
-      <td className="py-2 pr-2 font-mono text-xs">{c.numero}</td>
-      <td className="py-2 pr-2">{c.banque ?? "—"}</td>
-      <td className="py-2 pr-2 text-right font-medium">{fcfa(c.montant)}</td>
-      <td className="py-2 pr-2 text-xs text-ink-700/70">{[c.emetteur, c.beneficiaire].filter(Boolean).join(" / ") || "—"}</td>
-      <td className="py-2 pr-2">
+      <td data-label="N°" className="py-2 pr-2 font-mono text-xs">{c.numero}</td>
+      <td data-label="Banque" className="py-2 pr-2">{c.banque ?? "—"}</td>
+      <td data-label="Montant" className="py-2 pr-2 text-right font-medium">{fcfa(c.montant)}</td>
+      <td data-label="Émetteur / bénéficiaire" className="py-2 pr-2 text-xs text-ink-700/70">{[c.emetteur, c.beneficiaire].filter(Boolean).join(" / ") || "—"}</td>
+      <td data-label="État" className="py-2 pr-2">
         <span
           title={c.motifStatut ?? undefined}
           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -692,8 +693,8 @@ function LigneCheque({ cheque: c, comptes, peutEcrire }: { cheque: ChequeVue; co
       {peutEcrire && (
         <td className="py-2 text-right">
           {enCirculation && (
-            <div className="flex flex-wrap items-center justify-end gap-1.5">
-              <Select value={compteId} onChange={(e) => setCompteId(e.target.value)} className="h-8 w-auto text-xs">
+            <div className="flex flex-wrap items-center justify-end gap-1.5 mobile:justify-start">
+              <Select value={compteId} onChange={(e) => setCompteId(e.target.value)} className="h-8 w-auto text-xs mobile:h-11 mobile:text-base">
                 {comptes.map((cb) => (
                   <option key={cb.id} value={cb.id}>{cb.nom}</option>
                 ))}
@@ -706,7 +707,7 @@ function LigneCheque({ cheque: c, comptes, peutEcrire }: { cheque: ChequeVue; co
               />
               <Input
                 value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300}
-                placeholder="Motif rejet/annulation…" className="h-8 w-40 text-xs"
+                placeholder="Motif rejet/annulation…" className="h-8 w-40 text-xs mobile:h-11 mobile:w-full mobile:text-base"
               />
               <BoutonActionConfirmee
                 libelle="Rejeter" icone={Ban} ton="danger"
@@ -771,7 +772,7 @@ function SituationCompteImprimable({
 }) {
   const actifs = mouvements.filter((m) => !m.annule);
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -780,10 +781,10 @@ function SituationCompteImprimable({
           @page { size: A4 portrait; margin: 12mm; }
         }
       `}</style>
-      <div id="situation-compte-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="situation-compte-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Situation du compte</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
             <X size={18} />
           </button>
         </div>
@@ -794,42 +795,46 @@ function SituationCompteImprimable({
           sousTitre={`${c.nom} — ${c.banque}${c.numeroCompte ? ` · n° ${c.numeroCompte}` : ""}`}
         />
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 text-sm mobile:grid-cols-1">
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Solde initial</dt><dd className="font-semibold">{fcfa(c.soldeInitial)}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Solde théorique</dt><dd className="font-semibold text-forest-900">{fcfa(c.solde)}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Solde pointé</dt><dd>{fcfa(c.soldePointe)}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Dernier relevé</dt><dd>{c.dernierReleve ? `${fcfa(c.dernierReleve.solde)} (${c.dernierReleve.mois})` : "—"}</dd></div>
         </dl>
 
-        <table className="mt-4 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
-              <th className="py-1.5 pr-2">Date</th>
-              <th className="py-1.5 pr-2">Opération</th>
-              <th className="py-1.5 pr-2">Pièce</th>
-              <th className="py-1.5 text-right">Montant</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-cream-100">
-            {actifs.length === 0 ? (
-              <tr><td colSpan={4} className="py-3 text-center text-ink-700/55">Aucun mouvement.</td></tr>
-            ) : (
-              actifs.map((m) => {
-                const sens = sensMouvementBancaire(m.type);
-                return (
-                  <tr key={m.id}>
-                    <td className="py-1.5 pr-2 whitespace-nowrap">{dateFr(m.dateOperation)}</td>
-                    <td className="py-1.5 pr-2">{m.libelle}</td>
-                    <td className="py-1.5 pr-2 font-mono text-xs">{m.pieceJustificative}</td>
-                    <td className={`py-1.5 text-right font-medium ${sens > 0 ? "text-forest-700" : "text-red-700"}`}>
-                      {sens > 0 ? "+" : "−"}{fcfa(m.montant)}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
+                <th className="py-1.5 pr-2">Date</th>
+                <th className="py-1.5 pr-2">Opération</th>
+                <th className="py-1.5 pr-2">Pièce</th>
+                <th className="py-1.5 text-right">Montant</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-cream-100">
+              {actifs.length === 0 ? (
+                <tr><td colSpan={4} className="py-3 text-center text-ink-700/55">Aucun mouvement.</td></tr>
+              ) : (
+                actifs.map((m) => {
+                  const sens = sensMouvementBancaire(m.type);
+                  return (
+                    <tr key={m.id}>
+                      <td className="py-1.5 pr-2 whitespace-nowrap">{dateFr(m.dateOperation)}</td>
+                      <td className="py-1.5 pr-2">{m.libelle}</td>
+                      <td className="py-1.5 pr-2 font-mono text-xs">{m.pieceJustificative}</td>
+                      <td className={`py-1.5 text-right font-medium ${sens > 0 ? "text-forest-700" : "text-red-700"}`}>
+                        {sens > 0 ? "+" : "−"}{fcfa(m.montant)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <div className="mt-10 flex justify-end">
           <div className="text-center text-xs text-ink-700/60">

@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BarChart3, GraduationCap, Users, Award, CheckCircle2, Trophy, PieChart, MapPin,
-  LayoutGrid, Layers, Activity, RefreshCw, TrendingUp, HeartHandshake, Download, Info, Link2,
+  LayoutGrid, Layers, Activity, RefreshCw, TrendingUp, HeartHandshake, Download, Info, Link2, ChevronDown,
 } from "lucide-react";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { trouverPays, drapeauEmoji } from "@/lib/referentiels/pays";
 import { ChartBarVertical } from "@/app/app/statistiques/etablissement/charts";
@@ -50,52 +51,54 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-500 text-white"><BarChart3 size={20} /></span>
           <div>
             <h2 className="font-display text-lg font-bold text-forest-900">{T("Statistiques CAFOP")}</h2>
-            <p className="mt-0.5 text-sm text-ink-700/70">{T("Vue d'ensemble des performances et indicateurs des Centres d'Animation et de Formation Pédagogique.")}</p>
+            {/* Téléphone : masquée — l'en-tête CAFOP juste au-dessus porte déjà ce contexte. */}
+            <p className="mt-0.5 text-sm text-ink-700/70 mobile:hidden">{T("Vue d'ensemble des performances et indicateurs des Centres d'Animation et de Formation Pédagogique.")}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <span className="inline-flex h-9 items-center gap-2 rounded-full border border-cream-300 bg-white px-3 text-sm font-medium text-forest-900">
             {code ? drapeauEmoji(code) : "🏳️"} {pays}
           </span>
-          <button type="button" onClick={() => window.print()} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-600 bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 print:hidden">
+          <button type="button" onClick={() => window.print()} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-600 bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 print:hidden mobile:h-11">
             <Download size={15} /> Télécharger PDF
           </button>
-          <button type="button" onClick={() => router.refresh()} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100 print:hidden">
+          {/* Téléphone : masqué — la coquille mobile actualise déjà la page d'un geste (tirer vers le bas). */}
+          <button type="button" onClick={() => router.refresh()} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100 print:hidden mobile:hidden">
             <RefreshCw size={15} /> Actualiser
           </button>
         </div>
       </section>
 
-      {/* ALLER À */}
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm print:hidden">
-        <span className="font-semibold text-ink-700/45">ALLER À</span>
+      {/* ALLER À — Téléphone : 7 pastilles sur une ligne qui défile au doigt (au lieu de 3-4 lignes),
+          collée sous l'en-tête mobile pour rester accessible sur cette longue page ; cibles de 44 px. */}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm print:hidden rangee-defilante-mobile mobile:sticky mobile:top-[calc(3.5rem+var(--marge-sure-haut)+0.5rem)] mobile:z-20 mobile:px-2 mobile:py-1 mobile:shadow-soft">
+        <span className="font-semibold text-ink-700/45 mobile:hidden">ALLER À</span>
         {ANCRES.map((a) => (
-          <a key={a.id} href={`#${a.id}`} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50">{a.libelle}</a>
+          <a key={a.id} href={`#${a.id}`} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:px-4">{a.libelle}</a>
         ))}
       </div>
 
       {/* Indicateurs clés */}
-      <div id="cles" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Téléphone : 2 colonnes compactes (8 cartes pleine largeur = plus d'un écran de défilement). */}
+      <div id="cles" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3 mobile:scroll-mt-36">
         {cles.map((k) => (
-          <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
-            <div className="flex items-center justify-between">
+          <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft mobile:p-4">
+            <div className="flex items-center justify-between mobile:flex-wrap mobile:gap-2">
               <span className={`flex h-10 w-10 items-center justify-center rounded-full ${k.ton}`}><k.Icone size={18} /></span>
-              <span className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${k.tagTon}`}>{k.tag}</span>
+              <span className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold mobile:text-xs ${k.tagTon}`}>{k.tag}</span>
             </div>
-            <p className="mt-3 font-display text-3xl font-bold text-forest-900">{k.valeur}</p>
-            <p className="text-sm text-ink-700/60">{k.libelle}</p>
+            <p className="mt-3 font-display text-3xl font-bold text-forest-900 mobile:text-2xl">{k.valeur}</p>
+            <p className="text-sm text-ink-700/60 mobile:line-clamp-2 mobile:leading-snug">{k.libelle}</p>
           </div>
         ))}
       </div>
-      <p className="-mt-2 flex items-start gap-1.5 px-1 text-xs leading-relaxed text-ink-700/55">
-        <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
-        <span>Ces quatre repères résument l&apos;essentiel : le nombre de {T("centres CAFOP")} pris en compte, l&apos;effectif total d&apos;élèves-maîtres, la moyenne générale (sur 20) et le taux de réussite. La pastille de couleur rappelle la mention correspondant à la moyenne.</span>
-      </p>
+      <NoteInfo>Ces quatre repères résument l&apos;essentiel : le nombre de {T("centres CAFOP")} pris en compte, l&apos;effectif total d&apos;élèves-maîtres, la moyenne générale (sur 20) et le taux de réussite. La pastille de couleur rappelle la mention correspondant à la moyenne.</NoteInfo>
 
       {/* Genre */}
       <Carte id="genre" titre="Statistiques par Genre" sousTitre="Répartition filles / garçons dans l'ensemble des CAFOP" Icone={Users}>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <BlocGenre valeur={stats.genre.total} libelle="Total élèves-maîtres" ton="border-cream-200 bg-white" IconeTon="bg-forest-100 text-forest-700" />
+        {/* Téléphone : Total en pleine largeur, Filles et Garçons côte à côte (3 blocs hauts empilés sinon). */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-2">
+          <BlocGenre valeur={stats.genre.total} libelle="Total élèves-maîtres" ton="border-cream-200 bg-white mobile:col-span-2" IconeTon="bg-forest-100 text-forest-700" />
           <BlocGenre valeur={stats.genre.filles} libelle="Filles" pct={stats.genre.pctFilles} ton="border-pink-200 bg-pink-50/60" IconeTon="bg-pink-100 text-pink-600" barre="bg-pink-500" />
           <BlocGenre valeur={stats.genre.garcons} libelle="Garçons" pct={stats.genre.pctGarcons} ton="border-blue-200 bg-blue-50/60" IconeTon="bg-blue-100 text-blue-600" barre="bg-blue-500" />
         </div>
@@ -111,7 +114,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
       </Carte>
 
       {/* Classements */}
-      <div id="classements" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div id="classements" className="grid grid-cols-1 gap-4 lg:grid-cols-2 mobile:scroll-mt-36">
         <Carte titre="Classement Académique" sousTitre={`Top ${T("CAFOP")} par moyenne générale`} Icone={Trophy}>
           <ol className="space-y-1.5">
             {stats.classementAcademique.map((r, i) => (
@@ -148,7 +151,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
       </div>
 
       {/* Mentions & Pays */}
-      <div id="mentions" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div id="mentions" className="grid grid-cols-1 gap-4 lg:grid-cols-2 mobile:scroll-mt-36">
         <Carte titre="Répartition par Mention" sousTitre="Distribution des notes" Icone={Award} tonIcone="bg-gold-100 text-gold-700">
           <div className="space-y-2.5">
             {stats.mentions.map((m) => (
@@ -171,11 +174,11 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
           ) : (
             <div className="space-y-2">
               {stats.parPays.map((p) => (
-                <div key={p.pays} className="flex items-center justify-between gap-3 rounded-xl border border-gold-200 bg-gold-50/50 px-4 py-3">
+                <div key={p.pays} className="flex items-center justify-between gap-3 rounded-xl border border-gold-200 bg-gold-50/50 px-4 py-3 mobile:flex-col mobile:items-start mobile:gap-2">
                   <span className="inline-flex items-center gap-2 font-semibold text-forest-900">{code ? drapeauEmoji(code) : "🏳️"} {p.pays}</span>
-                  <span className="flex items-center gap-2 text-sm">
-                    <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-forest-800">{p.nbCentres} centres</span>
-                    <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-gold-800">{nb(p.totalEleves)} élèves-maîtres</span>
+                  <span className="flex items-center gap-2 text-sm mobile:flex-wrap">
+                    <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-forest-800 mobile:whitespace-nowrap">{p.nbCentres} centres</span>
+                    <span className="rounded-full bg-white px-2.5 py-1 font-semibold text-gold-800 mobile:whitespace-nowrap">{nb(p.totalEleves)} élèves-maîtres</span>
                   </span>
                 </div>
               ))}
@@ -190,10 +193,10 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {stats.centres.map((c) => (
             <div key={c.nom} className="rounded-2xl border border-cream-200 bg-white p-3 text-center shadow-sm">
-              <p className="truncate text-xs font-semibold text-forest-900" title={c.nom}>{c.nom}</p>
+              <p className="truncate text-xs font-semibold text-forest-900 mobile:line-clamp-2 mobile:whitespace-normal" title={c.nom}>{c.nom}</p>
               <p className="mt-1 font-display text-2xl font-bold text-gold-700">{nb(c.effectif)}</p>
-              <p className="text-[0.7rem] text-ink-700/55">élèves-maîtres</p>
-              <p className="mt-0.5 truncate text-[0.65rem] text-ink-700/45">DRENA {c.drena}</p>
+              <p className="text-[0.7rem] text-ink-700/55 mobile:text-xs mobile:text-ink-700/70">élèves-maîtres</p>
+              <p className="mt-0.5 truncate text-[0.65rem] text-ink-700/45 mobile:line-clamp-2 mobile:whitespace-normal mobile:text-xs mobile:text-ink-700/70">DRENA {c.drena}</p>
             </div>
           ))}
         </div>
@@ -204,7 +207,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
       <Carte id="groupes" titre="Statistiques par Groupe-Classe" sousTitre={`Performances détaillées par groupe-classe pour un ${T("CAFOP")}`} Icone={Layers}>
         <label className="block max-w-md">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-700/50">Sélectionner un {T("CAFOP")}</span>
-          <select value={centreSel} onChange={(e) => setCentreSel(e.target.value)} className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
+          <select value={centreSel} onChange={(e) => setCentreSel(e.target.value)} className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:text-base">
             {stats.groupeClasse.map((g) => <option key={g.centre} value={g.centre}>{g.centre}</option>)}
           </select>
         </label>
@@ -213,7 +216,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
             <div key={g.nom} className="rounded-2xl border border-cream-200 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-forest-900">{g.nom}</span>
-                <span className="rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800">{g.reussite} % réussite</span>
+                <span className="rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800 mobile:text-xs">{g.reussite} % réussite</span>
               </div>
               <p className="mt-1 font-display text-2xl font-bold text-forest-900">{g.moyenne.toFixed(2).replace(".", ",")}<span className="text-sm font-normal text-ink-700/50">/20</span></p>
               <p className="text-xs text-ink-700/55">{g.effectif} élèves-maîtres</p>
@@ -221,7 +224,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
                 <div className="bg-pink-500" style={{ width: `${(g.filles / g.effectif) * 100}%` }} />
                 <div className="bg-blue-500" style={{ width: `${(g.garcons / g.effectif) * 100}%` }} />
               </div>
-              <div className="mt-1 flex justify-between text-[0.7rem] text-ink-700/55">
+              <div className="mt-1 flex justify-between text-[0.7rem] text-ink-700/55 mobile:text-xs mobile:text-ink-700/70">
                 <span>{g.filles} filles</span>
                 <span>{g.garcons} garçons</span>
               </div>
@@ -232,34 +235,34 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
       </Carte>
 
       {/* KPI secondaires */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Téléphone : 2 colonnes compactes. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
         <KpiMini libelle="Progression moyenne" valeur={`${stats.progressionMoyenne} %`} Icone={TrendingUp} ton="bg-blue-100 text-blue-700" />
         <KpiMini libelle="Taux de participation" valeur={`${stats.tauxParticipation} %`} Icone={Activity} ton="bg-gold-100 text-gold-700" />
         <KpiMini libelle="Cohortes actives" valeur={nb(stats.cohortesActives)} Icone={Layers} ton="bg-purple-100 text-purple-700" />
         <KpiMini libelle="Liens CAFOP en ligne (exercices)" valeur={nb(stats.liensCfplExercices)} Icone={Link2} ton="bg-forest-100 text-forest-700" />
       </div>
-      <p className="-mt-2 flex items-start gap-1.5 px-1 text-xs leading-relaxed text-ink-700/55">
-        <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
-        <span>Quatre repères complémentaires : la <strong className="font-semibold">progression moyenne</strong> (avancement moyen des programmes), le <strong className="font-semibold">taux de participation</strong> (ici une moyenne globale — le graphique « Taux de participation » plus bas en montre l&apos;évolution mois par mois), le nombre de <strong className="font-semibold">cohortes actives</strong> (promotions en cours), et le nombre de séances du cahier de texte ayant communiqué un <strong className="font-semibold">lien « CAFOP en ligne »</strong> (cfpl2.eduweb.ci) dans la rubrique Exercices.</span>
-      </p>
+      <NoteInfo>
+        <>Quatre repères complémentaires : la <strong className="font-semibold">progression moyenne</strong> (avancement moyen des programmes), le <strong className="font-semibold">taux de participation</strong> (ici une moyenne globale — le graphique « Taux de participation » plus bas en montre l&apos;évolution mois par mois), le nombre de <strong className="font-semibold">cohortes actives</strong> (promotions en cours), et le nombre de séances du cahier de texte ayant communiqué un <strong className="font-semibold">lien « CAFOP en ligne »</strong> (cfpl2.eduweb.ci) dans la rubrique Exercices.</>
+      </NoteInfo>
 
       {/* Graphiques */}
-      <div id="graphiques" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div id="graphiques" className="grid grid-cols-1 gap-4 lg:grid-cols-2 mobile:scroll-mt-36">
         <Carte titre="Effectifs par centre" sousTitre="Nombre d'élèves-maîtres" Icone={BarChart3}>
-          <ChartBarVertical data={stats.effectifsParCentre} nomSerie="Élèves-maîtres" couleur="#246a48" />
-          <Legende>Chaque barre verticale correspond à un {T("centre")} : plus la barre est haute, plus il compte d&apos;élèves-maîtres inscrits. Ce graphique permet de comparer d&apos;un coup d&apos;œil la taille des {T("centres")}.</Legende>
+          <ChartBarVertical data={stats.effectifsParCentre} nomSerie="Élèves-maîtres" couleur="#246a48" unite="élèves-maîtres" />
+          <Legende texteMobile={<>Chaque ligne correspond à un {T("centre")} : plus la barre est longue, plus il compte d&apos;élèves-maîtres inscrits. Les {T("centres")} sont classés du plus grand au plus petit ; au-delà de 8, le bouton « Voir les … éléments » affiche la liste complète.</>}>Chaque barre verticale correspond à un {T("centre")} : plus la barre est haute, plus il compte d&apos;élèves-maîtres inscrits. Ce graphique permet de comparer d&apos;un coup d&apos;œil la taille des {T("centres")}.</Legende>
         </Carte>
         <Carte titre="Progression par promotion" sousTitre="Avancement (%)" Icone={TrendingUp} tonIcone="bg-gold-100 text-gold-700">
-          <ChartBarVertical data={stats.progressionParPromotion} nomSerie="Progression (%)" couleur="#e3b536" />
-          <Legende>Chaque barre représente une <strong className="font-semibold">promotion</strong>, désignée par ses années d&apos;entrée et de sortie (ex. « 2023-2026 »). Sa hauteur indique l&apos;<strong className="font-semibold">avancement du programme de formation</strong>, de 0 % (tout début) à 100 % (formation achevée). Les promotions les plus anciennes sont logiquement les plus avancées ; les plus récentes commencent à peine.</Legende>
+          <ChartBarVertical data={stats.progressionParPromotion} nomSerie="Progression (%)" couleur="#e3b536" ordonne max={100} unite="%" />
+          <Legende texteMobile={<>Chaque ligne représente une <strong className="font-semibold">promotion</strong>, désignée par ses années d&apos;entrée et de sortie (ex. « 2023-2026 »). La longueur de la barre indique l&apos;<strong className="font-semibold">avancement du programme de formation</strong>, de 0 % (tout début) à 100 % (formation achevée).</>}>Chaque barre représente une <strong className="font-semibold">promotion</strong>, désignée par ses années d&apos;entrée et de sortie (ex. « 2023-2026 »). Sa hauteur indique l&apos;<strong className="font-semibold">avancement du programme de formation</strong>, de 0 % (tout début) à 100 % (formation achevée). Les promotions les plus anciennes sont logiquement les plus avancées ; les plus récentes commencent à peine.</Legende>
         </Carte>
         <Carte titre="Taux de participation" sousTitre="Activité sur les plateformes" Icone={Activity}>
           <ChartAire data={stats.participationMensuelle} nomSerie="Participation (%)" />
-          <Legende>La courbe suit, mois après mois (d&apos;octobre à mai), le taux moyen de participation des élèves-maîtres (présence et activité), exprimé en pourcentage. Une courbe qui monte traduit une participation en hausse.</Legende>
+          <Legende texteMobile={<>Chaque pastille donne, pour un mois (d&apos;octobre à mai), le taux moyen de participation des élèves-maîtres (présence et activité), en pourcentage. La petite barre permet de comparer les mois entre eux.</>}>La courbe suit, mois après mois (d&apos;octobre à mai), le taux moyen de participation des élèves-maîtres (présence et activité), exprimé en pourcentage. Une courbe qui monte traduit une participation en hausse.</Legende>
         </Carte>
         <Carte titre="Effectifs par cohorte" sousTitre="Répartition" Icone={PieChart} tonIcone="bg-blue-100 text-blue-700">
           <ChartBarGroupe data={stats.effectifsParCohorte} />
-          <Legende>Pour chaque {T("centre")}, deux barres sont comparées : le nombre de <strong className="font-semibold text-forest-600">places ouvertes</strong> en promotion et l&apos;<strong className="font-semibold text-blue-600">effectif réel</strong> d&apos;élèves-maîtres. L&apos;écart entre les deux mesure le taux de remplissage.</Legende>
+          <Legende texteMobile={<>Pour chaque {T("centre")}, deux jauges sont comparées : le nombre de <strong className="font-semibold text-forest-600">places ouvertes</strong> en promotion (vert) et l&apos;<strong className="font-semibold text-gold-700">effectif réel</strong> d&apos;élèves-maîtres (or). Le pourcentage indiqué est le taux de remplissage.</>}>Pour chaque {T("centre")}, deux barres sont comparées : le nombre de <strong className="font-semibold text-forest-600">places ouvertes</strong> en promotion et l&apos;<strong className="font-semibold text-blue-600">effectif réel</strong> d&apos;élèves-maîtres. L&apos;écart entre les deux mesure le taux de remplissage.</Legende>
         </Carte>
       </div>
     </div>
@@ -267,7 +270,23 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
 }
 
 /** Note explicative « fine » sous un diagramme, pour que tout lecteur comprenne ce qu'il regarde. */
-function Legende({ children }: { children: React.ReactNode }) {
+function Legende({ children, texteMobile }: { children: React.ReactNode; texteMobile?: React.ReactNode }) {
+  // Téléphone : 8 notes de 3 à 5 lignes allongeaient la page de plusieurs écrans → repliées
+  // (« Comment lire ce bloc ? »). `texteMobile` décrit la présentation mobile quand elle diffère
+  // (classement horizontal, pastilles…). Ordinateur et impression : texte intégral, inchangé.
+  const mobile = useEcranMobile();
+  if (mobile) {
+    return (
+      <details className="group mt-3 border-t border-cream-100 pt-1 text-xs leading-relaxed text-ink-700/70">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 font-semibold text-forest-800 [&::-webkit-details-marker]:hidden">
+          <Info size={15} className="shrink-0 text-ink-700/50" />
+          Comment lire ce bloc ?
+          <ChevronDown size={16} className="ml-auto shrink-0 text-ink-700/50 transition-transform group-open:rotate-180" />
+        </summary>
+        <p className="pb-1">{texteMobile ?? children}</p>
+      </details>
+    );
+  }
   return (
     <p className="mt-3 flex items-start gap-1.5 border-t border-cream-100 pt-2.5 text-xs leading-relaxed text-ink-700/55">
       <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
@@ -276,9 +295,32 @@ function Legende({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Paragraphe d'aide sous une rangée d'indicateurs. Téléphone : replié, comme les légendes. */
+function NoteInfo({ children }: { children: React.ReactNode }) {
+  const mobile = useEcranMobile();
+  if (mobile) {
+    return (
+      <details className="group -mt-2 px-1 text-xs leading-relaxed text-ink-700/70">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 font-semibold text-forest-800 [&::-webkit-details-marker]:hidden">
+          <Info size={15} className="shrink-0 text-ink-700/50" />
+          À propos de ces indicateurs
+          <ChevronDown size={16} className="ml-auto shrink-0 text-ink-700/50 transition-transform group-open:rotate-180" />
+        </summary>
+        <p className="pb-1">{children}</p>
+      </details>
+    );
+  }
+  return (
+    <p className="-mt-2 flex items-start gap-1.5 px-1 text-xs leading-relaxed text-ink-700/55">
+      <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
+      <span>{children}</span>
+    </p>
+  );
+}
+
 function Carte({ id, titre, sousTitre, Icone, tonIcone = "bg-gold-100 text-gold-700", children }: { id?: string; titre: string; sousTitre?: string; Icone: typeof BarChart3; tonIcone?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+    <section id={id} className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft mobile:scroll-mt-36">
       <div className="mb-4 flex items-start gap-3">
         <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${tonIcone}`}><Icone size={17} /></span>
         <div>
@@ -293,7 +335,7 @@ function Carte({ id, titre, sousTitre, Icone, tonIcone = "bg-gold-100 text-gold-
 
 function BlocGenre({ valeur, libelle, pct, ton, IconeTon, barre }: { valeur: number; libelle: string; pct?: number; ton: string; IconeTon: string; barre?: string }) {
   return (
-    <div className={`rounded-2xl border p-4 text-center ${ton}`}>
+    <div className={`rounded-2xl border p-4 text-center mobile:p-3 ${ton}`}>
       <span className={`mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full ${IconeTon}`}><Users size={17} /></span>
       <p className="font-display text-2xl font-bold text-forest-900">{valeur.toLocaleString("fr-FR")}</p>
       <p className="text-xs text-ink-700/60">{libelle}</p>
@@ -302,7 +344,7 @@ function BlocGenre({ valeur, libelle, pct, ton, IconeTon, barre }: { valeur: num
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/70">
             <div className={`h-full rounded-full ${barre}`} style={{ width: `${pct}%` }} />
           </div>
-          <p className="mt-1 text-[0.7rem] font-semibold text-ink-700/60">{pct.toFixed(1).replace(".", ",")}%</p>
+          <p className="mt-1 text-[0.7rem] font-semibold text-ink-700/60 mobile:text-xs">{pct.toFixed(1).replace(".", ",")}%</p>
         </>
       )}
     </div>
@@ -316,12 +358,13 @@ function Rang({ i }: { i: number }) {
 
 function KpiMini({ libelle, valeur, Icone, ton }: { libelle: string; valeur: string; Icone: typeof BarChart3; ton: string }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+    // Téléphone : carte compacte (icône au-dessus, libellé puis chiffre), deux par rangée.
+    <div className="flex items-center justify-between rounded-2xl border border-cream-200 bg-white p-5 shadow-soft mobile:flex-col-reverse mobile:items-start mobile:gap-2 mobile:p-4">
       <div>
-        <p className="text-sm text-ink-700/60">{libelle}</p>
+        <p className="text-sm text-ink-700/60 mobile:leading-snug">{libelle}</p>
         <p className="mt-1 font-display text-2xl font-bold text-forest-900">{valeur}</p>
       </div>
-      <span className={`flex h-11 w-11 items-center justify-center rounded-full ${ton}`}><Icone size={20} /></span>
+      <span className={`flex h-11 w-11 items-center justify-center rounded-full mobile:h-9 mobile:w-9 ${ton}`}><Icone size={20} /></span>
     </div>
   );
 }

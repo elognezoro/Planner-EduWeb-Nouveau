@@ -109,8 +109,9 @@ export function GrilleSupervisionForm({
 
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
-      {/* Barre de progression sticky : total apprécié + répartition par code, en direct. */}
-      <div className="sticky top-2 z-20 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-cream-200 bg-white/95 px-4 py-2.5 shadow-soft backdrop-blur">
+      {/* Barre de progression sticky : total apprécié + répartition par code, en direct.
+          Téléphone : collée SOUS l'en-tête mobile (h-14), qui la masquait sinon. */}
+      <div className="sticky top-2 z-20 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-cream-200 bg-white/95 px-4 py-2.5 shadow-soft backdrop-blur mobile:top-[calc(3.5rem+var(--marge-sure-haut)+0.5rem)] mobile:px-3 mobile:py-2">
         <p className="text-sm font-semibold text-forest-900">
           {total} / {TOUTES_CLES.length} indicateurs appréciés
         </p>
@@ -183,7 +184,7 @@ export function GrilleSupervisionForm({
         </p>
         {/* Effectifs : liste déroulante 0-150 avec recherche rapide — une valeur au-delà de 150
             reste saisissable (entrée « Utiliser "…" » du SelectRecherche en mode valeurLibre). */}
-        <div className="grid gap-4 sm:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
           {(
             [
               { nom: "seance-effectifFilles", libelle: "Filles", valeur: initiale.seance.effectifFilles },
@@ -267,7 +268,7 @@ export function GrilleSupervisionForm({
                       type="button"
                       onClick={() => setItemOuvert(ouvert ? null : item.numero)}
                       aria-expanded={ouvert}
-                      className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors ${
+                      className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors mobile:gap-2 mobile:px-3 mobile:py-3 ${
                         ouvert ? "bg-forest-50" : "bg-cream-50/60 hover:bg-cream-100"
                       }`}
                     >
@@ -277,16 +278,17 @@ export function GrilleSupervisionForm({
                         {cles.map(
                           (c) =>
                             reponses[c] && (
+                              // Téléphone : puces par indicateur masquées (elles écrasaient l'énoncé) ; le compteur n/N reste.
                               <span
                                 key={c}
-                                className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${TON_CODE[reponses[c]]}`}
+                                className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold mobile:hidden ${TON_CODE[reponses[c]]}`}
                               >
                                 {reponses[c]}
                               </span>
                             ),
                         )}
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${
+                          className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold mobile:text-xs ${
                             nb === cles.length
                               ? "bg-forest-100 text-forest-800"
                               : nb > 0
@@ -304,7 +306,7 @@ export function GrilleSupervisionForm({
                     </button>
                     {/* Contenu TOUJOURS monté (masqué si replié) : les radios restent soumis. */}
                     <div className={ouvert ? "space-y-2.5 border-t border-cream-200 bg-white p-3.5" : "hidden"}>
-                      <p className="text-xs text-ink-700/70">
+                      <p className="text-xs text-ink-700/70 mobile:text-sm">
                         <span className="font-semibold text-forest-900">Critère :</span> {item.critere}
                       </p>
                       {item.indicateurs.map((indicateur, i) => {
@@ -314,15 +316,16 @@ export function GrilleSupervisionForm({
                             key={cle}
                             className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-cream-200 bg-cream-50/40 p-3"
                           >
-                            <p className="min-w-0 flex-1 text-sm text-ink-900">{indicateur}</p>
-                            <div className="flex shrink-0 items-center gap-1.5">
+                            <p className="min-w-0 flex-1 text-sm text-ink-900 mobile:basis-full">{indicateur}</p>
+                            {/* Téléphone : TS / S / P / I en contrôle segmenté pleine largeur (cibles de 44 px). */}
+                            <div className="flex shrink-0 items-center gap-1.5 mobile:grid mobile:w-full mobile:grid-cols-4 mobile:gap-2">
                               {ECHELLE.map((e) => {
                                 const coche = reponses[cle] === e.code;
                                 return (
                                   <label
                                     key={e.code}
                                     title={`${e.libelle}${coche ? " (cliquer à nouveau pour décocher)" : ""}`}
-                                    className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                                    className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors mobile:h-11 mobile:justify-center mobile:rounded-xl mobile:text-sm ${
                                       coche
                                         ? `border-transparent ${TON_CODE[e.code]}`
                                         : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-50"
@@ -339,7 +342,7 @@ export function GrilleSupervisionForm({
                                       onClick={() => {
                                         if (reponses[cle] === e.code) retirer(cle);
                                       }}
-                                      className="h-3.5 w-3.5 accent-forest-700 disabled:opacity-60"
+                                      className="h-3.5 w-3.5 accent-forest-700 disabled:opacity-60 mobile:h-4 mobile:w-4"
                                     />
                                     {e.code}
                                   </label>
@@ -358,6 +361,16 @@ export function GrilleSupervisionForm({
         );
       })}
 
+      {/* Téléphone : « Enregistrer la grille » colle au bas de l'écran pendant toute la saisie (à
+          gauche du bouton de l'assistant IA), au lieu de n'exister qu'en fin de formulaire. */}
+      {!lectureSeule && (
+        <div className="lg:hidden print:hidden sticky bottom-[calc(var(--hauteur-barre-onglets,0px)+1.25rem)] z-30 mr-16">
+          <SubmitButton className="mobile:min-h-14 mobile:shadow-lg!">
+            <Save size={15} /> Enregistrer la grille
+          </SubmitButton>
+        </div>
+      )}
+
       {/* Synthèse de la supervision (rubriques de fin de grille officielle). */}
       <Card>
         <h2 className="mb-3 flex items-center gap-2 font-display text-base font-bold text-forest-900">
@@ -373,7 +386,7 @@ export function GrilleSupervisionForm({
               defaultValue={initiale.pointsForts}
               disabled={lectureSeule}
               placeholder="Constats positifs relevés au cours de la séance observée…"
-              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70"
+              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70 mobile:text-base"
             />
           </div>
           <div>
@@ -385,7 +398,7 @@ export function GrilleSupervisionForm({
               defaultValue={initiale.pointsAmeliorer}
               disabled={lectureSeule}
               placeholder="Insuffisances et difficultés relevées au cours de la séance…"
-              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70"
+              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70 mobile:text-base"
             />
           </div>
           <div>
@@ -399,13 +412,13 @@ export function GrilleSupervisionForm({
               defaultValue={initiale.propositions}
               disabled={lectureSeule}
               placeholder="Conseils et pistes de remédiation formulés à l'issue de la supervision…"
-              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70"
+              className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70 mobile:text-base"
             />
           </div>
         </div>
         {!lectureSeule && (
           <div className="mt-5 flex justify-end">
-            <SubmitButton className="w-auto px-8">
+            <SubmitButton className="w-auto px-8 mobile:w-full">
               <Save size={15} /> Enregistrer la grille
             </SubmitButton>
           </div>

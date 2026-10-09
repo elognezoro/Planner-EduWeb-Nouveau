@@ -86,12 +86,13 @@ export default async function StructurePage({ params }: { params: Promise<{ id: 
 
       <PageHeader titre={`Salles & classes — ${e.nom}`} description="Gestion détaillée des salles physiques et des classes (capacité, type)." />
 
-      <Card>
+      <Card className="mobile:p-4">
         <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
           <DoorOpen size={18} /> Salles ({salles.length})
         </h2>
+        {/* Téléphone : les salles en liste verticale (une ligne par salle) plutôt qu'en nuage. */}
         {salles.length > 0 ? (
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="mb-5 flex flex-wrap gap-2 mobile:flex-col">
             {salles.map((s) =>
               peutGerer ? (
                 // Pastille éditable : modification du nom / de la capacité en ligne, suppression
@@ -105,7 +106,7 @@ export default async function StructurePage({ params }: { params: Promise<{ id: 
                   typeLibelle={libelleTypeSalle[s.type] ?? s.type}
                 />
               ) : (
-                <span key={s.id} className="inline-flex items-center gap-2 rounded-xl border border-cream-200 bg-cream-50 px-3 py-1.5 text-sm">
+                <span key={s.id} className="inline-flex items-center gap-2 rounded-xl border border-cream-200 bg-cream-50 px-3 py-1.5 text-sm mobile:flex mobile:flex-wrap mobile:justify-between">
                   <span className="font-medium text-forest-900">{s.nom}</span>
                   <span className="text-xs text-ink-700/60">
                     {libelleTypeSalle[s.type] ?? s.type} · {s.capacite} pl.
@@ -120,13 +121,14 @@ export default async function StructurePage({ params }: { params: Promise<{ id: 
         {peutGerer && <SalleForm etablissementId={id} />}
       </Card>
 
-      <Card>
+      <Card className="mobile:p-4">
         <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
           <Users2 size={18} /> Classes ({classes.length})
         </h2>
         {classes.length > 0 ? (
           <div className="mb-5 overflow-x-auto">
-            <table className="w-full min-w-[460px] border-collapse text-sm">
+            {/* 4 colonnes courtes : tiennent sans défilement latéral sur téléphone. */}
+            <table className="w-full min-w-[460px] border-collapse text-sm mobile:min-w-0">
               <thead>
                 <tr className="border-b border-cream-200 text-left">
                   <th className="py-2 pr-4 font-semibold text-ink-700/70">Classe</th>

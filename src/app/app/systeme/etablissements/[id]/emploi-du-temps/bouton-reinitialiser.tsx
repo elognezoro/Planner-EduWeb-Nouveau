@@ -9,7 +9,12 @@ import { RotateCcw, X } from "lucide-react";
  * affichés et les filtres de vue en revenant à l'URL de base. L'emploi du temps déjà
  * enregistré n'est PAS supprimé (action non destructive).
  */
-export function BoutonReinitialiserPage() {
+export function BoutonReinitialiserPage({
+  className,
+}: {
+  /** Classes AJOUTÉES au bouton déclencheur (variantes « mobile: » seulement). */
+  className?: string;
+} = {}) {
   const [ouvert, setOuvert] = useState(false);
 
   function reinitialiser() {
@@ -22,7 +27,7 @@ export function BoutonReinitialiserPage() {
       <button
         type="button"
         onClick={() => setOuvert(true)}
-        className="inline-flex h-12 items-center gap-2 rounded-full border border-cream-300 bg-white px-6 text-sm font-semibold text-ink-700/70 transition-colors hover:bg-cream-100"
+        className={`inline-flex h-12 items-center gap-2 rounded-full border border-cream-300 bg-white px-6 text-sm font-semibold text-ink-700/70 transition-colors hover:bg-cream-100 ${className ?? ""}`}
       >
         <RotateCcw size={17} /> Réinitialiser la page
       </button>
@@ -53,7 +58,7 @@ export function BoutonReinitialiserPage() {
                 </h2>
                 <button
                   onClick={() => setOuvert(false)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11"
                   aria-label="Fermer"
                 >
                   <X size={18} />

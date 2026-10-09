@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   Users, MessageSquare, ClipboardList, ShieldCheck, Plus, Info, Search, Check, X, Loader2,
-  Send, MapPin, Star, GraduationCap,
+  Send, MapPin, Star, GraduationCap, ChevronDown,
 } from "lucide-react";
 import {
   attribuerStagiaires,
@@ -17,6 +17,7 @@ import {
   type EtatForm,
 } from "@/lib/formation/stages-actions";
 import { FormAlert } from "@/components/ui/form";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
 import type { ComposanteModule } from "@/lib/formation/structure-module";
 
 const initial: EtatForm = { ok: false };
@@ -129,10 +130,10 @@ export function StagesCafop({
   const rafraichir = () => router.refresh();
 
   const nbEnAttente = demandes.filter((d) => d.statut === "en_attente").length;
-  const onglets: { cle: Onglet; libelle: string; Icone: typeof Users; badge?: number }[] = [
-    { cle: "registre", libelle: "Registre des maîtres d'application", Icone: Users },
-    { cle: "suivi", libelle: "Suivi des stagiaires", Icone: ClipboardList },
-    { cle: "autorisations", libelle: "Autorisations", Icone: ShieldCheck, badge: nbEnAttente || undefined },
+  const onglets: { cle: Onglet; libelle: string; court: string; Icone: typeof Users; badge?: number }[] = [
+    { cle: "registre", libelle: "Registre des maîtres d'application", court: "Maîtres", Icone: Users },
+    { cle: "suivi", libelle: "Suivi des stagiaires", court: "Suivi", Icone: ClipboardList },
+    { cle: "autorisations", libelle: "Autorisations", court: "Autorisations", Icone: ShieldCheck, badge: nbEnAttente || undefined },
   ];
 
   return (
@@ -159,17 +160,22 @@ export function StagesCafop({
       </div>
 
       {/* Onglets */}
-      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft">
+      {/* Téléphone : onglets sur une ligne qui défile, libellés courts. */}
+      <div className="rangee-defilante-mobile flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft">
         {onglets.map((o) => (
           <button
             key={o.cle}
             type="button"
             onClick={() => setOnglet(o.cle)}
-            className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors ${
+            className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors mobile:h-11 ${
               onglet === o.cle ? "bg-forest-800 text-cream-50" : "text-ink-700/70 hover:bg-cream-100"
             }`}
           >
-            <o.Icone size={15} /> {o.libelle}
+            <o.Icone size={15} />{" "}
+            <span>
+              <span className="mobile:hidden">{o.libelle}</span>
+              <span className="hidden mobile:inline">{o.court}</span>
+            </span>
             {!!o.badge && <span className="ml-1 rounded-full bg-gold-500 px-1.5 text-xs font-bold text-white">{o.badge}</span>}
           </button>
         ))}
@@ -299,7 +305,8 @@ function BadgeStagiaire({ attribution, peutEcrire, onChange }: { attribution: At
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-100 py-1 pl-3 pr-1.5 text-xs font-semibold text-forest-800">
+    // Téléphone : pastille qui peut passer à la ligne (nom + matricule + groupe + stage débordaient).
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-100 py-1 pl-3 pr-1.5 text-xs font-semibold text-forest-800 mobile:flex-wrap mobile:rounded-2xl mobile:py-1.5">
       {nomApprenant(attribution.apprenant)}
       {attribution.apprenant.matricule && <span className="font-normal text-ink-700/50">· {attribution.apprenant.matricule}</span>}
       {attribution.apprenant.groupe && <span className="rounded-full bg-cream-200 px-1.5 py-0.5">Gr. {attribution.apprenant.groupe}</span>}
@@ -307,15 +314,15 @@ function BadgeStagiaire({ attribution, peutEcrire, onChange }: { attribution: At
       {peutEcrire &&
         (confirmer ? (
           <span className="inline-flex items-center gap-1">
-            <button type="button" onClick={retirer} disabled={pending} title="Confirmer le retrait" className="rounded-full bg-red-600 p-1 text-white hover:bg-red-700 disabled:opacity-60">
+            <button type="button" onClick={retirer} disabled={pending} title="Confirmer le retrait" aria-label="Confirmer le retrait" className="rounded-full bg-red-600 p-1 text-white hover:bg-red-700 disabled:opacity-60 mobile:inline-flex mobile:h-10 mobile:w-10 mobile:items-center mobile:justify-center">
               {pending ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
             </button>
-            <button type="button" onClick={() => setConfirmer(false)} title="Annuler" className="rounded-full bg-cream-300 p-1 text-ink-700 hover:bg-cream-400">
+            <button type="button" onClick={() => setConfirmer(false)} title="Annuler" aria-label="Annuler" className="rounded-full bg-cream-300 p-1 text-ink-700 hover:bg-cream-400 mobile:inline-flex mobile:h-10 mobile:w-10 mobile:items-center mobile:justify-center">
               <X size={11} />
             </button>
           </span>
         ) : (
-          <button type="button" onClick={() => setConfirmer(true)} title="Retirer l'attribution" className="rounded-full p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600">
+          <button type="button" onClick={() => setConfirmer(true)} title="Retirer l'attribution" aria-label="Retirer l'attribution" className="rounded-full p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600 mobile:inline-flex mobile:h-10 mobile:w-10 mobile:items-center mobile:justify-center">
             <X size={11} />
           </button>
         ))}
@@ -445,9 +452,9 @@ function FormulaireAttribution({
             <span className="flex items-center gap-1.5 text-sm font-semibold text-forest-900">
               <GraduationCap size={15} /> Stagiaires — {libelleAnnee(annee)} ({selection.length} sélectionné{selection.length > 1 ? "s" : ""})
             </span>
-            <div className="flex items-center gap-2 rounded-lg border border-cream-300 bg-white px-2.5">
+            <div className="flex items-center gap-2 rounded-lg border border-cream-300 bg-white px-2.5 mobile:w-full">
               <Search size={13} className="text-ink-700/40" />
-              <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher un nom…" className="h-8 w-48 bg-transparent text-xs outline-none" />
+              <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher un nom…" className="h-8 w-48 bg-transparent text-xs outline-none mobile:h-11 mobile:w-full mobile:text-base" />
             </div>
           </div>
           {apprenantsFiltres.length === 0 ? (
@@ -524,6 +531,9 @@ function SuiviStagiaires({
     return q ? stagiaires.filter((s) => nomApprenant(s.apprenant).toLowerCase().includes(q)) : stagiaires;
   }, [stagiaires, recherche]);
   const sel = stagiaires.find((s) => s.apprenant.id === selId) ?? stagiaires[0] ?? null;
+  // Téléphone : la liste des stagiaires est dans une feuille montante (au lieu d'une colonne de
+  // plusieurs écrans au-dessus de la fiche).
+  const [listeOuverte, setListeOuverte] = useState(false);
 
   if (stagiaires.length === 0) {
     return <p className="rounded-2xl border border-cream-200 bg-white px-5 py-8 text-center text-sm text-ink-700/55">Aucun stagiaire attribué pour le moment.</p>;
@@ -531,7 +541,54 @@ function SuiviStagiaires({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
-      <aside className="space-y-2 rounded-2xl border border-cream-200 bg-white p-3 shadow-soft lg:max-h-[46rem] lg:overflow-auto">
+      <div className="lg:hidden print:hidden">
+        <button
+          type="button"
+          onClick={() => setListeOuverte(true)}
+          aria-haspopup="dialog"
+          className="flex min-h-14 w-full items-center gap-3 rounded-2xl border border-cream-200 bg-white px-4 py-2 text-left shadow-soft active:bg-cream-50"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-semibold uppercase tracking-wide text-ink-700/55">
+              Stagiaire ({stagiaires.length})
+            </span>
+            <span className="block truncate font-semibold text-forest-900">{sel ? nomApprenant(sel.apprenant) : "Choisir…"}</span>
+          </span>
+          <ChevronDown size={18} className="shrink-0 text-forest-700" />
+        </button>
+        <FeuilleBas ouvert={listeOuverte} onFermer={() => setListeOuverte(false)} titre="Choisir un stagiaire" hauteurMax="85dvh">
+          <div className="space-y-2 px-2 pb-2">
+            <div className="flex items-center gap-2 rounded-xl border border-cream-300 bg-white px-3">
+              <Search size={15} className="text-ink-700/40" />
+              <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher…" className="h-11 w-full bg-transparent text-base outline-none" />
+            </div>
+            <ul className="space-y-1">
+              {filtres.map((s) => {
+                const actif = sel?.apprenant.id === s.apprenant.id;
+                return (
+                  <li key={s.apprenant.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelId(s.apprenant.id);
+                        setListeOuverte(false);
+                      }}
+                      aria-current={actif ? "true" : undefined}
+                      className={`min-h-12 w-full rounded-xl px-3 py-2 text-left ${actif ? "bg-forest-800 text-cream-50" : "text-ink-700/85 active:bg-cream-100"}`}
+                    >
+                      <span className="block font-semibold">{nomApprenant(s.apprenant)}</span>
+                      <span className={`block text-xs ${actif ? "text-cream-100/80" : "text-ink-700/55"}`}>
+                        {libelleAnnee(s.annee)} · {s.maitres.join(", ")}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </FeuilleBas>
+      </div>
+      <aside className="space-y-2 rounded-2xl border border-cream-200 bg-white p-3 shadow-soft lg:max-h-[46rem] lg:overflow-auto mobile:hidden">
         <div className="flex items-center gap-2 rounded-lg border border-cream-300 px-2.5">
           <Search size={13} className="text-ink-700/40" />
           <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher…" className="h-9 w-full bg-transparent text-sm outline-none" />
@@ -712,11 +769,11 @@ function FilDialogue({
               <div className="mb-1 flex items-center justify-between gap-2">
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-forest-900">
                   {m.auteurNom ?? "—"}
-                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${m.duMaitre ? "bg-blue-100 text-blue-800" : "bg-forest-100 text-forest-800"}`}>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${m.duMaitre ? "bg-blue-100 text-blue-800" : "bg-forest-100 text-forest-800"}`}>
                     {m.duMaitre ? "Maître" : "Direction"}
                   </span>
                 </span>
-                <span className="text-[11px] text-ink-700/45">{m.creeLeLabel}</span>
+                <span className="text-[11px] text-ink-700/45 mobile:text-xs">{m.creeLeLabel}</span>
               </div>
               <p className="whitespace-pre-wrap text-sm text-ink-800">{m.contenu}</p>
             </div>
@@ -940,27 +997,31 @@ function GrilleEvaluation({
         <input type="hidden" name="criteres" value={JSON.stringify(criteres.filter((c) => c.critere.trim()))} />
         <ul className="space-y-1.5">
           {criteres.map((c, i) => (
-            <li key={i} className="flex items-center gap-1.5">
+            // Téléphone : l'intitulé du critère occupe sa propre ligne ; note, barème et retrait dessous
+            // (sur une seule rangée, l'intitulé n'avait qu'environ 60 px).
+            <li key={i} className="flex items-center gap-1.5 mobile:flex-wrap mobile:gap-2 mobile:border-b mobile:border-cream-100 mobile:pb-2">
               <input
                 value={c.critere}
                 onChange={(e) => setCriteres((l) => l.map((x, j) => (j === i ? { ...x, critere: e.target.value } : x)))}
                 placeholder="Critère"
-                className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+                className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:basis-full"
               />
               <input
                 type="number"
                 value={c.note}
                 onChange={(e) => setCriteres((l) => l.map((x, j) => (j === i ? { ...x, note: Number(e.target.value) } : x)))}
-                className="h-9 w-16 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+                aria-label={`Note — ${c.critere || `critère ${i + 1}`}`}
+                className="h-9 w-16 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0 mobile:flex-1 mobile:text-base"
               />
               <span className="text-xs text-ink-700/50">/</span>
               <input
                 type="number"
                 value={c.sur}
                 onChange={(e) => setCriteres((l) => l.map((x, j) => (j === i ? { ...x, sur: Number(e.target.value) } : x)))}
-                className="h-9 w-14 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+                aria-label={`Barème — ${c.critere || `critère ${i + 1}`}`}
+                className="h-9 w-14 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0 mobile:flex-1 mobile:text-base"
               />
-              <button type="button" onClick={() => setCriteres((l) => l.filter((_, j) => j !== i))} className="text-ink-700/40 hover:text-red-600">
+              <button type="button" onClick={() => setCriteres((l) => l.filter((_, j) => j !== i))} aria-label="Retirer le critère" className="text-ink-700/40 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
                 <X size={14} />
               </button>
             </li>
@@ -969,7 +1030,7 @@ function GrilleEvaluation({
         <button
           type="button"
           onClick={() => setCriteres((l) => [...l, { critere: "", note: 0, sur: 20 }])}
-          className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+          className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-4 mobile:text-sm"
         >
           <Plus size={12} /> Ajouter un critère
         </button>
@@ -1136,13 +1197,13 @@ function DemandeLigne({ demande, peutEcrire, onChange }: { demande: DemandeVue; 
           </p>
         </div>
         {peutEcrire && (
-          <form action={action} className="shrink-0 space-y-2">
+          <form action={action} className="shrink-0 space-y-2 mobile:w-full">
             <input type="hidden" name="id" value={demande.id} />
             {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
             {motifOuvert ? (
-              <input name="motifDecision" placeholder="Motif de la décision (facultatif)…" className="h-9 w-56 rounded-lg border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400" />
+              <input name="motifDecision" placeholder="Motif de la décision (facultatif)…" className="h-9 w-56 rounded-lg border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:w-full mobile:text-base" />
             ) : (
-              <button type="button" onClick={() => setMotifOuvert(true)} className="block text-xs font-medium text-forest-700 hover:underline">
+              <button type="button" onClick={() => setMotifOuvert(true)} className="block text-xs font-medium text-forest-700 hover:underline mobile:min-h-11 mobile:text-sm">
                 + Ajouter un motif de décision
               </button>
             )}

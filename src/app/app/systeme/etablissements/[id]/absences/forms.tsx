@@ -54,7 +54,7 @@ export function AjoutAbsenceForm({
           <Input id="motif" name="motif" maxLength={240} placeholder="Ex. : convocation, maladie…" />
         </div>
       </div>
-      <SubmitButton className="inline-flex w-auto items-center gap-2 px-6">
+      <SubmitButton className="inline-flex w-auto items-center gap-2 px-6 mobile:w-full">
         <CalendarPlus size={16} /> Enregistrer l&apos;absence
       </SubmitButton>
     </form>

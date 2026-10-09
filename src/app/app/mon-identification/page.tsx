@@ -54,7 +54,8 @@ function Ligne({ label, children }: { label: string; children: React.ReactNode }
   return (
     <div className="flex flex-col gap-1 border-b border-cream-200 py-3.5 last:border-0 sm:flex-row sm:items-center sm:justify-between">
       <span className="text-sm text-ink-700/60">{label}</span>
-      <span className="text-sm font-medium text-forest-900">{children}</span>
+      {/* Téléphone : une adresse e-mail longue se coupe au lieu de faire défiler la page. */}
+      <span className="text-sm font-medium text-forest-900 mobile:min-w-0 mobile:[overflow-wrap:anywhere]">{children}</span>
     </div>
   );
 }

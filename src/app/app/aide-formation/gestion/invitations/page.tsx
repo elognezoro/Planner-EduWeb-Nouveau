@@ -40,7 +40,7 @@ export default async function InvitationsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour à la gestion</Link>
+      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Retour à la gestion</Link>
       <PageHeader
         titre="Invitations & demandes d'inscription"
         description="Créez des liens d'invitation par formation (validation par l'admin, ou auto-validation par code) et traitez les demandes en attente."
@@ -60,7 +60,7 @@ export default async function InvitationsPage() {
               <div key={d.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-forest-900">{nomDe(d.utilisateur)}</p>
-                  <p className="text-xs text-ink-700/60">{d.utilisateur.email} · {d.session.titre} · demandé le {new Date(d.dateInscription).toLocaleDateString("fr-FR")}</p>
+                  <p className="text-xs text-ink-700/60 mobile:[overflow-wrap:anywhere]">{d.utilisateur.email} · {d.session.titre} · demandé le {new Date(d.dateInscription).toLocaleDateString("fr-FR")}</p>
                 </div>
                 <BoutonsDemande inscriptionId={d.id} />
               </div>

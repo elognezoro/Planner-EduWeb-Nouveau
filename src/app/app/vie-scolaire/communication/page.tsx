@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MessageSquare, PenSquare } from "lucide-react";
+import { ArrowLeft, MessageSquare, PenSquare } from "lucide-react";
 import { requireAccesComplet } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { NouveauMessageForm, RepondreForm, MarquerLue } from "./components";
+import { NouveauMessageForm, RepondreForm, MarquerLue, DefilerAuDernierMessage } from "./components";
+import { FormulaireReplieMobile } from "../_mobile/formulaire-replie";
 
 export const metadata: Metadata = { title: "Communication" };
 export const dynamic = "force-dynamic";
@@ -87,14 +88,17 @@ export default async function CommunicationPage({
         </Card>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
-          {/* Conversations + nouveau message */}
-          <div className="space-y-4">
-            <Card>
-              <h2 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-forest-900">
-                <PenSquare size={16} /> Nouveau message
-              </h2>
-              <NouveauMessageForm />
-            </Card>
+          {/* Conversations + nouveau message.
+              Téléphone : maître/détail — la liste OU le fil, jamais l'un sous l'autre. */}
+          <div className={`space-y-4 ${avec ? "mobile:hidden" : ""}`}>
+            <FormulaireReplieMobile libelle="Nouveau message">
+              <Card>
+                <h2 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-forest-900">
+                  <PenSquare size={16} /> Nouveau message
+                </h2>
+                <NouveauMessageForm />
+              </Card>
+            </FormulaireReplieMobile>
 
             <Card className="p-0">
               <h2 className="border-b border-cream-100 px-4 py-3 font-display text-sm font-bold text-forest-900">
@@ -113,7 +117,7 @@ export default async function CommunicationPage({
                         <div className="flex items-center justify-between gap-2">
                           <span className="truncate font-semibold text-forest-900">{c.nom}</span>
                           {c.nonLus > 0 && (
-                            <span className="shrink-0 rounded-full bg-red-500 px-1.5 text-[0.6rem] font-bold text-white">
+                            <span className="shrink-0 rounded-full bg-red-500 px-1.5 text-[0.6rem] font-bold text-white mobile:min-w-6 mobile:text-center mobile:text-xs">
                               {c.nonLus}
                             </span>
                           )}
@@ -128,7 +132,7 @@ export default async function CommunicationPage({
           </div>
 
           {/* Fil de conversation */}
-          <Card className="flex min-h-[24rem] flex-col">
+          <Card className={`flex min-h-[24rem] flex-col mobile:p-4 ${avec ? "mobile:min-h-[calc(100dvh-14rem)]" : "mobile:hidden"}`}>
             {!avec ? (
               <div className="flex flex-1 flex-col items-center justify-center text-center text-ink-700/45">
                 <MessageSquare size={28} />
@@ -137,6 +141,14 @@ export default async function CommunicationPage({
             ) : (
               <>
                 <MarquerLue avec={avec} />
+                {/* Téléphone : retour à la liste des conversations, puis dernier message à l'écran. */}
+                <DefilerAuDernierMessage nbMessages={thread.length} />
+                <Link
+                  href={BASE}
+                  className="-ml-2 mb-2 hidden min-h-11 items-center gap-1.5 self-start rounded-full px-2 text-sm font-semibold text-forest-700 active:bg-cream-100 mobile:inline-flex"
+                >
+                  <ArrowLeft size={16} aria-hidden /> Conversations
+                </Link>
                 <h2 className="mb-4 font-display text-base font-bold text-forest-900">{avecNom}</h2>
                 <div className="flex-1 space-y-2 overflow-y-auto">
                   {thread.length === 0 ? (
@@ -150,7 +162,7 @@ export default async function CommunicationPage({
                           }`}
                         >
                           <p className="whitespace-pre-wrap">{m.contenu}</p>
-                          <p className={`mt-1 text-[0.6rem] ${m.deMoi ? "text-cream-200/70" : "text-ink-700/45"}`}>
+                          <p className={`mt-1 text-[0.6rem] ${m.deMoi ? "text-cream-200/70" : "text-ink-700/45"} mobile:text-xs`}>
                             {heure(m.date)}
                           </p>
                         </div>
@@ -158,7 +170,9 @@ export default async function CommunicationPage({
                     ))
                   )}
                 </div>
-                <div className="mt-4 border-t border-cream-100 pt-3">
+                {/* Téléphone : zone de réponse COLLANTE au-dessus des onglets ; marge droite élargie
+                    pour que « Envoyer » reste à gauche de la bulle de l'assistant (fixe, au-dessus). */}
+                <div className="mt-4 border-t border-cream-100 pt-3 mobile:sticky mobile:bottom-[calc(var(--hauteur-barre-onglets)+0.25rem)] mobile:z-10 mobile:-mx-4 mobile:rounded-b-3xl mobile:bg-white mobile:pl-4 mobile:pr-[4.25rem] mobile:pb-3">
                   <RepondreForm destinataireId={avec} />
                 </div>
               </>

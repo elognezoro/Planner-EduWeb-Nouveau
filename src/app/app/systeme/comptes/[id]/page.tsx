@@ -130,14 +130,17 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <Link href={BASE} className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900">
+      {/* Téléphone : lien conservé (le retour de l'en-tête suit l'historique, pas forcément la
+          liste — arrivée depuis un e-mail), en cible de 44 px. */}
+      <Link href={BASE} className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:min-h-11">
         <ArrowLeft size={16} /> Tous les comptes
       </Link>
 
-      <PageHeader titre={nomComplet(compte)} description={compte.email} />
+      {/* Téléphone : un e-mail long (insécable) se coupe au lieu d'élargir la page. */}
+      <PageHeader className="mobile:[overflow-wrap:anywhere]" titre={nomComplet(compte)} description={compte.email} />
 
       {/* Résumé */}
-      <Card className="flex flex-wrap items-center gap-3">
+      <Card className="flex flex-wrap items-center gap-3 mobile:p-4">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-forest-800 text-base font-bold text-gold-300">
           {(compte.nom || compte.email).slice(0, 1).toUpperCase()}
         </span>
@@ -151,11 +154,11 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
       </Card>
 
       {demande && (
-        <Card className="border-gold-200 bg-gold-50/40">
+        <Card className="border-gold-200 bg-gold-50/40 mobile:p-4">
           <p className="flex flex-wrap items-center gap-2 text-sm text-ink-700/80">
             <Clock4 size={15} className="text-gold-700" />
             Demande de rôle en attente : <strong className="text-forest-900">{T(demande.roleDemande.libelle)}</strong>.
-            <Link href="/app/systeme/approbations" className="font-medium text-gold-700 hover:underline">
+            <Link href="/app/systeme/approbations" className="font-medium text-gold-700 hover:underline mobile:inline-flex mobile:min-h-11 mobile:items-center">
               Traiter dans Approbations →
             </Link>
           </p>

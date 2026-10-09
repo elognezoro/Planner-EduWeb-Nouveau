@@ -7,7 +7,7 @@ import { enregistrerReglagesAlertes, enregistrerModelesAlertes, lancerPasseAlert
 import { Card } from "@/components/app/ui";
 
 const inputCls =
-  "w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base";
 
 function Message({ m }: { m: { ok: boolean; texte: string } | null }) {
   if (!m) return null;
@@ -183,10 +183,10 @@ function Champ({ label, value, setValue, aide }: { label: string; value: string;
 
 function Canal({ libelle, actif, set, bientot }: { libelle: string; actif: boolean; set: (v: boolean) => void; bientot?: boolean }) {
   return (
-    <label className="inline-flex items-center gap-2 rounded-2xl border border-cream-300 px-3 py-2 text-sm">
-      <input type="checkbox" checked={actif} onChange={(e) => set(e.target.checked)} className="h-4 w-4 accent-forest-700" />
+    <label className="inline-flex items-center gap-2 rounded-2xl border border-cream-300 px-3 py-2 text-sm mobile:min-h-11">
+      <input type="checkbox" checked={actif} onChange={(e) => set(e.target.checked)} className="h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5" />
       <span className="text-forest-900">{libelle}</span>
-      {bientot && <span className="rounded-full bg-cream-200 px-1.5 py-0.5 text-[0.6rem] font-semibold text-ink-700/60">à venir</span>}
+      {bientot && <span className="rounded-full bg-cream-200 px-1.5 py-0.5 text-[0.6rem] font-semibold text-ink-700/60 mobile:text-xs">à venir</span>}
     </label>
   );
 }
@@ -207,7 +207,7 @@ function BoutonPrincipal({ onClick, pending, children }: { onClick: () => void; 
       type="button"
       onClick={onClick}
       disabled={pending}
-      className="inline-flex h-11 items-center justify-center rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition hover:bg-forest-700 disabled:opacity-60"
+      className="inline-flex h-11 items-center justify-center rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition hover:bg-forest-700 disabled:opacity-60 mobile:w-full"
     >
       {pending ? "…" : children}
     </button>

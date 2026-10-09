@@ -99,7 +99,7 @@ export default async function MonParrainagePage() {
             )}
           </Card>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-1 mobile:gap-3">
             <StatCard libelle="Filleul(e)s" valeur={filleuls.length} icone={<Users size={22} />} />
             <StatCard libelle="Gains à percevoir" valeur={fcfa(solde.acquise)} icone={<Wallet size={22} />} ton="gold" />
             <StatCard libelle="Déjà versé / crédité" valeur={fcfa(solde.versee + solde.creditee)} icone={<HandCoins size={22} />} ton="forest" />
@@ -120,8 +120,8 @@ export default async function MonParrainagePage() {
             ) : (
               <ul className="divide-y divide-cream-100">
                 {filleuls.map((f) => (
-                  <li key={f.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                    <span className="text-ink-900">{f.label}</span>
+                  <li key={f.id} className="flex items-center justify-between gap-3 py-2.5 text-sm mobile:flex-col mobile:items-start mobile:gap-0.5">
+                    <span className="text-ink-900 mobile:min-w-0 mobile:[overflow-wrap:anywhere]">{f.label}</span>
                     <span className="text-xs text-ink-700/50">inscrit(e) le {dateFr(f.creeLe)}</span>
                   </li>
                 ))}

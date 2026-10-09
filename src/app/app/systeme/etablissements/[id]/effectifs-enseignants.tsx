@@ -11,6 +11,7 @@ import {
 } from "./config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { estOption, estParentAOptions, parentDeOption, optionCanonique } from "@/lib/disciplines/options-disciplines";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 
 const initial: EtatForm = { ok: false };
 
@@ -45,6 +46,9 @@ export function EffectifsEnseignantsForm({
   const [editionId, setEditionId] = useState<string | null>(null);
   const [nomEdite, setNomEdite] = useState("");
   const [renommageEnCours, demarrerRenommage] = useTransition();
+  // Téléphone seulement : nom des champs d'effectif des lignes de discipline (leurs légendes
+  // « 1er / 2nd cycle » y sont aria-hidden) ; sur ordinateur, ils gardent le nom de HEAD.
+  const ecranMobile = useEcranMobile();
 
   function renommerDiscipline(disciplineId: string, ancienNom: string) {
     const nom = nomEdite.trim();
@@ -123,10 +127,10 @@ export function EffectifsEnseignantsForm({
     sous: boolean,
     sommeLecture?: { college: number; lycee: number },
   ) => (
-    <tr key={d.id} className="border-b border-cream-100 last:border-0">
-      <td className="py-2 pr-4 font-medium text-forest-900">
+    <tr key={d.id} className="border-b border-cream-100 last:border-0 mobile:flex mobile:flex-wrap mobile:items-end mobile:gap-x-3 mobile:gap-y-2 mobile:rounded-2xl mobile:border-0 mobile:p-3 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200 mobile:bg-white">
+      <td className="py-2 pr-4 font-medium text-forest-900 mobile:order-1 mobile:min-w-0 mobile:basis-[calc(100%-4rem)] mobile:self-center mobile:p-0">
         {editionId === d.id ? (
-          <span className={`inline-flex items-center gap-1.5 ${sous ? "pl-5" : ""}`}>
+          <span className={`inline-flex items-center gap-1.5 mobile:flex ${sous ? "pl-5" : ""}`}>
             <input
               value={nomEdite}
               onChange={(ev) => setNomEdite(ev.target.value)}
@@ -139,7 +143,7 @@ export function EffectifsEnseignantsForm({
               }}
               autoFocus
               aria-label={`Nouveau nom pour ${d.nom}`}
-              className="h-9 w-44 rounded-lg border border-forest-300 bg-white px-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-200"
+              className="h-9 w-44 rounded-lg border border-forest-300 bg-white px-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0 mobile:flex-1"
             />
             {renommageEnCours ? (
               <Loader2 size={14} className="animate-spin text-forest-600" />
@@ -149,7 +153,7 @@ export function EffectifsEnseignantsForm({
                   type="button"
                   onClick={() => renommerDiscipline(d.id, d.nom)}
                   aria-label="Valider le nouveau nom"
-                  className="rounded-full p-1 text-forest-700 hover:bg-forest-50"
+                  className="rounded-full p-1 text-forest-700 hover:bg-forest-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                 >
                   <Check size={14} />
                 </button>
@@ -157,7 +161,7 @@ export function EffectifsEnseignantsForm({
                   type="button"
                   onClick={() => setEditionId(null)}
                   aria-label="Annuler le renommage"
-                  className="rounded-full p-1 text-ink-700/45 hover:bg-cream-100"
+                  className="rounded-full p-1 text-ink-700/45 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                 >
                   <X size={14} />
                 </button>
@@ -183,7 +187,7 @@ export function EffectifsEnseignantsForm({
                   : `Modifier l'expression de ${d.nom} pour cet établissement (le référentiel national reste inchangé)`
               }
               aria-label={`Renommer ${d.nom}`}
-              className="rounded-full p-1 text-ink-700/35 hover:bg-forest-50 hover:text-forest-700"
+              className="rounded-full p-1 text-ink-700/35 hover:bg-forest-50 hover:text-forest-700 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
             >
               <Pencil size={12} />
             </button>
@@ -193,18 +197,20 @@ export function EffectifsEnseignantsForm({
       {sommeLecture ? (
         <>
           {/* PARENT à options : somme (lecture seule) — l'effectif se saisit sur chaque option. */}
-          <td className="px-3 py-2 text-center">
+          <td className="px-3 py-2 text-center mobile:order-3 mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+            <span aria-hidden className="mb-1 hidden text-left text-xs font-medium text-ink-700/70 mobile:block">1<sup>er</sup> cycle</span>
             <span
               title="Somme des options ci-dessous (se saisit sur chaque option)"
-              className="inline-flex h-9 w-20 items-center justify-center rounded-lg bg-cream-100/80 text-sm font-semibold text-ink-700/75"
+              className="inline-flex h-9 w-20 items-center justify-center rounded-lg bg-cream-100/80 text-sm font-semibold text-ink-700/75 mobile:h-11 mobile:w-full"
             >
               {sommeLecture.college || 0}
             </span>
           </td>
-          <td className="px-3 py-2 text-center">
+          <td className="px-3 py-2 text-center mobile:order-4 mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+            <span aria-hidden className="mb-1 hidden text-left text-xs font-medium text-ink-700/70 mobile:block">2<sup>nd</sup> cycle</span>
             <span
               title="Somme des options ci-dessous (se saisit sur chaque option)"
-              className="inline-flex h-9 w-20 items-center justify-center rounded-lg bg-cream-100/80 text-sm font-semibold text-ink-700/75"
+              className="inline-flex h-9 w-20 items-center justify-center rounded-lg bg-cream-100/80 text-sm font-semibold text-ink-700/75 mobile:h-11 mobile:w-full"
             >
               {sommeLecture.lycee || 0}
             </span>
@@ -212,7 +218,8 @@ export function EffectifsEnseignantsForm({
         </>
       ) : (
         <>
-          <td className="px-3 py-2 text-center">
+          <td className="px-3 py-2 text-center mobile:order-3 mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+            <span aria-hidden className="mb-1 hidden text-left text-xs font-medium text-ink-700/70 mobile:block">1<sup>er</sup> cycle</span>
             {/* key liée à la valeur persistée : le champ se resynchronise après
                 enregistrement au lieu d'être vidé par le reset des actions serveur. */}
             <input
@@ -222,13 +229,15 @@ export function EffectifsEnseignantsForm({
               min={0}
               defaultValue={valeurs[`college:${d.id}`] || ""}
               placeholder="0"
+              aria-label={ecranMobile ? `Effectif premier cycle — ${d.nom}` : undefined}
               // Sans objet (préscolaire/primaire) : SEULS les effectifs sont grisés — renommer ou
               // retirer une discipline de la liste reste possible (plus de fieldset global).
               disabled={desactive}
-              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
+              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50 mobile:h-11 mobile:w-full"
             />
           </td>
-          <td className="px-3 py-2 text-center">
+          <td className="px-3 py-2 text-center mobile:order-4 mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+            <span aria-hidden className="mb-1 hidden text-left text-xs font-medium text-ink-700/70 mobile:block">2<sup>nd</sup> cycle</span>
             <input
               key={`l:${d.id}:${valeurs[`lycee:${d.id}`] || 0}`}
               type="number"
@@ -236,13 +245,14 @@ export function EffectifsEnseignantsForm({
               min={0}
               defaultValue={valeurs[`lycee:${d.id}`] || ""}
               placeholder="0"
+              aria-label={ecranMobile ? `Effectif second cycle — ${d.nom}` : undefined}
               disabled={desactive}
-              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
+              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50 mobile:h-11 mobile:w-full"
             />
           </td>
         </>
       )}
-      <td className="py-2 text-right">
+      <td className="py-2 text-right mobile:order-2 mobile:ml-auto mobile:self-center mobile:p-0">
         {retraitEnCours && confirmeRetrait === d.id ? (
           <Loader2 size={15} className="ml-auto animate-spin text-forest-600" />
         ) : confirmeRetrait === d.id ? (
@@ -250,14 +260,14 @@ export function EffectifsEnseignantsForm({
             <button
               type="button"
               onClick={() => retirerDiscipline(d.id)}
-              className="rounded-full bg-red-600 px-2 py-0.5 text-[0.65rem] font-semibold text-white hover:bg-red-500"
+              className="rounded-full bg-red-600 px-2 py-0.5 text-[0.65rem] font-semibold text-white hover:bg-red-500 mobile:min-h-10 mobile:px-3 mobile:text-sm"
             >
               Retirer
             </button>
             <button
               type="button"
               onClick={() => setConfirmeRetrait(null)}
-              className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-medium text-ink-700/60 hover:bg-cream-100"
+              className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-medium text-ink-700/60 hover:bg-cream-100 mobile:min-h-10 mobile:px-3 mobile:text-sm"
             >
               Annuler
             </button>
@@ -268,7 +278,7 @@ export function EffectifsEnseignantsForm({
             onClick={() => setConfirmeRetrait(d.id)}
             title={`Retirer ${d.nom} de la liste de cet établissement`}
             aria-label={`Retirer ${d.nom}`}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 transition-colors hover:bg-red-50 hover:text-red-600"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 transition-colors hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
           >
             <Trash2 size={14} />
           </button>
@@ -279,14 +289,15 @@ export function EffectifsEnseignantsForm({
 
   /** Sous-ligne d'OPTION : effectif ÉDITABLE par cycle (source de vérité ; le parent en affiche la somme). */
   const rendreOptionEditable = (o: { id: string; nom: string }) => (
-    <tr key={`opt-${o.id}`} className="border-b border-cream-50 bg-cream-50/30 last:border-0">
-      <td className="py-1.5 pr-4">
-        <span className="inline-flex items-center gap-1.5 pl-6 text-sm text-ink-700/70">
+    <tr key={`opt-${o.id}`} className="border-b border-cream-50 bg-cream-50/30 last:border-0 mobile:flex mobile:flex-wrap mobile:items-end mobile:gap-x-3 mobile:gap-y-2 mobile:rounded-2xl mobile:border-0 mobile:p-3 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200 mobile:ml-4 mobile:bg-cream-50">
+      <td className="py-1.5 pr-4 mobile:basis-full mobile:p-0">
+        <span className="inline-flex items-center gap-1.5 pl-6 text-sm text-ink-700/70 mobile:pl-0">
           <span aria-hidden className="text-ink-700/35">└</span> {o.nom}
-          <span className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-ink-700/45">option</span>
+          <span className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">option</span>
         </span>
       </td>
-      <td className="px-3 py-1.5 text-center">
+      <td className="px-3 py-1.5 text-center mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+        <span aria-hidden className="mb-1 hidden text-left text-xs font-medium text-ink-700/70 mobile:block">1<sup>er</sup> cycle</span>
         <input
           key={`c:${o.id}:${valeurs[`college:${o.id}`] || 0}`}
           type="number"
@@ -296,10 +307,11 @@ export function EffectifsEnseignantsForm({
           placeholder="0"
           aria-label={`Effectif premier cycle — ${o.nom}`}
           disabled={desactive}
-          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
+          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50 mobile:h-11 mobile:w-full"
         />
       </td>
-      <td className="px-3 py-1.5 text-center">
+      <td className="px-3 py-1.5 text-center mobile:min-w-0 mobile:grow mobile:basis-[calc(50%-0.5rem)] mobile:p-0">
+        <span aria-hidden className="mb-1 hidden text-left text-xs font-medium text-ink-700/70 mobile:block">2<sup>nd</sup> cycle</span>
         <input
           key={`l:${o.id}:${valeurs[`lycee:${o.id}`] || 0}`}
           type="number"
@@ -309,10 +321,10 @@ export function EffectifsEnseignantsForm({
           placeholder="0"
           aria-label={`Effectif second cycle — ${o.nom}`}
           disabled={desactive}
-          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
+          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50 mobile:h-11 mobile:w-full"
         />
       </td>
-      <td />
+      <td className="mobile:hidden" />
     </tr>
   );
 
@@ -345,7 +357,7 @@ export function EffectifsEnseignantsForm({
                 max={40}
                 defaultValue={volume1erCycle || ""}
                 placeholder="Ex : 18"
-                className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11"
               />
             </label>
             <label className="block">
@@ -360,7 +372,7 @@ export function EffectifsEnseignantsForm({
                 max={40}
                 defaultValue={volume2ndCycle || ""}
                 placeholder="Ex : 15"
-                className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11"
               />
             </label>
           </div>
@@ -377,9 +389,11 @@ export function EffectifsEnseignantsForm({
         {/* Plus de <fieldset disabled> global : seuls les champs d'effectifs sont grisés (voir
             rendreLigne), la gestion de la liste des disciplines reste disponible. */}
         <fieldset className="m-0 min-w-0 border-0 p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[420px] border-collapse text-sm">
-            <thead>
+        {/* Téléphone : une carte par discipline (nom + crayon + corbeille, puis les deux
+            effectifs étiquetés) — la colonne « Second cycle » et la corbeille étaient hors écran. */}
+        <div className="overflow-x-auto mobile:overflow-visible">
+          <table className="w-full min-w-[420px] border-collapse text-sm mobile:block mobile:min-w-0">
+            <thead className="mobile:hidden">
               <tr className="border-b border-cream-200 text-left">
                 <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Discipline</th>
                 <th className="px-3 py-2.5 text-center font-semibold text-ink-700/70">Premier cycle</th>
@@ -387,7 +401,7 @@ export function EffectifsEnseignantsForm({
                 <th className="w-10 py-2.5" />
               </tr>
             </thead>
-            <tbody>
+            <tbody className="mobile:block mobile:space-y-2">
               {simples.map((d) => {
                 const options = estParentAOptions(d.nomCanonique) ? optionsParParent.get(normNom(d.nomCanonique)) ?? [] : [];
                 if (options.length > 0) {
@@ -407,8 +421,8 @@ export function EffectifsEnseignantsForm({
               })}
               {couples.length > 0 && (
                 <>
-                  <tr key="titre-couples">
-                    <td colSpan={4} className="pb-1 pt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/50">
+                  <tr key="titre-couples" className="mobile:block">
+                    <td colSpan={4} className="pb-1 pt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/50 mobile:block mobile:text-xs mobile:text-ink-700/70">
                       Couples de spécialités
                     </td>
                   </tr>
@@ -422,7 +436,7 @@ export function EffectifsEnseignantsForm({
 
         {!desactive && (
           <>
-            <SubmitButton className="w-auto px-6">Enregistrer les effectifs enseignants</SubmitButton>
+            <SubmitButton className="w-auto px-6 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:py-2">Enregistrer les effectifs enseignants</SubmitButton>
             <p className="text-xs text-ink-700/55">
               Nombre d&apos;enseignants disponibles par discipline et par cycle. Le solveur répartit ces
               enseignants (anonymes) sur les classes sans jamais les mettre en double sur un même créneau.
@@ -432,7 +446,7 @@ export function EffectifsEnseignantsForm({
           </>
         )}
         {desactive && (
-          <SubmitButton className="w-auto px-6">Enregistrer le volume horaire</SubmitButton>
+          <SubmitButton className="w-auto px-6 mobile:w-full">Enregistrer le volume horaire</SubmitButton>
         )}
       </form>
 
@@ -454,13 +468,13 @@ export function EffectifsEnseignantsForm({
               }
             }}
             placeholder="Ex : Allemand — ou un couple : Lettres / Anglais…"
-            className="h-10 min-w-[14rem] flex-1 rounded-xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="h-10 min-w-[14rem] flex-1 rounded-xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0 mobile:basis-full"
           />
           <button
             type="button"
             onClick={ajouterDiscipline}
             disabled={ajoutEnCours || !nouvelle.trim()}
-            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-forest-200 px-5 text-sm font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-forest-200 px-5 text-sm font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-11"
           >
             {ajoutEnCours ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Ajouter
           </button>

@@ -96,7 +96,7 @@ export default async function RapportsAntennesPage() {
         <BoutonImprimerApfc />
       </div>
 
-      <div className="apfc-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8">
+      <div className="apfc-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8 mobile:p-4">
         <style
           dangerouslySetInnerHTML={{
             __html: `@media print { @page { size: A4 portrait; margin: 12mm; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .apfc-feuille { border: 0 !important; box-shadow: none !important; padding: 0 !important; } }`,
@@ -122,7 +122,7 @@ export default async function RapportsAntennesPage() {
           <p className="text-sm text-ink-700/70">Impossible de charger les rapports d&apos;antennes.</p>
         ) : (
           <>
-            <div className="mb-5 grid gap-4 sm:grid-cols-3">
+            <div className="mb-5 grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:last:odd:col-span-2">
               <StatCard libelle={T("Antennes (APFC)")} valeur={kpis.antennes} icone={<Network size={22} />} />
               <StatCard libelle="Sessions" valeur={kpis.sessions} icone={<BookMarked size={22} />} ton="gold" />
               <StatCard libelle="Participants" valeur={kpis.participants} icone={<Users size={22} />} />
@@ -133,7 +133,8 @@ export default async function RapportsAntennesPage() {
               <p className="text-sm text-ink-700/60">Aucune APFC enregistrée.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-sm">
+                {/* Téléphone : une carte par antenne (« libellé : valeur »). */}
+                <table className="tableau-cartes-mobile w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-cream-200 text-left text-xs text-ink-700/65">
                       <th className="py-2.5 pr-3 font-semibold">Antenne</th>
@@ -145,10 +146,10 @@ export default async function RapportsAntennesPage() {
                   <tbody>
                     {lignes.map((l) => (
                       <tr key={l.id} className="border-b border-cream-100 last:border-0">
-                        <td className="py-2.5 pr-3 font-medium text-forest-900">{l.nom}</td>
-                        <td className="px-2 py-2.5 text-ink-700/70">{l.region}</td>
-                        <td className="px-2 py-2.5 text-right text-ink-700/80">{l.sessions}</td>
-                        <td className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.participants}</td>
+                        <td className="py-2.5 pr-3 font-medium text-forest-900 mobile:font-semibold">{l.nom}</td>
+                        <td data-label="Région" className="px-2 py-2.5 text-ink-700/70">{l.region}</td>
+                        <td data-label="Sessions" className="px-2 py-2.5 text-right text-ink-700/80">{l.sessions}</td>
+                        <td data-label="Participants" className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.participants}</td>
                       </tr>
                     ))}
                   </tbody>

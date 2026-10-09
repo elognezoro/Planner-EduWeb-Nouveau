@@ -10,7 +10,7 @@ import { appliquerTermeApfc } from "@/lib/apfc-terme";
 
 const initial: EtatForm = { ok: false };
 const inputCls =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 
 export interface AntenneVue {
   id: string;
@@ -67,31 +67,32 @@ export function VueFormationContinue({
               // Antenne UNIQUE du rôle cloisonné : préchoisie et cachée.
               <input type="hidden" name="apfcId" value={antennes[0]?.id ?? ""} />
             ) : (
-              <div className="max-w-md">
+              <div className="max-w-md mobile:max-w-none">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">
                   Antenne <span className="text-red-600">*</span>
                 </label>
                 <SelectRecherche name="apfcId" options={options} requis placeholder={T("Rechercher une antenne APFC…")} />
               </div>
             )}
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="min-w-[14rem] flex-1">
+            {/* Téléphone : grille de 2 colonnes (intitulé et lieu pleine largeur, années côte à côte). */}
+            <div className="flex flex-wrap items-end gap-3 mobile:grid mobile:grid-cols-2">
+              <div className="min-w-[14rem] flex-1 mobile:col-span-2 mobile:min-w-0">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Intitulé de la session</label>
                 <input name="libelle" required className={inputCls} placeholder="Formation continue — Maths" />
               </div>
-              <div className="w-24">
+              <div className="w-24 mobile:w-auto">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Année déb.</label>
                 <input name="anneeDebut" type="number" className={inputCls} placeholder="2026" />
               </div>
-              <div className="w-24">
+              <div className="w-24 mobile:w-auto">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Année fin</label>
                 <input name="anneeFin" type="number" className={inputCls} placeholder="2027" />
               </div>
-              <div className="min-w-[12rem]">
+              <div className="min-w-[12rem] mobile:col-span-2 mobile:min-w-0">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Lieu</label>
                 <input name="lieu" className={inputCls} placeholder="Salle de formation…" />
               </div>
-              <SubmitButton className="w-auto px-6">
+              <SubmitButton className="w-auto px-6 mobile:col-span-2 mobile:w-full">
                 <Plus size={15} /> Ajouter la session
               </SubmitButton>
             </div>
@@ -112,7 +113,7 @@ export function VueFormationContinue({
               setAntenneFiltre(o?.id ?? null);
               setOuverte(o?.id ?? null); // filtrer sur une antenne la déplie directement
             }}
-            className="w-72"
+            className="w-72 mobile:w-full"
           />
           <span className="text-xs text-ink-700/60">
             {totalSessions} session(s) · {totalParticipants} participant(s)
@@ -137,7 +138,7 @@ export function VueFormationContinue({
                   type="button"
                   onClick={() => setOuverte(deplie ? null : a.id)}
                   aria-expanded={deplie}
-                  className={`flex w-full flex-wrap items-center justify-between gap-2 px-5 py-3.5 text-left transition-colors ${
+                  className={`flex w-full flex-wrap items-center justify-between gap-2 px-5 py-3.5 text-left transition-colors mobile:px-4 ${
                     deplie ? "bg-forest-50/60" : "hover:bg-cream-50"
                   }`}
                 >
@@ -161,7 +162,7 @@ export function VueFormationContinue({
                   </span>
                 </button>
                 {deplie && (
-                  <div className="space-y-3 border-t border-cream-200 bg-cream-50/40 p-4">
+                  <div className="space-y-3 border-t border-cream-200 bg-cream-50/40 p-4 mobile:p-3">
                     {a.cohortes.length === 0 ? (
                       <p className="text-sm text-ink-700/55">Aucune session enregistrée pour cette antenne.</p>
                     ) : (

@@ -83,7 +83,7 @@ export function OngletDroits({
                     </p>
                     <p className="mt-1 flex flex-wrap gap-1">
                       {d.permissions.map((p) => (
-                        <span key={p} className="rounded-full bg-forest-50 px-2 py-0.5 text-[11px] font-medium text-forest-800">
+                        <span key={p} className="rounded-full bg-forest-50 px-2 py-0.5 text-[11px] font-medium text-forest-800 mobile:text-xs">
                           {libellesPermissions.get(p) ?? p}
                         </span>
                       ))}
@@ -149,11 +149,12 @@ function FormulaireDelegation({ etablissementId, personnel }: { etablissementId:
         <Label>Permissions déléguées (sous-ensemble du registre)</Label>
         <div className="mt-1 grid gap-1.5 rounded-2xl border border-cream-200 bg-cream-50/50 p-3 sm:grid-cols-2">
           {PERMISSIONS_FINANCE.map((p) => (
-            <label key={p.code} className="flex cursor-pointer items-start gap-2 text-sm text-ink-800">
+            // Téléphone : chaque case offre une cible de 44 px ; code de permission en 14 px.
+            <label key={p.code} className="flex cursor-pointer items-start gap-2 text-sm text-ink-800 mobile:min-h-11 mobile:py-1">
               <input type="checkbox" name="permissions" value={p.code} className="mt-1 accent-forest-700" />
               <span>
                 {p.libelle}
-                <span className="block font-mono text-[11px] text-ink-700/45">{p.code}</span>
+                <span className="block font-mono text-[11px] text-ink-700/45 mobile:text-xs">{p.code}</span>
               </span>
             </label>
           ))}
@@ -189,7 +190,7 @@ function BoutonRevoquer({ id, version }: { id: string; version: number }) {
       <span className="inline-flex flex-col items-end gap-1">
         <button
           type="button" onClick={() => setConfirmer(true)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
         >
           <Ban size={13} /> Révoquer
         </button>
@@ -198,17 +199,18 @@ function BoutonRevoquer({ id, version }: { id: string; version: number }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5">
+    // Téléphone : « Oui » et l'annulation passent à 44 px et peuvent aller à la ligne.
+    <span className="inline-flex items-center gap-1.5 mobile:flex-wrap mobile:gap-2">
       <span className="text-xs font-medium text-red-700">Révoquer cette délégation ?</span>
       <button
         type="button" onClick={revoquer} disabled={pending}
-        className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-500 disabled:opacity-50"
+        className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-500 disabled:opacity-50 mobile:h-11 mobile:px-4 mobile:text-sm"
       >
         {pending ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} Oui
       </button>
       <button
         type="button" onClick={() => setConfirmer(false)}
-        className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-cream-300 text-ink-700/60 hover:bg-cream-100"
+        className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-cream-300 text-ink-700/60 hover:bg-cream-100 mobile:h-11 mobile:w-11"
       >
         <X size={12} />
       </button>

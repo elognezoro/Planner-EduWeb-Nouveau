@@ -93,7 +93,7 @@ export default async function RapportsActivitePage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader titre="Rapports d'activité" description="Volumétrie des actions sur les 30 derniers jours." />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:last:odd:col-span-2">
         {cartes.map((c, i) => (
           <StatCard key={c.libelle} libelle={c.libelle} valeur={c.valeur} icone={c.icone} ton={i % 2 ? "gold" : "forest"} />
         ))}
@@ -107,9 +107,11 @@ export default async function RapportsActivitePage() {
           ) : (
             <ul className="divide-y divide-cream-100">
               {journal.map((j) => (
-                <li key={j.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-                  <span className="text-forest-900">{LIBELLE_ACTION[j.action] ?? j.action}</span>
-                  <span className="text-xs text-ink-700/55">
+                // Téléphone : action puis « e-mail · date » en dessous (les e-mails longs écrasaient l'action).
+                <li key={j.id} className="flex items-center justify-between gap-2 py-2 text-sm mobile:flex-col mobile:items-start mobile:gap-0.5">
+                  {/* Téléphone : code d'action brut ou e-mail insécable coupé au lieu d'élargir la page (date coupée en dernier recours). */}
+                  <span className="text-forest-900 mobile:max-w-full mobile:wrap-anywhere">{LIBELLE_ACTION[j.action] ?? j.action}</span>
+                  <span className="text-xs text-ink-700/55 mobile:max-w-full mobile:wrap-anywhere">
                     {j.acteurEmail ?? "—"} · {new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(j.creeLe)}
                   </span>
                 </li>

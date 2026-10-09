@@ -61,7 +61,9 @@ function BoutonDepot({ h, onClick }: { h: string; onClick: () => void }) {
     <button type="button" onClick={onClick} disabled={pending}
       className={`flex ${h} w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-cream-300 bg-white text-ink-700/50 transition hover:border-forest-300 hover:bg-forest-50/40 hover:text-forest-700 disabled:opacity-60`}>
       {pending ? <Loader2 className="h-5 w-5 animate-spin text-forest-600" /> : <ImageUp className="h-5 w-5" />}
-      <span className="text-xs font-medium">{pending ? "Téléversement…" : "Cliquez pour déposer une image"}</span>
+      <span className="text-xs font-medium mobile:hidden">{pending ? "Téléversement…" : "Cliquez pour déposer une image"}</span>
+      {/* Téléphone : libellé adapté au doigt. */}
+      <span className="hidden text-xs font-medium mobile:inline">{pending ? "Téléversement…" : "Touchez pour choisir une image"}</span>
     </button>
   );
 }
@@ -69,7 +71,7 @@ function BoutonDepot({ h, onClick }: { h: string; onClick: () => void }) {
 function SupprBtn() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:underline disabled:opacity-60">
+    <button type="submit" disabled={pending} className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:underline disabled:opacity-60 mobile:min-h-11 mobile:px-2 mobile:-ml-2">
       {pending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />} Retirer
     </button>
   );
@@ -81,7 +83,7 @@ export function ConfigSeminaireClient({ slug, titre, url, config }: { slug: stri
     <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <h2 className="font-display text-base font-bold text-forest-900">{titre}</h2>
-        {url && <Link href={url} target="_blank" className="inline-flex items-center gap-1 text-xs font-semibold text-forest-700 hover:underline">Ouvrir <ExternalLink className="h-3 w-3" /></Link>}
+        {url && <Link href={url} target="_blank" className="inline-flex items-center gap-1 text-xs font-semibold text-forest-700 hover:underline mobile:min-h-11 mobile:px-2 mobile:-mr-2">Ouvrir <ExternalLink className="h-3 w-3" /></Link>}
       </div>
 
       {/* Couverture (bannière de la carte) */}

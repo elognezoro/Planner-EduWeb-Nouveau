@@ -50,7 +50,7 @@ function ZoneDepot({
         const fichier = e.dataTransfer.files?.[0];
         if (fichier) onDeposer(fichier);
       }}
-      className={`flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white p-3 transition-colors disabled:pointer-events-none ${
+      className={`flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white p-3 transition-colors disabled:pointer-events-none mobile:h-32 ${
         survol ? "border-forest-500 bg-forest-50/70 text-forest-700" : bordureRepos
       }`}
     >
@@ -70,12 +70,19 @@ function ZoneDepot({
           <>
             <Image src={defautUrl} alt="" width={64} height={44} unoptimized className="h-12 w-auto object-contain" />
             <span className="text-xs font-medium text-ink-700/70">{defautLabel}</span>
-            <span className="text-[0.7rem] text-ink-700/45">Cliquez ou glissez pour remplacer</span>
+            {/* Téléphone : pas de glisser-déposer au doigt — libellé adapté. */}
+            <span className="text-[0.7rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">
+              <span className="mobile:hidden">Cliquez ou glissez pour remplacer</span>
+              <span className="hidden mobile:inline">Touchez pour remplacer</span>
+            </span>
           </>
         ) : (
           <>
             <ImageUp size={22} />
-            <span className="px-3 text-xs font-medium">Cliquez ou glissez-déposez une image</span>
+            <span className="px-3 text-xs font-medium">
+              <span className="mobile:hidden">Cliquez ou glissez-déposez une image</span>
+              <span className="hidden mobile:inline">Touchez pour choisir une image</span>
+            </span>
           </>
         )}
       </span>
@@ -90,7 +97,7 @@ function BoutonRetirer() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:underline disabled:opacity-60"
+      className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:underline disabled:opacity-60 mobile:min-h-11"
     >
       {pending && <Loader2 size={13} className="animate-spin" />}
       Retirer l&apos;image
@@ -152,7 +159,7 @@ function Zone({
       <p className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-ink-700/60">
         {libelle}
         {special && (
-          <span className="inline-flex items-center rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-semibold normal-case tracking-normal text-gold-800 ring-1 ring-gold-300">
+          <span className="inline-flex items-center rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-semibold normal-case tracking-normal text-gold-800 ring-1 ring-gold-300 mobile:text-xs">
             Officiel · intégré automatiquement
           </span>
         )}
@@ -161,7 +168,7 @@ function Zone({
       {url ? (
         <>
           {/* Prévisualisation grand format dans la zone en pointillés — rendu direct du document. */}
-          <div className={`relative h-44 w-full overflow-hidden rounded-2xl border-2 border-dashed bg-white ${special ? "border-gold-400" : "border-cream-300"}`}>
+          <div className={`relative h-44 w-full overflow-hidden rounded-2xl border-2 border-dashed bg-white mobile:h-32 ${special ? "border-gold-400" : "border-cream-300"}`}>
             {/* `unoptimized` : chargement direct depuis le Blob — l'optimiseur Next peut rejeter
                 l'hôte selon le réseau (DNS64/NAT64 → IP jugée privée), pour un simple aperçu. */}
             <Image src={url} alt={libelle} fill unoptimized className="object-contain p-4" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
@@ -215,7 +222,7 @@ export function DocumentsUpload({
 }) {
   const code = trouverPays(pays)?.code;
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mobile:gap-4">
       <Zone
         etablissementId={etablissementId}
         type="embleme"

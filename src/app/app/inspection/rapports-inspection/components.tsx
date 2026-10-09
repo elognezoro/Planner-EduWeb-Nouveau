@@ -19,6 +19,8 @@ import {
   Tooltip,
 } from "recharts";
 import { Card } from "@/components/app/ui";
+import { useEcranMobile, useImpressionDepuisEcranMobile } from "@/lib/mobile/appareil";
+import { ClassementBarres } from "@/components/app/mobile/graphiques-mobiles";
 import { SelectRecherche } from "@/components/app/select-recherche";
 import { FormAlert } from "@/components/ui/form";
 import { validerRapportInspection } from "./actions";
@@ -50,17 +52,19 @@ function defilerVers(id: string) {
 
 export function BandeauAllerA() {
   return (
-    <Card className="flex flex-wrap items-center gap-x-3 gap-y-2 p-4">
-      <span className="text-[0.65rem] font-bold uppercase tracking-widest text-ink-700/55">
+    // Téléphone : le bandeau remplace le navigateur flottant (masqué, il chevauchait le bouton de
+    // l'assistant) — collé sous l'en-tête mobile, pastilles sur une ligne qui défile au doigt.
+    <Card className="flex flex-wrap items-center gap-x-3 gap-y-2 p-4 mobile:sticky mobile:top-[calc(3.5rem+var(--marge-sure-haut)+0.5rem)] mobile:z-20 mobile:flex-nowrap mobile:p-2">
+      <span className="text-[0.65rem] font-bold uppercase tracking-widest text-ink-700/55 mobile:hidden">
         Aller à
       </span>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="rangee-defilante-mobile flex flex-wrap items-center gap-2 mobile:min-w-0 mobile:flex-1">
         {SECTIONS.map((s) => (
           <button
             key={s.id}
             type="button"
             onClick={() => defilerVers(s.id)}
-            className="rounded-full border border-cream-300 bg-cream-50/60 px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:border-forest-300 hover:bg-forest-50"
+            className="rounded-full border border-cream-300 bg-cream-50/60 px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:border-forest-300 hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
           >
             {s.libelle}
           </button>
@@ -85,7 +89,7 @@ export function BandeauFiltres({
   const pathname = usePathname();
   return (
     <Card className="flex flex-wrap items-center gap-x-3 gap-y-2 p-4">
-      <span className="text-[0.65rem] font-bold uppercase tracking-widest text-ink-700/55">
+      <span className="text-[0.65rem] font-bold uppercase tracking-widest text-ink-700/55 mobile:text-xs">
         Filtres
       </span>
       <SelectRecherche
@@ -102,7 +106,7 @@ export function BandeauFiltres({
           // affiché reste celui de la visite courante tant qu'une autre n'est pas choisie.
           if (o) router.push(`${pathname}?visite=${encodeURIComponent(o.id)}`);
         }}
-        className="min-w-64 flex-1"
+        className="min-w-64 flex-1 mobile:w-full mobile:min-w-0"
       />
     </Card>
   );
@@ -118,7 +122,7 @@ export interface RapportInitial {
 }
 
 const textareaCls =
-  "w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70";
+  "w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70 mobile:text-base";
 
 export function RapportForm({
   visiteId,
@@ -136,7 +140,7 @@ export function RapportForm({
     <form id={FORM_RAPPORT_ID} action={action} className="space-y-6">
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
-      <Card id="points-forts" className="scroll-mt-24">
+      <Card id="points-forts" className="scroll-mt-24 mobile:scroll-mt-36">
         <h2 className="font-display text-base font-bold text-forest-900">Points forts</h2>
         <p className="mt-0.5 mb-3 flex items-center gap-1.5 text-xs font-semibold text-forest-700">
           <ThumbsUp size={14} /> Atouts observés
@@ -152,7 +156,7 @@ export function RapportForm({
         />
       </Card>
 
-      <Card id="axes-amelioration" className="scroll-mt-24">
+      <Card id="axes-amelioration" className="scroll-mt-24 mobile:scroll-mt-36">
         <h2 className="font-display text-base font-bold text-forest-900">Axes d&apos;amélioration</h2>
         <p className="mt-0.5 mb-3 flex items-center gap-1.5 text-xs font-semibold text-gold-700">
           <AlertTriangle size={14} /> Points de vigilance
@@ -168,7 +172,7 @@ export function RapportForm({
         />
       </Card>
 
-      <Card id="recommandations" className="scroll-mt-24">
+      <Card id="recommandations" className="scroll-mt-24 mobile:scroll-mt-36">
         <h2 className="font-display text-base font-bold text-forest-900">Recommandations</h2>
         <p className="mt-0.5 mb-3 flex items-center gap-1.5 text-xs font-semibold text-forest-700">
           <ListChecks size={14} /> Actions à mettre en œuvre
@@ -194,13 +198,30 @@ export function RadarProfil({
 }: {
   donnees: { domaine: string; valeur: number }[];
 }) {
+  const mobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
+  // Téléphone : les libellés latéraux du radar étaient rognés et les scores visibles au seul
+  // toucher. Lecture chiffrée par domaine, dans l'ordre de la grille (papier et ordinateur inchangés).
+  if (mobile) {
+    return (
+      <ClassementBarres
+        donnees={donnees.map((d) => ({ libelle: d.domaine, valeur: d.valeur }))}
+        trier={false}
+        max={20}
+        decimales={1}
+        unite="/20"
+        limite={donnees.length}
+      />
+    );
+  }
   return (
     <ResponsiveContainer width="100%" height={260}>
       <RadarChart data={donnees} outerRadius="72%">
         <PolarGrid stroke="#e9dcbe" />
         <PolarAngleAxis dataKey="domaine" tick={{ fontSize: 11, fill: "#2b3a33" }} />
         <PolarRadiusAxis domain={[0, 20]} tickCount={5} tick={{ fontSize: 10, fill: "#8a917f" }} axisLine={false} />
-        <Radar
+        <Radar isAnimationActive={impression ? false : undefined}
           name="Score /20"
           dataKey="valeur"
           stroke="#246a48"
@@ -226,7 +247,9 @@ export function RadarProfil({
 export function NavigateurFlottant() {
   const [ouvert, setOuvert] = useState(false);
   return (
-    <div className="flottant-bas fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 print:hidden">
+    // Téléphone : masqué — il occupait exactement la place du bouton de l'assistant IA ; le
+    // bandeau « Aller à », collé sous l'en-tête, en tient lieu.
+    <div className="flottant-bas fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 print:hidden mobile:hidden">
       {ouvert && (
         <div className="w-52 overflow-hidden rounded-2xl border border-cream-200 bg-white py-1 shadow-lg">
           {SECTIONS.map((s) => (

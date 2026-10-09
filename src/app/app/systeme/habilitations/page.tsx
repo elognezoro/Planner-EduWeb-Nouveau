@@ -73,7 +73,7 @@ export default async function HabilitationsPage({
       />
 
       {/* Recherche rapide (e-mail ou mots-clés du nom / des prénoms) */}
-      <Card>
+      <Card className="mobile:p-4">
         <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
           <div className="min-w-[14rem] flex-1">
             <label htmlFor="q" className="mb-1.5 block text-xs font-medium text-forest-900">
@@ -95,14 +95,14 @@ export default async function HabilitationsPage({
           </div>
           <button
             type="submit"
-            className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+            className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:flex-1"
           >
             Rechercher
           </button>
           {q && (
             <Link
               href={BASE}
-              className="inline-flex h-11 items-center gap-1 rounded-full border border-cream-300 px-4 text-sm font-medium text-ink-700/70 hover:bg-red-50 hover:text-red-600"
+              className="inline-flex h-11 items-center gap-1 rounded-full border border-cream-300 px-4 text-sm font-medium text-ink-700/70 hover:bg-red-50 hover:text-red-600 mobile:flex-1 mobile:justify-center"
             >
               <X size={14} /> Réinitialiser
             </Link>
@@ -125,14 +125,16 @@ export default async function HabilitationsPage({
           </p>
         </Card>
       ) : (
-        <Card className="overflow-x-auto p-0">
-          <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3">
+        // Téléphone : chaque compte devient une carte (identité, puis rôle et actions) — la carte
+        // englobante s'efface pour ne pas doubler les bordures.
+        <Card className="overflow-x-auto p-0 mobile:overflow-visible mobile:rounded-none mobile:border-0 mobile:bg-transparent mobile:shadow-none">
+          <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3 mobile:border-0 mobile:px-1 mobile:pt-0">
             <p className="text-sm font-semibold text-forest-900">
               {comptes.length} compte(s){q ? ` pour « ${q} »` : ""}
               {!q && comptes.length === 100 ? " (100 plus récents — affinez avec la recherche)" : ""}
             </p>
           </div>
-          <table className="w-full min-w-[640px] border-collapse text-sm">
+          <table className="tableau-cartes-mobile w-full min-w-[640px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-cream-200 bg-cream-50 text-left">
                 <th className="px-5 py-3 font-semibold text-ink-700/70">Utilisateur</th>

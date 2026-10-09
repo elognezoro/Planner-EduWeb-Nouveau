@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight, Pencil, Check } from "lucide-react";
 import {
   GrilleNiveauEditor,
@@ -90,6 +90,18 @@ export function VolumesBlock({
     setEtatsAuto((s) => (s[niveauId] === e ? s : { ...s, [niveauId]: e }));
   }, []);
 
+  // Téléphone : les onglets forment une bande qui défile ; l'onglet actif y est ramené au centre
+  // (défilement de la BANDE seule — sur ordinateur, elle ne déborde pas : aucun effet).
+  const bande = useRef<HTMLDivElement>(null);
+  const idActif = niveauActif?.id;
+  useEffect(() => {
+    const c = bande.current;
+    const el = c?.querySelector<HTMLElement>("[data-onglet-actif]");
+    if (!c || !el || c.scrollWidth <= c.clientWidth) return;
+    const ecart = el.getBoundingClientRect().left - c.getBoundingClientRect().left;
+    c.scrollBy({ left: ecart - (c.clientWidth - el.offsetWidth) / 2 });
+  }, [idActif]);
+
   function ouvrir(id: string) {
     setActif(id);
     setVisites((s) => (s.has(id) ? s : new Set(s).add(id)));
@@ -147,8 +159,11 @@ export function VolumesBlock({
     <div>
       {message && <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{message}</p>}
 
-      {/* Onglets des niveaux (avec suppression par niveau) */}
-      <div className="mb-3 flex flex-wrap gap-1.5">
+      {/* Onglets des niveaux (avec suppression par niveau).
+          Téléphone : une bande qui défile, sans flèches ni corbeille collées au libellé (on
+          déplaçait ou supprimait un niveau en voulant l'ouvrir) — ces actions passent dans la
+          rangée « niveau actif » ci-dessous. */}
+      <div ref={bande} className="rangee-defilante-mobile mb-3 flex flex-wrap gap-1.5 mobile:-mx-4 mobile:px-4">
         {niveaux.map((n, index) => {
           const estActif = !!niveauActif && n.id === niveauActif.id;
           const styleFleche = estActif
@@ -157,6 +172,7 @@ export function VolumesBlock({
           return (
             <span
               key={n.id}
+              data-onglet-actif={estActif ? "" : undefined}
               className={`inline-flex items-center rounded-full transition-colors ${
                 estActif ? "bg-forest-800 text-cream-50" : "border border-cream-300 bg-white text-forest-800 hover:bg-forest-50"
               }`}
@@ -169,7 +185,7 @@ export function VolumesBlock({
                 disabled={pending || index === 0}
                 title={`Déplacer ${n.nom} vers la gauche`}
                 aria-label={`Déplacer le niveau ${n.nom} vers la gauche`}
-                className={`ml-1 flex h-5 w-4 items-center justify-center rounded disabled:opacity-25 ${styleFleche}`}
+                className={`ml-1 flex h-5 w-4 items-center justify-center rounded disabled:opacity-25 mobile:hidden ${styleFleche}`}
               >
                 <ChevronLeft size={13} />
               </button>
@@ -189,7 +205,7 @@ export function VolumesBlock({
                   }
                 }}
                 title={`Voir la grille de ${n.nom}`}
-                className="inline-flex cursor-pointer items-center gap-1 py-1.5 px-1 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-forest-300"
+                className="inline-flex cursor-pointer items-center gap-1 py-1.5 px-1 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-forest-300 mobile:min-h-11 mobile:px-4"
               >
                 {n.nom}
                 {/* Échec d'un enregistrement automatique survenu hors écran : signalé sur l'onglet. */}
@@ -208,7 +224,7 @@ export function VolumesBlock({
                 disabled={pending || index === niveaux.length - 1}
                 title={`Déplacer ${n.nom} vers la droite`}
                 aria-label={`Déplacer le niveau ${n.nom} vers la droite`}
-                className={`mr-0.5 flex h-5 w-4 items-center justify-center rounded disabled:opacity-25 ${styleFleche}`}
+                className={`mr-0.5 flex h-5 w-4 items-center justify-center rounded disabled:opacity-25 mobile:hidden ${styleFleche}`}
               >
                 <ChevronRight size={13} />
               </button>
@@ -218,7 +234,7 @@ export function VolumesBlock({
                 disabled={pending}
                 title={`Supprimer le niveau ${n.nom}`}
                 aria-label={`Supprimer le niveau ${n.nom}`}
-                className={`mr-1.5 flex h-5 w-5 items-center justify-center rounded-full disabled:opacity-50 ${
+                className={`mr-1.5 flex h-5 w-5 items-center justify-center rounded-full disabled:opacity-50 mobile:hidden ${
                   estActif ? "text-cream-50/70 hover:bg-white/20 hover:text-white" : "text-ink-700/40 hover:bg-red-50 hover:text-red-600"
                 }`}
               >
@@ -228,6 +244,42 @@ export function VolumesBlock({
           );
         })}
       </div>
+
+      {/* Téléphone : actions du niveau actif, à part et à la taille du doigt. */}
+      {niveauActif && (
+        <div className="mb-3 hidden items-center gap-2 lg:hidden print:hidden mobile:flex">
+          <button
+            type="button"
+            onClick={() => deplacer(niveauActif.id, "gauche")}
+            disabled={pending || niveaux.findIndex((n) => n.id === niveauActif.id) === 0}
+            aria-label={`Déplacer le niveau ${niveauActif.nom} vers la gauche`}
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-cream-300 bg-white text-forest-800 active:bg-forest-50 disabled:opacity-40"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            type="button"
+            onClick={() => deplacer(niveauActif.id, "droite")}
+            disabled={pending || niveaux.findIndex((n) => n.id === niveauActif.id) === niveaux.length - 1}
+            aria-label={`Déplacer le niveau ${niveauActif.nom} vers la droite`}
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-cream-300 bg-white text-forest-800 active:bg-forest-50 disabled:opacity-40"
+          >
+            <ChevronRight size={18} />
+          </button>
+          <span className="min-w-0 flex-1 truncate text-sm text-ink-700/70">
+            Niveau <strong className="text-forest-900">{niveauActif.nom}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => supprimer(niveauActif.id, niveauActif.nom)}
+            disabled={pending}
+            aria-label={`Supprimer le niveau ${niveauActif.nom}`}
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 active:bg-red-50 disabled:opacity-50"
+          >
+            <Trash2 size={17} />
+          </button>
+        </div>
+      )}
 
       {/* Renommer le niveau actif — libellé PROPRE à cet établissement (le nom national ne bouge pas)
           — et, pour un niveau créé par l'établissement, corriger son CYCLE. */}
@@ -245,42 +297,42 @@ export function VolumesBlock({
                 autoFocus
                 maxLength={60}
                 placeholder="Nom affiché (ex : 6e)"
-                className="h-9 w-52 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                className="h-9 w-52 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full"
               />
               <button
                 type="button"
                 onClick={renommer}
                 disabled={pending}
-                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-11 mobile:text-sm"
               >
                 {pending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Enregistrer
               </button>
               <button
                 type="button"
                 onClick={() => setRenomme(false)}
-                className="inline-flex h-9 items-center rounded-full border border-cream-300 px-3 text-xs font-medium text-ink-700/70 hover:bg-cream-100"
+                className="inline-flex h-9 items-center rounded-full border border-cream-300 px-3 text-xs font-medium text-ink-700/70 hover:bg-cream-100 mobile:h-11 mobile:text-sm"
               >
                 Annuler
               </button>
-              <span className="text-[0.7rem] text-ink-700/45">Vider le champ rétablit le nom d&apos;origine.</span>
+              <span className="text-[0.7rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">Vider le champ rétablit le nom d&apos;origine.</span>
             </div>
           ) : (
             <button
               type="button"
               onClick={ouvrirRenommage}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-forest-700 hover:text-forest-900"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-forest-700 hover:text-forest-900 mobile:min-h-11 mobile:text-sm"
             >
               <Pencil size={13} /> Renommer « {niveauActif.nom} » pour cet établissement
             </button>
           )}
           {niveauActif.propre && !renomme && (
-            <label className="inline-flex items-center gap-1.5 text-xs text-ink-700/70">
+            <label className="inline-flex items-center gap-1.5 text-xs text-ink-700/70 mobile:flex mobile:w-full mobile:flex-wrap">
               Cycle de « {niveauActif.nom} » :
               <select
                 value={niveauActif.cycle}
                 onChange={(e) => changerCycle(niveauActif.id, e.target.value)}
                 disabled={pending}
-                className="h-8 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
+                className="h-8 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:text-base"
               >
                 {CYCLES.map((c) => (
                   <option key={c.v} value={c.v}>{c.l}</option>
@@ -303,13 +355,13 @@ export function VolumesBlock({
             }
           }}
           placeholder="Nouveau niveau (ex : 6ème, CP1, BT1…)"
-          className="h-9 w-56 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-9 w-56 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full"
         />
         <select
           value={cycle}
           onChange={(e) => setCycle(e.target.value)}
           aria-label="Cycle du nouveau niveau"
-          className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0 mobile:flex-1"
         >
           {CYCLES.map((c) => (
             <option key={c.v} value={c.v}>{c.l}</option>
@@ -319,7 +371,7 @@ export function VolumesBlock({
           type="button"
           onClick={ajouter}
           disabled={pending || !nom.trim()}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-11 mobile:text-sm"
         >
           {pending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Ajouter le niveau
         </button>
@@ -333,7 +385,7 @@ export function VolumesBlock({
           .map((n) => {
             const restreinte = modePrimaire && estPrimaireOuPrescolaire(n.cycle);
             return (
-              <div key={n.id} hidden={n.id !== niveauActif.id} className="overflow-x-auto">
+              <div key={n.id} hidden={n.id !== niveauActif.id} className="overflow-x-auto mobile:overflow-visible">
                 <GrilleNiveauEditor
                   etablissementId={etablissementId}
                   niveauId={n.id}

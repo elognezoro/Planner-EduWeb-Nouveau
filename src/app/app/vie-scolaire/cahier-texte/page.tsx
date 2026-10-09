@@ -326,15 +326,15 @@ export default async function CahierTextePage({
       ) : (
         <>
           {/* Compteurs */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
             <KpiCard index={0} libelle="Séances saisies" valeur={kpi.total} icone={<NotebookPen size={22} />} href="#seances" />
             <KpiCard index={1} libelle="Publiées" valeur={kpi.publiees} ton="forest" icone={<Send size={22} />} href="#seances" />
             <KpiCard index={2} libelle="Brouillons" valeur={kpi.brouillons} ton={kpi.brouillons > 0 ? "gold" : "cream"} icone={<FileEdit size={22} />} href="#seances" />
             <KpiCard index={3} libelle="Demandes d'accès" valeur={kpi.demandes} ton={kpi.demandes > 0 ? "red" : "cream"} icone={<KeyRound size={22} />} href="#demandes" />
           </div>
 
-          {/* ALLER À : navigation rapide */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* ALLER À : navigation rapide (téléphone : les tuiles ci-dessus servent déjà d'ancres) */}
+          <div className="flex flex-wrap items-center gap-2 mobile:hidden">
             <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/45">Aller à</span>
             <Link href="#seances" className="rounded-full border border-cream-300 bg-white px-4 py-1.5 text-sm font-medium text-forest-800 hover:border-gold-300">
               Séances

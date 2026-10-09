@@ -132,7 +132,7 @@ function SectionPays({ groupe }: { groupe: GroupePays }) {
             ))}
           </select>
         )}
-        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-sm text-forest-800">
+        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-sm text-forest-800 mobile:min-h-11">
           <input
             type="checkbox"
             checked={sansUniquement}
@@ -140,16 +140,17 @@ function SectionPays({ groupe }: { groupe: GroupePays }) {
               setSansUniquement(e.target.checked);
               if (e.target.checked) setFiltreDiocese(""); // exclusif du filtre par diocèse
             }}
-            className="h-4 w-4 rounded border-cream-300"
+            className="h-4 w-4 rounded border-cream-300 mobile:h-5 mobile:w-5"
           />
           Uniquement sans diocèse
         </label>
       </div>
 
-      {/* Barre d'affectation groupée */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-forest-200 bg-forest-50/50 p-3 sm:flex-row sm:items-center">
-        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-sm font-medium text-forest-800">
-          <input type="checkbox" checked={toutCoche} onChange={toutBasculer} disabled={idsVisibles.length === 0} className="h-4 w-4 rounded border-cream-300" />
+      {/* Barre d'affectation groupée — téléphone : collante sous l'en-tête (elle disparaissait dès
+          qu'on faisait défiler une longue liste), sur fond opaque. */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-forest-200 bg-forest-50/50 p-3 sm:flex-row sm:items-center mobile:sticky mobile:top-[calc(3.5rem+var(--marge-sure-haut)+0.5rem)] mobile:z-10 mobile:gap-2 mobile:bg-forest-50 mobile:shadow-md">
+        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-sm font-medium text-forest-800 mobile:min-h-10">
+          <input type="checkbox" checked={toutCoche} onChange={toutBasculer} disabled={idsVisibles.length === 0} className="h-4 w-4 rounded border-cream-300 mobile:h-5 mobile:w-5" />
           {selection.size > 0 ? `${selection.size} sélectionné(s)` : "Tout sélectionner"}
         </label>
         {groupe.dioceses.length > 0 ? (
@@ -195,15 +196,20 @@ function SectionPays({ groupe }: { groupe: GroupePays }) {
       ) : (
         <ul className="divide-y divide-cream-200">
           {visibles.map((e) => (
-            <li key={e.id} className="flex flex-wrap items-center gap-3 py-2.5">
+            <li key={e.id} className="flex flex-wrap items-center gap-3 py-2.5 mobile:relative mobile:min-h-12 mobile:py-3">
               <input
+                id={`selection-${e.id}`}
                 type="checkbox"
                 checked={selection.has(e.id)}
                 onChange={() => basculer(e.id)}
                 aria-label={`Sélectionner ${e.nom}`}
-                className="h-4 w-4 shrink-0 rounded border-cream-300"
+                className="h-4 w-4 shrink-0 rounded border-cream-300 mobile:h-5 mobile:w-5"
               />
-              <div className="min-w-0 flex-1">
+              {/* Téléphone : toute la ligne devient la cible de la case (calque sans contenu). */}
+              <label htmlFor={`selection-${e.id}`} aria-hidden className="absolute inset-0 hidden cursor-pointer mobile:block" />
+              {/* Téléphone : le nom occupe la ligne 1 (case + gouttière + 0,5rem de marge) et le badge
+                  du diocèse passe en ligne 2, aligné sous le nom — sinon un libellé long tronquait le nom. */}
+              <div className="min-w-0 flex-1 mobile:basis-[calc(100%-2.5rem)]">
                 <p className="truncate text-sm font-medium text-forest-900">{e.nom}</p>
                 <p className="flex flex-wrap items-center gap-x-2 text-xs text-ink-700/55">
                   {(e.ville || e.regionNom) && (
@@ -216,11 +222,11 @@ function SectionPays({ groupe }: { groupe: GroupePays }) {
                 </p>
               </div>
               {e.diocese ? (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-forest-100 px-2.5 py-1 text-xs font-medium text-forest-800">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-forest-100 px-2.5 py-1 text-xs font-medium text-forest-800 mobile:ml-8">
                   <Church size={11} /> {e.diocese}
                 </span>
               ) : (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-100 px-2.5 py-1 text-xs font-medium text-gold-800">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-100 px-2.5 py-1 text-xs font-medium text-gold-800 mobile:ml-8">
                   <X size={11} /> Sans diocèse
                 </span>
               )}

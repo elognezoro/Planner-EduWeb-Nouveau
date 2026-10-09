@@ -117,7 +117,8 @@ export default async function EfficacitePage({
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          {/* Téléphone : KPI en 2 colonnes compactes, le dernier en pleine largeur. */}
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
             <StatCard libelle="Moyenne générale /20" valeur={moyenneGenerale ?? "—"} icone={<TrendingUp size={22} />} />
             <StatCard libelle="Taux de réussite" valeur={`${tauxReussite}%`} icone={<Target size={22} />} ton="gold" />
             <StatCard libelle="Élèves évalués" valeur={nbEleves} icone={<Award size={22} />} />
@@ -125,7 +126,8 @@ export default async function EfficacitePage({
 
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">Taux de réussite par niveau (%)</h2>
-            <ChartBarVertical data={parNiveau.map(({ label, valeur }) => ({ label, valeur }))} nomSerie="Réussite %" couleur="#246a48" vide="Aucune note pour calculer l'efficacité." />
+            {/* Téléphone : ordre des niveaux conservé, jauge sur 100 %. */}
+            <ChartBarVertical data={parNiveau.map(({ label, valeur }) => ({ label, valeur }))} nomSerie="Réussite %" couleur="#246a48" vide="Aucune note pour calculer l'efficacité." ordonne max={100} unite="%" />
           </Card>
         </>
       )}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Church, ArrowLeft, BarChart3 } from "lucide-react";
+import { PublierTitreMobile } from "@/components/app/mobile/publier-titre";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements, type PorteeUtilisateur } from "@/lib/rbac";
 import { Card } from "@/components/app/ui";
@@ -117,13 +118,15 @@ export async function VueDiocesaine({
 function Entete({ titre, sousTitre }: { titre: string; sousTitre: string }) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
+      {/* Téléphone : le titre passe dans l'en-tête de la coquille (une seule fois à l'écran). */}
+      <PublierTitreMobile titre={titre} />
       <div>
-        <h1 className="font-display text-2xl font-bold text-forest-900">{titre}</h1>
+        <h1 className="titre-page-ecran-mobile font-display text-2xl font-bold text-forest-900">{titre}</h1>
         <p className="mt-1 text-sm text-ink-700/60">{sousTitre}</p>
       </div>
       <Link
         href="/app/systeme/etablissements/reseau"
-        className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-medium text-forest-800 hover:border-forest-300 hover:bg-forest-50"
+        className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-medium text-forest-800 hover:border-forest-300 hover:bg-forest-50 mobile:min-h-11 mobile:w-full mobile:justify-center"
       >
         <BarChart3 size={15} /> Statistiques du réseau
       </Link>

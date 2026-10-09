@@ -96,13 +96,14 @@ export function OngletAchats({
     <div className="space-y-5">
       <StatsAchats tb={tableauBord} />
 
-      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft print:hidden">
+      {/* Téléphone : sous-onglets sur une ligne qui défile au doigt (au lieu de murs de pastilles). */}
+      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft print:hidden rangee-defilante-mobile">
         {sections.map((s) => (
           <button
             key={s.cle}
             type="button"
             onClick={() => setSection(s.cle)}
-            className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-colors ${
+            className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-colors mobile:h-11 ${
               section === s.cle ? "bg-forest-800 text-cream-50" : "text-ink-700/70 hover:bg-cream-100"
             }`}
           >
@@ -180,10 +181,10 @@ function StatsAchats({ tb }: { tb: TableauBordAchatsVue }) {
     { libelle: "Engagements en cours (RM-905)", valeur: fcfa(tb.totalEngage) },
   ];
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mobile:grid-cols-2 mobile:gap-2 mobile:[&>div]:p-3 mobile:[&_p+p]:tabular-nums mobile:[&_p+p]:wrap-anywhere">
       {stats.map((s) => (
         <div key={s.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55">{s.libelle}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/75">{s.libelle}</p>
           <p className={`mt-1 font-display text-base font-bold ${s.alerte ? "text-amber-700" : "text-forest-900"}`}>
             {s.valeur}
           </p>
@@ -346,11 +347,12 @@ function LigneDemande({
   useApresSucces(etatDevis, () => setDevisOuvert(false));
 
   return (
-    <li className="rounded-2xl border border-cream-200 bg-white p-3.5">
+    <li className="rounded-2xl border border-cream-200 bg-white p-3.5 mobile:p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900">
-            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50" aria-label="Détail">
+          {/* Téléphone : pastilles de statut en 14 px, flèche de détail de 44 px. */}
+          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900 mobile:[&>span]:text-xs">
+            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50 mobile:-my-2 mobile:-ml-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Détail">
               {detail ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
             {d.numero ?? "Brouillon"} · {d.objet}
@@ -366,13 +368,13 @@ function LigneDemande({
               </span>
             )}
           </p>
-          <p className="mt-0.5 text-xs text-ink-700/60">
+          <p className="mt-0.5 text-xs text-ink-700/60 mobile:text-ink-700/75">
             {fcfa(d.montantEstime)} · {d.categorieBudget} — {d.categorieLibelle} · demandé par {d.demandeurNom} le {dateFr(d.date)}
             {d.decideParNom ? ` · décidé par ${d.decideParNom}` : ""}
           </p>
         </div>
         {peutGerer && (
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 mobile:w-full mobile:gap-2 mobile:[&_button]:min-h-11 mobile:[&_button]:px-3.5 mobile:[&_button]:text-xs">
             {d.statut === "brouillon" && (
               <>
                 <button type="button" onClick={onModifier} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
@@ -392,8 +394,8 @@ function LigneDemande({
                   champs={{ etablissementId, id: d.id, version: String(d.version), decision: "approuver" }}
                   onSucces={(m) => onMessage(m ?? "Demande approuvée.")}
                 />
-                <span className="inline-flex items-center gap-1">
-                  <Input value={motifRefus} onChange={(e) => setMotifRefus(e.target.value)} maxLength={300} placeholder="Motif du refus…" className="h-8 w-40 text-xs" />
+                <span className="inline-flex items-center gap-1 mobile:w-full mobile:gap-2">
+                  <Input value={motifRefus} onChange={(e) => setMotifRefus(e.target.value)} maxLength={300} placeholder="Motif du refus…" className="h-8 w-40 text-xs mobile:h-11 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base" />
                   <BoutonActionConfirmee
                     libelle="Refuser" icone={Ban} ton="danger" action={deciderDemandeAchat}
                     champs={{ etablissementId, id: d.id, version: String(d.version), decision: "refuser", motifRefus }}
@@ -460,7 +462,7 @@ function LigneDemande({
                     <span>
                       <strong>{v.fournisseurNom}</strong> — {fcfa(v.montant)}
                       {v.delaiJours ? ` · ${v.delaiJours} j` : ""}{v.pieceReference ? ` · ${v.pieceReference}` : ""}
-                      {v.retenu && <span className="ml-2 rounded-full bg-forest-50 px-2 py-0.5 text-[10px] font-bold text-forest-800">RETENU</span>}
+                      {v.retenu && <span className="ml-2 rounded-full bg-forest-50 px-2 py-0.5 text-[10px] font-bold text-forest-800 mobile:text-xs">RETENU</span>}
                     </span>
                     {peutGerer && (
                       <span className="flex gap-1.5">
@@ -672,7 +674,7 @@ function FormBonCommande({
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-cream-200">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="w-full min-w-[720px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11 mobile:[&_td_input]:min-w-0 mobile:[&_td_select]:min-w-0">
           <thead>
             <tr className="bg-cream-100 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
               <th className="px-3 py-2">Article économat (optionnel)</th>
@@ -686,22 +688,22 @@ function FormBonCommande({
           <tbody>
             {lignes.map((l) => (
               <tr key={l.cle} className="border-t border-cream-200">
-                <td className="px-3 py-1.5">
-                  <Select value={l.articleId} onChange={(e) => majLigne(l.cle, "articleId", e.target.value)} className="min-w-40">
+                <td data-label="Article" className="px-3 py-1.5">
+                  <Select value={l.articleId} onChange={(e) => majLigne(l.cle, "articleId", e.target.value)} className="min-w-40 mobile:min-w-0">
                     <option value="">— Libre (service…) —</option>
                     {articles.filter((a) => a.actif).map((a) => <option key={a.id} value={a.id}>{a.nom}</option>)}
                   </Select>
                 </td>
-                <td className="px-3 py-1.5">
+                <td data-label="Désignation" className="px-3 py-1.5">
                   <Input value={l.designation} maxLength={160} onChange={(e) => majLigne(l.cle, "designation", e.target.value)} />
                 </td>
-                <td className="px-3 py-1.5">
+                <td data-label="Quantité" className="px-3 py-1.5">
                   <Input type="number" min={1} step={1} value={l.quantite} className="w-24" onChange={(e) => majLigne(l.cle, "quantite", e.target.value)} />
                 </td>
-                <td className="px-3 py-1.5">
+                <td data-label="Prix unitaire" className="px-3 py-1.5">
                   <Input type="number" min={1} step={1} value={l.prixUnitaire} className="w-32" onChange={(e) => majLigne(l.cle, "prixUnitaire", e.target.value)} />
                 </td>
-                <td className="px-3 py-1.5 text-right font-semibold whitespace-nowrap">
+                <td data-label="Total" className="px-3 py-1.5 text-right font-semibold whitespace-nowrap">
                   {fcfa((Math.trunc(Number(l.quantite)) || 0) * (Math.trunc(Number(l.prixUnitaire)) || 0))}
                 </td>
                 <td className="px-3 py-1.5 text-right">
@@ -769,11 +771,12 @@ function LigneBonCommande({
   const [receptionOuverte, setReceptionOuverte] = useState(false);
 
   return (
-    <li className="rounded-2xl border border-cream-200 bg-white p-3.5">
+    <li className="rounded-2xl border border-cream-200 bg-white p-3.5 mobile:p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900">
-            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50" aria-label="Détail">
+          {/* Téléphone : pastilles de statut en 14 px, flèche de détail de 44 px. */}
+          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900 mobile:[&>span]:text-xs">
+            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50 mobile:-my-2 mobile:-ml-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Détail">
               {detail ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
             {bc.numero ?? "Brouillon"} · {bc.fournisseurNom}
@@ -787,12 +790,12 @@ function LigneBonCommande({
             )}
             {bc.enRetard && <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-600">EN RETARD</span>}
           </p>
-          <p className="mt-0.5 text-xs text-ink-700/60">
+          <p className="mt-0.5 text-xs text-ink-700/60 mobile:text-ink-700/75">
             {fcfa(bc.totalCommande)} · demande {bc.demandeNumero ?? "—"} ({bc.demandeObjet}) · facturé {fcfa(bc.totalFacture)} · payé {fcfa(bc.totalPaye)}
             {bc.dateLivraisonPrevue ? ` · livraison prévue ${dateFr(bc.dateLivraisonPrevue)}` : ""}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 mobile:w-full mobile:gap-2 mobile:[&_button]:min-h-11 mobile:[&_button]:px-3.5 mobile:[&_button]:text-xs">
           {bc.statut === "emise" && (
             <button type="button" onClick={onImprimer} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
               <Printer size={11} /> Imprimer
@@ -820,8 +823,8 @@ function LigneBonCommande({
             </button>
           )}
           {peutGerer && bc.statut !== "annulee" && (
-            <span className="inline-flex items-center gap-1">
-              <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif d'annulation…" className="h-8 w-36 text-xs" />
+            <span className="inline-flex items-center gap-1 mobile:w-full mobile:gap-2">
+              <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif d'annulation…" className="h-8 w-36 text-xs mobile:h-11 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base" />
               <BoutonActionConfirmee
                 libelle="Annuler" icone={Ban} ton="danger" action={annulerBonCommande}
                 champs={{ etablissementId, id: bc.id, version: String(bc.version), motif }}
@@ -835,7 +838,7 @@ function LigneBonCommande({
 
       {detail && (
         <div className="mt-3 space-y-3 rounded-xl bg-cream-50/70 p-3">
-          <table className="w-full text-xs">
+          <table className="w-full text-xs tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="text-left text-[10px] font-semibold uppercase tracking-wide text-ink-700/50">
                 <th className="px-2 py-1">Désignation</th>
@@ -850,11 +853,11 @@ function LigneBonCommande({
               {bc.lignes.map((l) => (
                 <tr key={l.id} className="border-t border-cream-200/70">
                   <td className="px-2 py-1">{l.designation}{l.articleId ? " · stockable" : ""}</td>
-                  <td className="px-2 py-1 text-right">{l.quantite}</td>
-                  <td className="px-2 py-1 text-right">{fcfa(l.prixUnitaire)}</td>
-                  <td className="px-2 py-1 text-right font-semibold">{fcfa(l.total)}</td>
-                  <td className={`px-2 py-1 text-right ${l.quantiteRecue < l.quantite ? "text-amber-700" : "text-forest-800"}`}>{l.quantiteRecue}</td>
-                  <td className="px-2 py-1 text-right">{l.quantiteRetournee || ""}</td>
+                  <td data-label="Commandé" className="px-2 py-1 text-right">{l.quantite}</td>
+                  <td data-label="PU" className="px-2 py-1 text-right">{fcfa(l.prixUnitaire)}</td>
+                  <td data-label="Total" className="px-2 py-1 text-right font-semibold">{fcfa(l.total)}</td>
+                  <td data-label="Reçu" className={`px-2 py-1 text-right ${l.quantiteRecue < l.quantite ? "text-amber-700" : "text-forest-800"}`}>{l.quantiteRecue}</td>
+                  <td data-label="Retourné" className="px-2 py-1 text-right">{l.quantiteRetournee || ""}</td>
                 </tr>
               ))}
             </tbody>
@@ -925,26 +928,26 @@ function FormReception({
             <span className="self-center text-xs">{l.designation} <span className="text-ink-700/50">(reste {l.quantite - l.quantiteRecue})</span></span>
             <Input
               type="number" min={0} max={l.quantite - l.quantiteRecue} step={1} placeholder="Reçue"
-              value={quantites[l.id]?.recue ?? ""} className="h-9 text-xs"
+              value={quantites[l.id]?.recue ?? ""} className="h-9 text-xs mobile:h-11 mobile:text-base"
               onChange={(e) => setQuantites((q) => ({ ...q, [l.id]: { ...q[l.id], recue: e.target.value } }))}
             />
             <Input
               type="number" min={0} step={1} placeholder="Refusée (écart)"
-              value={quantites[l.id]?.refusee ?? ""} className="h-9 text-xs"
+              value={quantites[l.id]?.refusee ?? ""} className="h-9 text-xs mobile:h-11 mobile:text-base"
               onChange={(e) => setQuantites((q) => ({ ...q, [l.id]: { ...q[l.id], refusee: e.target.value } }))}
             />
             <Input
               placeholder="Observation…" maxLength={160}
-              value={quantites[l.id]?.observation ?? ""} className="h-9 text-xs"
+              value={quantites[l.id]?.observation ?? ""} className="h-9 text-xs mobile:h-11 mobile:text-base"
               onChange={(e) => setQuantites((q) => ({ ...q, [l.id]: { ...q[l.id], observation: e.target.value } }))}
             />
           </div>
         ))}
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <Input name="observations" maxLength={300} placeholder="Observations générales (état, conformité des références…)" className="h-9 flex-1 text-xs" />
+        <Input name="observations" maxLength={300} placeholder="Observations générales (état, conformité des références…)" className="h-9 flex-1 text-xs mobile:h-11 mobile:text-base" />
         <SubmitButton>Enregistrer la réception</SubmitButton>
-        <button type="button" onClick={onFin} className="rounded-full border border-cream-300 px-3.5 py-2 text-xs font-semibold text-ink-700/70 hover:bg-cream-100">
+        <button type="button" onClick={onFin} className="rounded-full border border-cream-300 px-3.5 py-2 text-xs font-semibold text-ink-700/70 hover:bg-cream-100 mobile:min-h-11">
           Fermer
         </button>
       </div>
@@ -971,8 +974,8 @@ function LigneReceptionListe({
           {r.observations ? ` · ${r.observations}` : ""}
         </span>
         {peutReceptionner && (
-          <span className="inline-flex items-center gap-1">
-            <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-7 w-32 text-xs" />
+          <span className="inline-flex items-center gap-1 mobile:w-full mobile:gap-2">
+            <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-7 w-32 text-xs mobile:h-11 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base" />
             <BoutonActionConfirmee
               libelle="Annuler" icone={PackageX} ton="danger" action={annulerReception}
               champs={{ etablissementId, id: r.id, version: String(r.version), motif }}
@@ -1097,11 +1100,12 @@ function LigneFactureFrs({
     f.statut === "validee" ? "bg-forest-50 text-forest-800" : f.statut === "annulee" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700";
 
   return (
-    <li className="rounded-2xl border border-cream-200 bg-white p-3.5">
+    <li className="rounded-2xl border border-cream-200 bg-white p-3.5 mobile:p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900">
-            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50" aria-label="Détail">
+          {/* Téléphone : pastilles de statut en 14 px, flèche de détail de 44 px. */}
+          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900 mobile:[&>span]:text-xs">
+            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50 mobile:-my-2 mobile:-ml-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Détail">
               {detail ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
             {f.numeroFournisseur} · {f.fournisseurNom}
@@ -1118,14 +1122,14 @@ function LigneFactureFrs({
               </span>
             )}
           </p>
-          <p className="mt-0.5 text-xs text-ink-700/60">
+          <p className="mt-0.5 text-xs text-ink-700/60 mobile:text-ink-700/75">
             {fcfa(f.montant)}{f.taxes > 0 ? ` (dont taxes ${fcfa(f.taxes)})` : ""} · BC {f.bonCommandeNumero ?? "—"} ·
             payé {fcfa(f.totalPaye)} · reste {fcfa(f.reste)}
             {f.dateEcheance ? ` · échéance ${dateFr(f.dateEcheance)}` : ""} · pièce : {f.pieceJustificative}
           </p>
         </div>
         {peutGerer && (
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 mobile:w-full mobile:gap-2 mobile:[&_button]:min-h-11 mobile:[&_button]:px-3.5 mobile:[&_button]:text-xs">
             {f.statut === "saisie" && (
               <BoutonActionConfirmee
                 libelle="Valider (écritures RM-904)" icone={Check} ton="primaire" action={validerFactureFournisseur}
@@ -1143,8 +1147,8 @@ function LigneFactureFrs({
               </button>
             )}
             {f.statut !== "annulee" && f.totalPaye === 0 && (
-              <span className="inline-flex items-center gap-1">
-                <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-8 w-32 text-xs" />
+              <span className="inline-flex items-center gap-1 mobile:w-full mobile:gap-2">
+                <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-8 w-32 text-xs mobile:h-11 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base" />
                 <BoutonActionConfirmee
                   libelle="Annuler" icone={Ban} ton="danger" action={annulerFactureFournisseur}
                   champs={{ etablissementId, id: f.id, version: String(f.version), motif }}
@@ -1209,8 +1213,8 @@ function LignePaiementFrs({
         {p.reference ? ` · ${p.reference}` : ""} · {dateFr(p.date)}{p.payeParNom ? ` · par ${p.payeParNom}` : ""}
       </span>
       {peutGerer && (
-        <span className="inline-flex items-center gap-1">
-          <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-7 w-32 text-xs" />
+        <span className="inline-flex items-center gap-1 mobile:w-full mobile:gap-2">
+          <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-7 w-32 text-xs mobile:h-11 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base" />
           <BoutonActionConfirmee
             libelle="Annuler" icone={Ban} ton="danger" action={annulerPaiementFournisseur}
             champs={{ etablissementId, id: p.id, version: String(p.version), motif }}
@@ -1339,7 +1343,7 @@ function SectionBudget({ engagements }: { engagements: EngagementCategorieVue[] 
         <p className="mt-3 text-sm text-ink-700/60">Aucun engagement ni budget de dépense pour l&apos;exercice.</p>
       ) : (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[640px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
                 <th className="px-2 py-2">Catégorie</th>
@@ -1355,10 +1359,10 @@ function SectionBudget({ engagements }: { engagements: EngagementCategorieVue[] 
                 return (
                   <tr key={e.categorie} className="border-b border-cream-100">
                     <td className="px-2 py-1.5 text-xs"><span className="font-mono">{e.categorie}</span> — {e.libelle}</td>
-                    <td className="px-2 py-1.5 text-right">{e.prevu !== null ? fcfa(e.prevu) : <span className="text-ink-700/40">non budgété</span>}</td>
-                    <td className="px-2 py-1.5 text-right">{fcfa(e.consomme)}</td>
-                    <td className="px-2 py-1.5 text-right">{fcfa(e.engage)}</td>
-                    <td className={`px-2 py-1.5 text-right font-semibold ${depasse ? "text-red-600" : "text-forest-800"}`}>
+                    <td data-label="Budget prévu" className="px-2 py-1.5 text-right">{e.prevu !== null ? fcfa(e.prevu) : <span className="text-ink-700/40">non budgété</span>}</td>
+                    <td data-label="Consommé" className="px-2 py-1.5 text-right">{fcfa(e.consomme)}</td>
+                    <td data-label="Engagé" className="px-2 py-1.5 text-right">{fcfa(e.engage)}</td>
+                    <td data-label="Disponible" className={`px-2 py-1.5 text-right font-semibold ${depasse ? "text-red-600" : "text-forest-800"}`}>
                       {e.disponible !== null ? (
                         <>{depasse && <AlertTriangle size={12} className="mr-1 inline" />}{fcfa(e.disponible)}</>
                       ) : "—"}
@@ -1386,7 +1390,7 @@ function BonCommandeImprimable({
   onFermer: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -1395,10 +1399,10 @@ function BonCommandeImprimable({
           @page { size: A4 portrait; margin: 12mm; }
         }
       `}</style>
-      <div id="bon-commande-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="bon-commande-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Bon de commande</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer">
             <X size={16} />
           </button>
         </div>
@@ -1420,30 +1424,34 @@ function BonCommandeImprimable({
           {bc.conditionsPaiement && <p><strong>Conditions de paiement :</strong> {bc.conditionsPaiement}</p>}
         </div>
 
-        <table className="mt-4 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-y-2 border-forest-800 text-left text-xs uppercase tracking-wide">
-              <th className="py-2 pr-2">Désignation</th>
-              <th className="py-2 pr-2 text-right">Quantité</th>
-              <th className="py-2 pr-2 text-right">Prix unitaire</th>
-              <th className="py-2 text-right">Montant</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bc.lignes.map((l) => (
-              <tr key={l.id} className="border-b border-cream-200">
-                <td className="py-1.5 pr-2">{l.designation}</td>
-                <td className="py-1.5 pr-2 text-right">{l.quantite}</td>
-                <td className="py-1.5 pr-2 text-right">{fcfa(l.prixUnitaire)}</td>
-                <td className="py-1.5 text-right font-semibold">{fcfa(l.total)}</td>
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-y-2 border-forest-800 text-left text-xs uppercase tracking-wide">
+                <th className="py-2 pr-2">Désignation</th>
+                <th className="py-2 pr-2 text-right">Quantité</th>
+                <th className="py-2 pr-2 text-right">Prix unitaire</th>
+                <th className="py-2 text-right">Montant</th>
               </tr>
-            ))}
-            <tr className="border-t-2 border-forest-800 font-bold">
-              <td className="py-2" colSpan={3}>TOTAL</td>
-              <td className="py-2 text-right">{fcfa(bc.totalCommande)}</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {bc.lignes.map((l) => (
+                <tr key={l.id} className="border-b border-cream-200">
+                  <td className="py-1.5 pr-2">{l.designation}</td>
+                  <td className="py-1.5 pr-2 text-right">{l.quantite}</td>
+                  <td className="py-1.5 pr-2 text-right">{fcfa(l.prixUnitaire)}</td>
+                  <td className="py-1.5 text-right font-semibold">{fcfa(l.total)}</td>
+                </tr>
+              ))}
+              <tr className="border-t-2 border-forest-800 font-bold">
+                <td className="py-2" colSpan={3}>TOTAL</td>
+                <td className="py-2 text-right">{fcfa(bc.totalCommande)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <p className="mt-3 text-xs italic">
           Arrêté le présent bon de commande à la somme de {nombreEnLettres(bc.totalCommande)} francs CFA.
@@ -1485,7 +1493,7 @@ function BonRetourImprimable({
   onFermer: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -1494,10 +1502,10 @@ function BonRetourImprimable({
           @page { size: A4 portrait; margin: 12mm; }
         }
       `}</style>
-      <div id="bon-retour-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="bon-retour-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Bon de retour</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer">
             <X size={16} />
           </button>
         </div>

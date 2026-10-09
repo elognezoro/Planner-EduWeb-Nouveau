@@ -10,6 +10,7 @@ import { bilanHeuresAbsences, bilansAbsencesDirection, type BilanHeures } from "
 import { BilanHeuresAbsences } from "@/components/app/bilan-heures-absences";
 import { DemandeAbsenceForm } from "./forms";
 import { DecisionButtons } from "./decision-buttons";
+import { FormulaireReplieMobile } from "../_mobile/formulaire-replie";
 
 export const metadata: Metadata = { title: "Autorisations d'absence" };
 export const dynamic = "force-dynamic";
@@ -108,12 +109,15 @@ export default async function AbsencesPage() {
       />
 
       {estDemandeur && (
-        <Card>
-          <h2 className="mb-3 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
-            <CalendarX2 size={18} className="text-forest-600" /> Nouvelle demande
-          </h2>
-          <DemandeAbsenceForm />
-        </Card>
+        // Téléphone : formulaire replié derrière un bouton, les listes passent en premier écran.
+        <FormulaireReplieMobile libelle="Nouvelle demande d'absence">
+          <Card>
+            <h2 className="mb-3 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
+              <CalendarX2 size={18} className="text-forest-600" /> Nouvelle demande
+            </h2>
+            <DemandeAbsenceForm />
+          </Card>
+        </FormulaireReplieMobile>
       )}
 
       {estDecideur && (
@@ -139,7 +143,7 @@ export default async function AbsencesPage() {
                       )}
                       {d.motif && <p className="mt-1 text-sm text-ink-800">« {d.motif} »</p>}
                     </div>
-                    <Link href={`/app/vie-scolaire/absences/${d.id}/fiche`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50">
+                    <Link href={`/app/vie-scolaire/absences/${d.id}/fiche`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-4">
                       <FileText size={13} /> Fiche
                     </Link>
                   </div>
@@ -172,7 +176,7 @@ export default async function AbsencesPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${b.classe}`}>{b.libelle}</span>
-                      <Link href={`/app/vie-scolaire/absences/${d.id}/fiche`} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50">
+                      <Link href={`/app/vie-scolaire/absences/${d.id}/fiche`} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:px-4">
                         Fiche
                       </Link>
                     </div>
@@ -218,7 +222,8 @@ export default async function AbsencesPage() {
           <BlocStats stats={statsRegion.global} />
           {statsRegion.parEtablissement.length > 0 && (
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[560px] text-sm">
+              {/* Téléphone : une carte par établissement (nom en titre, valeurs en lignes). */}
+              <table className="w-full min-w-[560px] text-sm tableau-cartes-mobile">
                 <thead>
                   <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                     <th className="py-1.5 pr-2">Établissement</th>
@@ -232,12 +237,12 @@ export default async function AbsencesPage() {
                 <tbody className="divide-y divide-cream-100">
                   {statsRegion.parEtablissement.map((e) => (
                     <tr key={e.etablissementId}>
-                      <td className="py-1.5 pr-2 font-medium text-forest-900">{e.nom}</td>
-                      <td className="py-1.5 pr-2 text-right">{e.stats.total}</td>
-                      <td className="py-1.5 pr-2 text-right text-forest-700">{e.stats.approuvees}</td>
-                      <td className="py-1.5 pr-2 text-right">{e.stats.joursAbsence}</td>
-                      <td className="py-1.5 pr-2 text-right">{e.stats.seancesAffectees}</td>
-                      <td className="py-1.5 text-right text-red-600">{e.stats.seancesARattraper}</td>
+                      <td className="py-1.5 pr-2 font-medium text-forest-900 mobile:font-semibold">{e.nom}</td>
+                      <td data-label="Demandes" className="py-1.5 pr-2 text-right">{e.stats.total}</td>
+                      <td data-label="Approuvées" className="py-1.5 pr-2 text-right text-forest-700">{e.stats.approuvees}</td>
+                      <td data-label="Jours" className="py-1.5 pr-2 text-right">{e.stats.joursAbsence}</td>
+                      <td data-label="Séances" className="py-1.5 pr-2 text-right">{e.stats.seancesAffectees}</td>
+                      <td data-label="À rattraper" className="py-1.5 text-right text-red-600">{e.stats.seancesARattraper}</td>
                     </tr>
                   ))}
                 </tbody>

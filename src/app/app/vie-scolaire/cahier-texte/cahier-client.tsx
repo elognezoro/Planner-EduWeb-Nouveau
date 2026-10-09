@@ -55,8 +55,9 @@ export interface DemandeAccesLigne {
 
 const TYPES_ACTIVITE = ["Cours", "Travaux dirigés", "Travaux pratiques", "Évaluation", "Remédiation", "Sortie pédagogique"];
 
+// « mobile:text-base » : 16 px au moins dans un champ, sinon iOS zoome à la saisie.
 const CHAMP_CLASSES =
-  "h-11 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-11 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base";
 
 function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10);
@@ -89,7 +90,7 @@ function ListeEditable({
             type="button"
             onClick={() => poser(valeurs.filter((_, j) => j !== i))}
             aria-label="Retirer"
-            className="shrink-0 rounded-full p-1.5 text-ink-700/50 hover:bg-cream-100"
+            className="shrink-0 rounded-full p-1.5 text-ink-700/50 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
           >
             <X size={15} />
           </button>
@@ -159,11 +160,11 @@ function SeanceModal({
 
   const champ = CHAMP_CLASSES;
   const zone =
-    "w-full rounded-2xl border border-cream-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+    "w-full rounded-2xl border border-cream-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base";
   const etiquette = "mb-1.5 block text-sm font-medium text-forest-900";
   const sousSection = "flex items-center justify-between";
   const boutonAjouter =
-    "inline-flex items-center gap-1 text-xs font-semibold text-forest-700 hover:text-forest-600";
+    "inline-flex items-center gap-1 text-xs font-semibold text-forest-700 hover:text-forest-600 mobile:min-h-11 mobile:px-2 mobile:text-sm";
 
   return (
     <>
@@ -179,16 +180,18 @@ function SeanceModal({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={{ duration: 0.2 }}
-        className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[min(46rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-cream-200 bg-white p-6 shadow-soft"
+        className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[min(46rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-cream-200 bg-white p-6 shadow-soft mobile:inset-0 mobile:max-h-none mobile:w-full mobile:translate-x-0 mobile:translate-y-0 mobile:rounded-none mobile:border-0 mobile:px-4 mobile:py-0"
       >
-        <div className="flex items-start justify-between">
+        {/* Téléphone : formulaire PLEIN ÉCRAN — en-tête (titre + fermer) collé en haut, boutons
+            d'enregistrement collés en bas ; l'ordinateur garde la fenêtre centrée. */}
+        <div className="flex items-start justify-between mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:items-center mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:pb-3 mobile:pt-[calc(0.75rem+var(--marge-sure-haut))]">
           <div>
             <h2 className="font-display text-xl font-bold text-forest-900">
               {seance ? "Modifier la séance" : "Nouvelle séance"}
             </h2>
             <p className="mt-0.5 text-xs text-ink-700/60">Remplissez les informations de la séance.</p>
           </div>
-          <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+          <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
             <X size={18} />
           </button>
         </div>
@@ -301,14 +304,20 @@ function SeanceModal({
             <div className="mt-1.5 space-y-2">
               {sousTitres.length === 0 && <p className="text-xs italic text-ink-700/50">Aucun sous-titre ajouté.</p>}
               {sousTitres.map((s, i) => (
-                <div key={i} className="flex items-center gap-2" style={{ paddingLeft: (s.niveau - 1) * 18 }}>
+                <div
+                  key={i}
+                  // Téléphone : retrait divisé par 3 (la variable --retrait porte celui de l'ordinateur)
+                  // et liseré à gauche, pour garder un champ de saisie utilisable au niveau 4.
+                  className={`flex items-center gap-2 mobile:pl-[calc(var(--retrait)/3)]! ${s.niveau > 1 ? "mobile:border-l-2 mobile:border-forest-200" : ""}`}
+                  style={{ paddingLeft: (s.niveau - 1) * 18, "--retrait": `${(s.niveau - 1) * 18}px` } as React.CSSProperties}
+                >
                   <select
                     value={s.niveau}
                     onChange={(e) =>
                       setSousTitres(sousTitres.map((x, j) => (j === i ? { ...x, niveau: Number(e.target.value) as SousTitre["niveau"] } : x)))
                     }
                     aria-label="Niveau hiérarchique"
-                    className="h-11 shrink-0 rounded-2xl border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+                    className="h-11 shrink-0 rounded-2xl border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 mobile:text-base"
                   >
                     {[1, 2, 3, 4].map((n) => (
                       <option key={n} value={n}>
@@ -326,7 +335,7 @@ function SeanceModal({
                     type="button"
                     onClick={() => setSousTitres(sousTitres.filter((_, j) => j !== i))}
                     aria-label="Retirer le sous-titre"
-                    className="shrink-0 rounded-full p-1.5 text-ink-700/50 hover:bg-cream-100"
+                    className="shrink-0 rounded-full p-1.5 text-ink-700/50 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                   >
                     <X size={15} />
                   </button>
@@ -384,8 +393,10 @@ function SeanceModal({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap justify-end gap-2">
-          <button onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
+        {/* Téléphone : barre collante — « Créer / Enregistrer » sur toute la largeur, puis
+            Brouillon et Publier ; « Annuler » est la croix de l'en-tête. */}
+        <div className="mt-6 flex flex-wrap justify-end gap-2 mobile:sticky mobile:bottom-0 mobile:z-10 mobile:-mx-4 mobile:mt-4 mobile:grid mobile:grid-cols-2 mobile:border-t mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:pb-[calc(0.75rem+var(--marge-sure-bas))] mobile:pt-3">
+          <button onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100 mobile:hidden">
             Annuler
           </button>
           <button
@@ -398,7 +409,7 @@ function SeanceModal({
           <button
             onClick={() => soumettre("publie")}
             disabled={pending}
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60 mobile:order-first mobile:col-span-2 mobile:h-12 mobile:justify-center"
           >
             {pending ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
             {seance ? "Enregistrer" : "Créer la séance"}
@@ -406,7 +417,7 @@ function SeanceModal({
           <button
             onClick={() => soumettre("publie")}
             disabled={pending}
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-600 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-500 disabled:opacity-60"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-600 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-500 disabled:opacity-60 mobile:justify-center"
           >
             <Send size={14} /> Publier
           </button>
@@ -464,7 +475,7 @@ export function ListeSeances({ seances, catalogues }: { seances: SeanceLigne[]; 
                 <button
                   onClick={() => setEnEdition(s)}
                   title="Modifier la séance"
-                  className="rounded-full p-1.5 text-ink-700/55 hover:bg-cream-100"
+                  className="rounded-full p-1.5 text-ink-700/55 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                 >
                   <Pencil size={15} />
                 </button>
@@ -519,18 +530,18 @@ export function LigneDemandeAcces({ demande }: { demande: DemandeAccesLigne }) {
     <div className="rounded-2xl border border-cream-200 bg-white p-4">
       <p className="font-semibold text-forest-900">{demande.demandeur}</p>
       <p className="mt-0.5 text-xs text-ink-700/60">{demande.seance}</p>
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex gap-2 mobile:grid mobile:grid-cols-2">
         <button
           onClick={() => decider("accordee")}
           disabled={pending}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60 mobile:h-11 mobile:justify-center mobile:text-sm"
         >
           {pending ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} Accorder
         </button>
         <button
           onClick={() => decider("refusee")}
           disabled={pending}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 px-4 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 px-4 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 mobile:h-11 mobile:justify-center mobile:text-sm"
         >
           Refuser
         </button>

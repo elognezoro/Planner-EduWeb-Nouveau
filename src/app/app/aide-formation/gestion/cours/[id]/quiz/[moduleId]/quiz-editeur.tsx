@@ -6,6 +6,7 @@ import { Plus, Trash2, Pencil, X, Check, ChevronUp, ChevronDown } from "lucide-r
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { TYPES_QUESTION, MODES_QUIZ, REVELATIONS_SOLUTION, TYPES_CHOIX } from "@/lib/lms";
 import { enregistrerReglagesQuiz, enregistrerQuestion, supprimerQuestion } from "@/app/app/aide-formation/quiz-actions";
+import { FormulaireEnFeuille, useConfirmationMobile } from "@/app/app/aide-formation/outils-mobiles";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -39,9 +40,10 @@ export function FormReglages({ moduleId, coursId, seuil, consigne, mode, revelat
         <input type="checkbox" name="verificationImmediate" defaultChecked={verificationImmediate} className="mt-0.5 accent-forest-600" />
         <span>Vérification immédiate — afficher un bouton « Vérifier » après chaque question <span className="font-normal text-ink-700/55">(la bonne réponse n&apos;est révélée que selon la politique de révélation ci-dessus ; décochez pour un examen strict).</span></span>
       </label>
-      <div className="flex items-end gap-3">
-        <div className="w-40"><label className={label}>Seuil de réussite (%)</label><input name="seuilReussite" type="number" min={0} max={100} defaultValue={seuil} className={champ} /></div>
-        <SubmitButton className="w-auto px-5">Enregistrer les réglages</SubmitButton>
+      {/* Téléphone : champ et bouton empilés pleine largeur (le bouton se comprimait). */}
+      <div className="flex items-end gap-3 mobile:flex-col mobile:items-stretch">
+        <div className="w-40 mobile:w-full"><label className={label}>Seuil de réussite (%)</label><input name="seuilReussite" type="number" min={0} max={100} defaultValue={seuil} className={champ} /></div>
+        <SubmitButton className="w-auto px-5 mobile:w-full">Enregistrer les réglages</SubmitButton>
       </div>
     </form>
   );
@@ -79,16 +81,26 @@ export function FormQuestion({ quizId, question }: { quizId: string; question?: 
   const retirer = (i: number) => setChoix((cs) => cs.filter((_, j) => j !== i));
   const bouger = (i: number, sens: -1 | 1) => setChoix((cs) => { const j = i + sens; if (j < 0 || j >= cs.length) return cs; const a = [...cs]; [a[i], a[j]] = [a[j], a[i]]; return a; });
 
-  if (!ouvert && !question) return <button type="button" onClick={ouvrirNouvelle} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"><Plus size={15} /> Ajouter une question</button>;
-  if (!ouvert && question) return <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700" title="Modifier"><Pencil size={14} /></button>;
+  const declencheur = question
+    ? <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center" title="Modifier"><Pencil size={14} /></button>
+    : <button type="button" onClick={ouvrirNouvelle} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11"><Plus size={15} /> Ajouter une question</button>;
 
   const verrou = type === "vrai_faux";
   const estChoix = TYPES_CHOIX.includes(type);
+  // Ordinateur : le formulaire se déplie à la place du bouton. Téléphone : il se dépliait dans le
+  // petit groupe d'actions à droite de l'énoncé (énoncé réduit à 0 px) → feuille montante.
   return (
+    <FormulaireEnFeuille
+      ouvert={ouvert}
+      onFermer={() => setOuvert(false)}
+      titre={question ? "Modifier la question" : "Nouvelle question"}
+      declencheur={declencheur}
+      rendre={() => (
     <form action={action} className="space-y-3 rounded-2xl border border-forest-200 bg-white p-4 shadow-soft">
       {question && <input type="hidden" name="id" value={question.id} />}
       <input type="hidden" name="quizId" value={quizId} />
-      <div className="flex items-center justify-between">
+      {/* Titre et fermeture déjà portés par la feuille sur téléphone. */}
+      <div className="flex items-center justify-between mobile:hidden">
         <h4 className="font-display text-sm font-bold text-forest-900">{question ? "Modifier la question" : "Nouvelle question"}</h4>
         <button type="button" onClick={() => setOuvert(false)} className="rounded-lg p-1 text-ink-700/40 hover:bg-cream-100"><X size={16} /></button>
       </div>
@@ -104,40 +116,49 @@ export function FormQuestion({ quizId, question }: { quizId: string; question?: 
         <label className={label}>{labelChoix(type)}</label>
         <div className="space-y-2">
           {choix.map((c, i) => (
-            <div key={i} className="flex items-center gap-2">
-              {estChoix && <input type={type === "choix_multiple" ? "checkbox" : "radio"} name="choixCorrect" value={i} checked={c.correct} onChange={(e) => setCorrect(i, e.target.checked)} className="accent-forest-600" title="Bonne réponse" />}
+            // Téléphone : la correspondance (association, texte à trous) passe sur une 2e ligne pleine
+            // largeur, sous le 1er champ — deux champs de 70 px côte à côte étaient illisibles.
+            <div key={i} className="flex items-center gap-2 mobile:flex-wrap">
+              {estChoix && <input type={type === "choix_multiple" ? "checkbox" : "radio"} name="choixCorrect" value={i} checked={c.correct} onChange={(e) => setCorrect(i, e.target.checked)} className="accent-forest-600 mobile:h-5 mobile:w-5 mobile:shrink-0" title="Bonne réponse" />}
               {type === "remise_en_ordre" && <span className="w-5 shrink-0 text-center text-xs font-bold text-ink-700/40">{i + 1}</span>}
-              <input name="choixTexte" value={c.texte} onChange={(e) => setTexte(i, e.target.value)} readOnly={verrou} placeholder={placeholderTexte(type, i)} className={`${champ} min-w-0 ${verrou ? "bg-cream-50 text-ink-700/70" : ""}`} />
+              <input name="choixTexte" value={c.texte} onChange={(e) => setTexte(i, e.target.value)} readOnly={verrou} placeholder={placeholderTexte(type, i)} className={`${champ} min-w-0 mobile:h-11 mobile:flex-1 ${verrou ? "bg-cream-50 text-ink-700/70" : ""}`} />
               {(type === "association" || type === "texte_a_trous") && (
                 <>
-                  {type === "association" && <span className="shrink-0 text-ink-700/40">→</span>}
-                  <input name="choixApparie" value={c.apparie} onChange={(e) => setApparie(i, e.target.value)} placeholder={type === "association" ? "Correspondance" : "Alternatives a|b (facultatif)"} className={`${champ} min-w-0`} />
+                  {type === "association" && <span className="shrink-0 text-ink-700/40 mobile:hidden">→</span>}
+                  <input name="choixApparie" value={c.apparie} onChange={(e) => setApparie(i, e.target.value)} placeholder={type === "association" ? "Correspondance" : "Alternatives a|b (facultatif)"} className={`${champ} min-w-0 mobile:order-last mobile:h-11 mobile:basis-full`} />
                 </>
               )}
               {type === "remise_en_ordre" && (
-                <div className="flex shrink-0 flex-col">
-                  <button type="button" onClick={() => bouger(i, -1)} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700"><ChevronUp size={14} /></button>
-                  <button type="button" onClick={() => bouger(i, 1)} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700"><ChevronDown size={14} /></button>
+                <div className="flex shrink-0 flex-col mobile:flex-row mobile:gap-1">
+                  <button type="button" onClick={() => bouger(i, -1)} aria-label="Monter l'élément" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200"><ChevronUp size={14} className="mobile:size-[18px]" /></button>
+                  <button type="button" onClick={() => bouger(i, 1)} aria-label="Descendre l'élément" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200"><ChevronDown size={14} className="mobile:size-[18px]" /></button>
                 </div>
               )}
-              {!verrou && choix.length > minChoix(type) && <button type="button" onClick={() => retirer(i)} className="shrink-0 rounded-lg p-1.5 text-ink-700/40 hover:text-red-600"><Trash2 size={14} /></button>}
+              {!verrou && choix.length > minChoix(type) && <button type="button" onClick={() => retirer(i)} aria-label="Retirer" className="shrink-0 rounded-lg p-1.5 text-ink-700/40 hover:text-red-600 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center"><Trash2 size={14} /></button>}
             </div>
           ))}
         </div>
-        {!verrou && <button type="button" onClick={ajouter} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:text-forest-900"><Plus size={14} /> {labelAjout(type)}</button>}
+        {!verrou && <button type="button" onClick={ajouter} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:text-forest-900 mobile:min-h-11"><Plus size={14} /> {labelAjout(type)}</button>}
       </div>
       <div><label className={label}>Explication / correction <span className="font-normal text-ink-700/50">(feedback révélé selon la politique du quiz)</span></label>
         <textarea name="explication" rows={2} defaultValue={question?.explication ?? ""} placeholder="Pourquoi cette réponse est correcte…" className={`${champ} h-auto py-2`} /></div>
-      <div className="flex justify-end"><SubmitButton className="w-auto px-5"><Check size={15} /> Enregistrer la question</SubmitButton></div>
+      <div className="flex justify-end"><SubmitButton className="w-auto px-5 mobile:w-full"><Check size={15} /> Enregistrer la question</SubmitButton></div>
     </form>
+      )}
+    />
   );
 }
 
 export function SupprimerQuestionBtn({ id }: { id: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  // Téléphone : confirmation dans une feuille montante (window.confirm conservé sur ordinateur).
+  const { confirmer, feuille } = useConfirmationMobile();
   return (
-    <button type="button" disabled={pending} onClick={async () => { if (window.confirm("Supprimer cette question ?")) { setPending(true); await supprimerQuestion(id); router.refresh(); } }}
-      className="rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40" title="Supprimer"><Trash2 size={14} /></button>
+    <>
+      <button type="button" disabled={pending} onClick={() => confirmer("Supprimer cette question ?", async () => { setPending(true); await supprimerQuestion(id); router.refresh(); })}
+        className="rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center" title="Supprimer"><Trash2 size={14} /></button>
+      {feuille}
+    </>
   );
 }

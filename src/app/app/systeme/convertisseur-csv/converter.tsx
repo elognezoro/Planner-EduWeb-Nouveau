@@ -242,7 +242,7 @@ export function Convertisseur() {
         }}
         onDragLeave={() => setSurvol(false)}
         onDrop={onDrop}
-        className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
+        className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors mobile:px-4 mobile:py-6 ${
           survol ? "border-forest-400 bg-forest-50/60" : "border-cream-300 bg-cream-50/40"
         }`}
       >
@@ -262,13 +262,18 @@ export function Convertisseur() {
         ) : (
           <UploadCloud className="mb-2 text-forest-500" size={30} />
         )}
-        <p className="text-base font-semibold text-forest-900">
+        <p className="text-base font-semibold text-forest-900 mobile:hidden">
           Glissez un fichier ici, ou <span className="underline">parcourez</span>
         </p>
+        {/* Téléphone : pas de glisser-déposer au doigt — un appui ouvre le choix du fichier. */}
+        <p className="text-base font-semibold text-forest-900 lg:hidden print:hidden">
+          Touchez pour choisir un fichier
+        </p>
         <p className="mt-1 text-sm text-ink-700/60">Excel (.xlsx, .xls), Word (.docx), CSV ou texte</p>
+        {/* Téléphone : un nom de fichier insécable (tirets bas) se coupe au lieu de déborder. */}
         {fichierNom && (
-          <span className="pointer-events-none mt-3 inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-3 py-1 text-sm font-medium text-forest-800">
-            <FileSpreadsheet size={13} /> {fichierNom} · {lignes.length} ligne(s)
+          <span className="pointer-events-none mt-3 inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-3 py-1 text-sm font-medium text-forest-800 mobile:max-w-full mobile:rounded-2xl mobile:[overflow-wrap:anywhere]">
+            <FileSpreadsheet size={13} className="mobile:shrink-0" /> {fichierNom} · {lignes.length} ligne(s)
           </span>
         )}
       </div>
@@ -284,9 +289,9 @@ export function Convertisseur() {
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Correspondance des colonnes */}
             <section className="space-y-3 rounded-2xl border border-cream-200 bg-white p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mobile:flex-wrap mobile:gap-x-3">
                 <h3 className="text-base font-bold text-forest-900">Colonnes du fichier</h3>
-                <label className="flex items-center gap-1.5 text-sm text-ink-700/70">
+                <label className="flex items-center gap-1.5 text-sm text-ink-700/70 mobile:min-h-11">
                   <input type="checkbox" checked={avecEntete} onChange={(e) => setAvecEntete(e.target.checked)} />
                   1re ligne = en-tête
                 </label>
@@ -298,7 +303,7 @@ export function Convertisseur() {
                     key={m}
                     type="button"
                     onClick={() => setModeNom(m)}
-                    className={`rounded-full border px-3 py-1.5 font-medium transition-colors ${
+                    className={`rounded-full border px-3 py-1.5 font-medium transition-colors mobile:min-h-11 mobile:px-4 ${
                       modeNom === m ? "border-transparent bg-forest-700 text-cream-50" : "border-cream-300 text-ink-700/70 hover:border-forest-300"
                     }`}
                   >
@@ -386,7 +391,7 @@ export function Convertisseur() {
                   <button
                     type="button"
                     onClick={() => setColonnesPerso((c) => [...c, { entete: "", valeur: "" }])}
-                    className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-sm font-medium text-forest-700 hover:bg-forest-50"
+                    className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-sm font-medium text-forest-700 hover:bg-forest-50 mobile:min-h-11 mobile:px-4"
                   >
                     <Plus size={13} /> Ajouter
                   </button>
@@ -401,18 +406,18 @@ export function Convertisseur() {
                         value={c.entete}
                         onChange={(e) => setColonnesPerso((arr) => arr.map((x, j) => (j === i ? { ...x, entete: e.target.value } : x)))}
                         placeholder="En-tête (ex : group1)"
-                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0"
                       />
                       <input
                         value={c.valeur}
                         onChange={(e) => setColonnesPerso((arr) => arr.map((x, j) => (j === i ? { ...x, valeur: e.target.value } : x)))}
                         placeholder="Valeur"
-                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0"
                       />
                       <button
                         type="button"
                         onClick={() => setColonnesPerso((arr) => arr.filter((_, j) => j !== i))}
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
                         aria-label="Retirer"
                       >
                         <Trash2 size={14} />
@@ -424,13 +429,13 @@ export function Convertisseur() {
             </section>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Actions — téléphone : empilées pleine largeur, hauteur libre (libellés longs en 18 px). */}
+          <div className="flex flex-wrap items-center gap-2 mobile:flex-col mobile:items-stretch">
             <button
               type="button"
               onClick={telecharger}
               disabled={!sortie || sortie.rows.length === 0}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-base font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-base font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-auto mobile:min-h-12 mobile:justify-center mobile:py-2.5 mobile:leading-tight"
             >
               <Download size={16} /> Télécharger le CSV Moodle ({sortie?.rows.length ?? 0})
             </button>
@@ -438,14 +443,14 @@ export function Convertisseur() {
               type="button"
               onClick={genererPdf}
               disabled={!sortie || sortie.rows.length === 0}
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-base font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-base font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-auto mobile:min-h-12 mobile:justify-center mobile:py-2.5 mobile:leading-tight"
             >
               <FileText size={16} /> Version PDF (4 colonnes)
             </button>
             <button
               type="button"
               onClick={() => setConfirmerReinit(true)}
-              className="inline-flex h-11 items-center gap-1.5 rounded-full border border-cream-300 px-5 text-base font-medium text-ink-700/70 hover:bg-cream-100"
+              className="inline-flex h-11 items-center gap-1.5 rounded-full border border-cream-300 px-5 text-base font-medium text-ink-700/70 hover:bg-cream-100 mobile:h-auto mobile:min-h-12 mobile:justify-center mobile:py-2.5 mobile:leading-tight"
             >
               <X size={15} /> Recommencer
             </button>
@@ -515,7 +520,8 @@ export function Convertisseur() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="titre-reinit-conv"
-              className="fixed left-1/2 top-1/2 z-50 w-[min(30rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
+              // Téléphone : feuille ancrée en bas de l'écran, boutons pleine largeur.
+              className="fixed left-1/2 top-1/2 z-50 w-[min(30rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft mobile:inset-x-0 mobile:top-auto mobile:bottom-0 mobile:w-full mobile:max-w-none mobile:max-h-[92dvh] mobile:translate-x-0 mobile:translate-y-0 mobile:overflow-y-auto mobile:rounded-b-none"
             >
               <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3.5">
                 <h2 id="titre-reinit-conv" className="font-display text-base font-bold text-forest-900">
@@ -524,19 +530,19 @@ export function Convertisseur() {
                 <button
                   type="button"
                   onClick={() => setConfirmerReinit(false)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11"
                   aria-label="Fermer"
                 >
                   <X size={18} />
                 </button>
               </div>
-              <div className="p-5">
+              <div className="p-5 mobile:pb-[calc(1.25rem+var(--marge-sure-bas))]">
                 <p className="text-sm leading-relaxed text-ink-700/80">
                   La <strong>liste chargée</strong> et son <strong>mappage de colonnes</strong> seront
                   effacés, et vous reviendrez à la zone de dépôt. Vos champs de{" "}
                   <strong>personnalisation</strong> (établissement, année, classe…) sont conservés.
                 </p>
-                <div className="mt-5 flex justify-end gap-2">
+                <div className="mt-5 flex justify-end gap-2 mobile:flex-col-reverse mobile:items-stretch">
                   <button
                     type="button"
                     onClick={() => setConfirmerReinit(false)}
@@ -547,7 +553,7 @@ export function Convertisseur() {
                   <button
                     type="button"
                     onClick={reinit}
-                    className="inline-flex h-11 items-center gap-2 rounded-full bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-700"
+                    className="inline-flex h-11 items-center gap-2 rounded-full bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-700 mobile:justify-center"
                   >
                     <RotateCcw size={16} /> Recommencer
                   </button>

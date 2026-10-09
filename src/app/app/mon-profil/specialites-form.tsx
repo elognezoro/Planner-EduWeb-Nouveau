@@ -88,17 +88,18 @@ export function SpecialitesForm({
               const active = selection.has(nom);
               return (
                 <li key={nom}>
+                  {/* Téléphone : lignes cochables de 44 px et case agrandie (bureau inchangé). */}
                   <button
                     type="button"
                     role="option"
                     aria-selected={active}
                     onClick={() => basculer(nom)}
-                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-forest-50 ${
+                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-forest-50 mobile:min-h-11 mobile:py-2.5 ${
                       active ? "font-semibold text-forest-900" : "text-ink-800"
                     }`}
                   >
                     <span
-                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border mobile:h-5 mobile:w-5 ${
                         active ? "border-forest-600 bg-forest-600 text-white" : "border-cream-300 bg-white"
                       }`}
                     >

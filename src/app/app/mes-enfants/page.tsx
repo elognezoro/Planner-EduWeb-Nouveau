@@ -106,7 +106,7 @@ export default async function MesEnfantsPage() {
                 {e.classe && (
                   <Link
                     href={`/app/vie-scolaire/cahier-texte?classe=${e.classe.id}`}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
                   >
                     <NotebookPen size={13} /> Cahier de texte
                   </Link>
@@ -127,9 +127,17 @@ export default async function MesEnfantsPage() {
                     </p>
                     <Link
                       href="/app/vie-scolaire/notes-bulletins"
-                      className="inline-flex items-center gap-0.5 text-xs font-semibold text-forest-700 hover:text-forest-900"
+                      className="inline-flex items-center gap-0.5 text-xs font-semibold text-forest-700 hover:text-forest-900 mobile:hidden"
                     >
                       Voir <ArrowUpRight size={12} />
+                    </Link>
+                    {/* Téléphone : « Voir » ouvre le livret de l'enfant (Notes & bulletins est
+                        refusé au rôle parent : l'ancien lien menait à une impasse). */}
+                    <Link
+                      href={`/app/vie-scolaire/livret-scolaire?eleve=${e.id}`}
+                      className="-mr-2 hidden min-h-11 items-center gap-1 rounded-full px-2 text-sm font-semibold text-forest-700 active:bg-cream-100 mobile:inline-flex"
+                    >
+                      Livret <ArrowUpRight size={14} aria-hidden />
                     </Link>
                   </div>
                   <ListeNotes notes={e.notes} />

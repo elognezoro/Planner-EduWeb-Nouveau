@@ -54,27 +54,29 @@ export default async function GuidesPage() {
 
       <Link
         href="/app/aide-formation/guides/plateforme"
-        className="group flex items-center gap-4 rounded-2xl border border-gold-200 bg-gradient-to-r from-gold-50 to-forest-50/40 p-5 shadow-soft transition hover:border-gold-300"
+        className="group flex items-center gap-4 rounded-2xl border border-gold-200 bg-gradient-to-r from-gold-50 to-forest-50/40 p-5 shadow-soft transition hover:border-gold-300 mobile:gap-3 mobile:p-4"
       >
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white"><Compass size={24} /></span>
+        {/* Téléphone : carte resserrée (icône réduite, flèche retirée — toute la carte est un lien)
+            pour laisser au texte une largeur lisible. */}
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white mobile:h-10 mobile:w-10"><Compass size={24} /></span>
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-base font-bold text-forest-900">Guide complet de la plateforme</h2>
           <p className="text-sm text-ink-700/70">Prise en main, usage détaillé de chaque rôle et chapitre approfondi sur le centre de formation (badges et certificats compris).</p>
         </div>
-        <ArrowRight size={20} className="shrink-0 text-forest-600 transition group-hover:translate-x-0.5" />
+        <ArrowRight size={20} className="shrink-0 text-forest-600 transition group-hover:translate-x-0.5 mobile:hidden" />
       </Link>
 
       {/* Manuel du formateur — visible UNIQUEMENT des formateurs désignés (et de l'admin). */}
       {formateur && (
         <Link
           href="/app/aide-formation/manuel"
-          className="group flex items-center gap-4 rounded-2xl border border-forest-300 bg-gradient-to-r from-forest-50 to-cream-50 p-5 shadow-soft transition hover:border-forest-400"
+          className="group flex items-center gap-4 rounded-2xl border border-forest-300 bg-gradient-to-r from-forest-50 to-cream-50 p-5 shadow-soft transition hover:border-forest-400 mobile:gap-3 mobile:p-4"
         >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-forest-800 text-gold-300"><FileText size={24} /></span>
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-forest-800 text-gold-300 mobile:h-10 mobile:w-10"><FileText size={24} /></span>
           <div className="min-w-0 flex-1">
             <h2 className="flex flex-wrap items-center gap-2 font-display text-base font-bold text-forest-900">
               Manuel du formateur — formation générale (Word)
-              <span className="inline-flex items-center gap-1 rounded-full bg-forest-800 px-2.5 py-0.5 text-[0.65rem] font-semibold text-cream-50">
+              <span className="inline-flex items-center gap-1 rounded-full bg-forest-800 px-2.5 py-0.5 text-[0.65rem] font-semibold text-cream-50 mobile:text-[0.9375rem]">
                 <ShieldCheck size={11} /> Formateurs désignés
               </span>
             </h2>
@@ -83,7 +85,7 @@ export default async function GuidesPage() {
               formations interactives et corrigés des évaluations. Téléchargeable en Word et en PDF.
             </p>
           </div>
-          <ArrowRight size={20} className="shrink-0 text-forest-600 transition group-hover:translate-x-0.5" />
+          <ArrowRight size={20} className="shrink-0 text-forest-600 transition group-hover:translate-x-0.5 mobile:hidden" />
         </Link>
       )}
 

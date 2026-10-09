@@ -69,7 +69,8 @@ export function ChampMotDePasse({
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
           aria-pressed={visible}
-          className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-ink-700/50 transition-colors hover:bg-cream-100 hover:text-forest-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-200"
+          // Téléphone : cible de 44 px, logée dans la marge droite du champ (pr-12).
+          className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-ink-700/50 transition-colors hover:bg-cream-100 hover:text-forest-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-200 mobile:right-1 mobile:h-11 mobile:w-11"
         >
           {visible ? <EyeOff size={17} /> : <Eye size={17} />}
         </button>
@@ -86,13 +87,13 @@ export function ChampMotDePasse({
                 style={{ width: `${largeur}%` }}
               />
             </div>
-            <span className="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-ink-700/55">
+            <span className="shrink-0 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-ink-700/55 mobile:text-xs mobile:tracking-[0.06em]">
               {force.libelle}
             </span>
           </div>
 
           <div className="rounded-xl border border-cream-200 bg-cream-50/70 p-3">
-            <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-ink-700/45">
+            <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-ink-700/45 mobile:text-xs mobile:tracking-[0.06em] mobile:text-ink-700/60">
               Le mot de passe doit contenir :
             </p>
             <ul className="grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">

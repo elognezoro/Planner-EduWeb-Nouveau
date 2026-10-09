@@ -33,6 +33,7 @@ import {
 } from "./recherche-action";
 import { SelecteurEtabCascade, type EtabCascade } from "./selecteur-etab-cascade";
 import { ReglageEssai } from "@/components/app/reglage-essai";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
 import { SelectRecherche } from "@/components/app/select-recherche";
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 
@@ -173,6 +174,11 @@ export function TableauComptes({
   const [confirmeSuppr, setConfirmeSuppr] = useState<string | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
   const [pending, start] = useTransition();
+  // Téléphone : les actions d'un compte s'ouvrent dans une feuille montante (au lieu d'une rangée
+  // de 7 icônes de 28 px et d'un menu flottant coupé par le conteneur). Le compte reste mémorisé
+  // pendant la fermeture animée de la feuille, d'où deux états.
+  const [actionsMobile, setActionsMobile] = useState<LigneCompte | null>(null);
+  const [feuilleActions, setFeuilleActions] = useState(false);
 
   const triees = useMemo(() => {
     const copie = [...lignes];
@@ -203,6 +209,7 @@ export function TableauComptes({
     setModale(null);
     setMenuPlus(null);
     setConfirmeSuppr(null);
+    setFeuilleActions(false);
     if (ok) router.refresh();
   }
 
@@ -237,8 +244,32 @@ export function TableauComptes({
           <span className="font-semibold">{selection.size} sélectionné(s)</span>
         </div>
       )}
+      {/* Téléphone : l'en-tête du tableau (tri par colonne) disparaît en mode cartes — tri par liste. */}
+      <div className="px-1 pb-3 lg:hidden print:hidden">
+        <label className="flex items-center gap-2 text-sm text-ink-700/70">
+          <span className="shrink-0">Trier par</span>
+          <select
+            value={`${tri.colonne}:${tri.asc ? "asc" : "desc"}`}
+            onChange={(e) => {
+              const [colonne, sens] = e.target.value.split(":") as [Colonne, string];
+              setTri({ colonne, asc: sens === "asc" });
+            }}
+            className="h-11 min-w-0 flex-1 rounded-full border border-cream-300 bg-white px-4 pr-8 text-sm text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          >
+            <option value="creeLe:desc">Inscription : plus récents</option>
+            <option value="creeLe:asc">Inscription : plus anciens</option>
+            <option value="nomAffiche:asc">Nom (A → Z)</option>
+            <option value="nomAffiche:desc">Nom (Z → A)</option>
+            <option value="roleLibelle:asc">Rôle</option>
+            <option value="etablissement:asc">Établissement</option>
+            <option value="pays:asc">Pays</option>
+            <option value="statut:asc">Statut</option>
+          </select>
+        </label>
+      </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[980px] border-collapse text-sm">
+        {/* Téléphone : chaque compte devient une carte (globals.css, .tableau-cartes-mobile). */}
+        <table className="tableau-cartes-mobile w-full min-w-[980px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-xs text-ink-700/55">
               <th className="w-10 px-4 py-3">
@@ -265,7 +296,9 @@ export function TableauComptes({
               const { jour, heure } = dateUtc(c.creeLe);
               return (
                 <tr key={c.id} className="border-b border-cream-100 transition-colors last:border-0 hover:bg-cream-50/50">
-                  <td className="px-4 py-3">
+                  {/* Téléphone : pas de sélection multiple en mode cartes. « hidden! » (important) car la
+                      règle « td » de .tableau-cartes-mobile, hors couche, l'emporte sur « mobile:hidden ». */}
+                  <td className="px-4 py-3 mobile:hidden!">
                     <input
                       type="checkbox"
                       checked={selection.has(c.id)}
@@ -273,45 +306,49 @@ export function TableauComptes({
                       aria-label={`Sélectionner ${c.nomAffiche}`}
                     />
                   </td>
-                  <td className="py-3 pl-1 pr-3">
+                  {/* Téléphone : 1re cellule visible de la carte — pas de filet « td + td » au-dessus. */}
+                  <td className="py-3 pl-1 pr-3 mobile:border-t-0!">
                     <div className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-800 text-xs font-bold text-gold-300">
                         {(c.nomAffiche !== "—" ? c.nomAffiche : c.email).slice(0, 1).toUpperCase()}
                       </span>
                       <div className="min-w-0">
                         <p className="font-medium text-forest-900">{c.nomAffiche}</p>
-                        <p className="truncate text-xs text-ink-700/55">{c.email}</p>
+                        <p className="truncate text-xs text-ink-700/55 mobile:whitespace-normal mobile:break-all mobile:text-ink-700/70">{c.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-3">
+                  <td data-label="Rôle" className="px-3 py-3">
+                    <span className="mobile:flex mobile:flex-col mobile:items-end">
                     <Badge ton={estAdmin ? "refus" : "neutre"}>{c.roleLibelle}</Badge>
                     {c.demandeRole && (
                       <span
-                        className="mt-1 block w-fit rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-semibold text-gold-800"
+                        className="mt-1 block w-fit rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-semibold text-gold-800 mobile:text-xs"
                         title={`Demande en attente : ${c.demandeRole.roleLibelle}${c.demandeRole.etab ? ` — ${c.demandeRole.etab.nom}` : c.demandeRole.structure ? ` — ${c.demandeRole.structure}` : ""}`}
                       >
                         Demande : {c.demandeRole.roleLibelle}
                       </span>
                     )}
+                    </span>
                   </td>
-                  <td className="max-w-[13rem] truncate px-3 py-3 text-sm text-forest-900">
+                  <td data-label="Établissement" className="max-w-[13rem] truncate px-3 py-3 text-sm text-forest-900 mobile:max-w-none mobile:whitespace-normal">
                     {c.etablissement ?? <span className="text-xs text-ink-700/40">—</span>}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td data-label="Pays" className="whitespace-nowrap px-3 py-3 mobile:whitespace-normal">
                     <DrapeauPays pays={c.pays} />
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-700/60">
+                  <td data-label="Inscrit le" className="whitespace-nowrap px-3 py-3 text-xs text-ink-700/60 mobile:whitespace-normal">
                     {jour} · {heure}
                   </td>
-                  <td className="px-3 py-3">
+                  <td data-label="Statut" className="px-3 py-3">
                     <Badge ton={TON_STATUT[c.statut] ?? "attente"}>
                       {c.statut === "actif" && <BadgeCheck size={12} className="mr-1 inline" />}
                       {LIBELLE_STATUT[c.statut] ?? c.statut}
                     </Badge>
                   </td>
                   <td className="px-3 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                    {/* Téléphone : Habilitation, Aperçu et « ⋯ » (feuille d'actions) en cibles de 44 px. */}
+                    <div className="flex items-center justify-end gap-1 mobile:gap-2">
                       {confirmeSuppr === c.id ? (
                         <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600">
                           Supprimer définitivement ?
@@ -329,7 +366,7 @@ export function TableauComptes({
                             <button
                               onClick={() => setModale({ type: "habilitation", ligne: c })}
                               title="Habilitation (rôle, pays, rattachement)"
-                              className="rounded-full p-1.5 text-forest-600 transition-colors hover:bg-forest-50"
+                              className="rounded-full p-1.5 text-forest-600 transition-colors hover:bg-forest-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:border mobile:border-forest-100"
                             >
                               <ShieldCheck size={16} />
                             </button>
@@ -338,7 +375,7 @@ export function TableauComptes({
                           <button
                             onClick={() => setModale({ type: "apercu", ligne: c })}
                             title="Aperçu du profil"
-                            className="rounded-full p-1.5 text-ink-700/55 transition-colors hover:bg-cream-100"
+                            className="rounded-full p-1.5 text-ink-700/55 transition-colors hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:border mobile:border-cream-200"
                           >
                             <Eye size={16} />
                           </button>
@@ -347,14 +384,14 @@ export function TableauComptes({
                             <Link
                               href={`/app/vie-scolaire/communication?avec=${c.id}`}
                               title="Envoyer un message"
-                              className="rounded-full p-1.5 text-forest-600 transition-colors hover:bg-forest-50"
+                              className="rounded-full p-1.5 text-forest-600 transition-colors hover:bg-forest-50 mobile:hidden"
                             >
                               <MessageSquare size={16} />
                             </Link>
                           )}
                           {/* Scan : se connecter en tant que l'utilisateur */}
                           {peutIncarner && !estAdmin && !estSoi && (
-                            <form action={voirCommeUtilisateur} className="inline-flex">
+                            <form action={voirCommeUtilisateur} className="inline-flex mobile:hidden">
                               <input type="hidden" name="utilisateurId" value={c.id} />
                               <button type="submit" title="Se connecter en tant que cet utilisateur" className="rounded-full p-1.5 text-indigo-600 transition-colors hover:bg-indigo-50">
                                 <ScanEye size={16} />
@@ -365,7 +402,7 @@ export function TableauComptes({
                           <button
                             onClick={() => setModale({ type: "edition", ligne: c })}
                             title="Modifier l'utilisateur"
-                            className="rounded-full p-1.5 text-ink-700/55 transition-colors hover:bg-cream-100"
+                            className="rounded-full p-1.5 text-ink-700/55 transition-colors hover:bg-cream-100 mobile:hidden"
                           >
                             <Pencil size={16} />
                           </button>
@@ -374,14 +411,14 @@ export function TableauComptes({
                             <button
                               onClick={() => setConfirmeSuppr(c.id)}
                               title="Supprimer le compte"
-                              className="rounded-full p-1.5 text-red-500 transition-colors hover:bg-red-50"
+                              className="rounded-full p-1.5 text-red-500 transition-colors hover:bg-red-50 mobile:hidden"
                             >
                               <Trash2 size={16} />
                             </button>
                           )}
                           {/* ⋯ : suspendre / archiver / activer */}
                           {!estSoi && !estAdmin && (
-                            <div className="relative">
+                            <div className="relative mobile:hidden">
                               <button
                                 onClick={() => setMenuPlus((m) => (m === c.id ? null : c.id))}
                                 title="Autres actions"
@@ -421,6 +458,21 @@ export function TableauComptes({
                               </AnimatePresence>
                             </div>
                           )}
+                          {/* Téléphone : « ⋯ » toujours présent (même pour soi ou un admin : Modifier, Aperçu…). */}
+                          <div className="lg:hidden print:hidden">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActionsMobile(c);
+                                setFeuilleActions(true);
+                              }}
+                              aria-haspopup="dialog"
+                              aria-label={`Actions pour ${c.nomAffiche !== "—" ? c.nomAffiche : c.email}`}
+                              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-cream-200 text-ink-700/70 active:bg-cream-100"
+                            >
+                              <MoreHorizontal size={18} />
+                            </button>
+                          </div>
                         </>
                       )}
                     </div>
@@ -447,7 +499,154 @@ export function TableauComptes({
           <ModaleEdition ligne={modale.ligne} estSoi={modale.ligne.id === monId} onClose={() => setModale(null)} onDone={terminer} terme={terme} termeApfc={termeApfc} />
         )}
       </AnimatePresence>
+
+      <FeuilleBas ouvert={feuilleActions} onFermer={() => setFeuilleActions(false)} titre="Actions du compte">
+        {actionsMobile && (
+          <FeuilleActionsCompte
+            key={actionsMobile.id}
+            ligne={actionsMobile}
+            estSoi={actionsMobile.id === monId}
+            peutIncarner={peutIncarner}
+            pending={pending}
+            ouvrir={(type) => {
+              setFeuilleActions(false);
+              setModale({ type, ligne: actionsMobile });
+            }}
+            onStatut={(statut) => statutRapide(actionsMobile, statut)}
+            onSupprimer={() => supprimer(actionsMobile)}
+          />
+        )}
+      </FeuilleBas>
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Feuille d'actions d'un compte (TÉLÉPHONE uniquement)
+//  Mêmes actions que la rangée d'icônes de l'ordinateur, en rangées de 48 px libellées ;
+//  la suppression se confirme dans la feuille (gros bouton rouge pleine largeur).
+// ─────────────────────────────────────────────────────────────
+function FeuilleActionsCompte({
+  ligne,
+  estSoi,
+  peutIncarner,
+  pending,
+  ouvrir,
+  onStatut,
+  onSupprimer,
+}: {
+  ligne: LigneCompte;
+  estSoi: boolean;
+  peutIncarner: boolean;
+  pending: boolean;
+  ouvrir: (type: TypeModale) => void;
+  onStatut: (statut: "actif" | "suspendu" | "archive") => void;
+  onSupprimer: () => void;
+}) {
+  const [confirme, setConfirme] = useState(false);
+  const estAdmin = ligne.roleTech === "admin";
+  const gerable = !estSoi && !estAdmin;
+  const rangee =
+    "flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 text-left text-base font-medium text-forest-900 active:bg-cream-100 disabled:opacity-50";
+  return (
+    <div className="px-2 pb-2">
+      <div className="mb-2 flex items-center gap-3 rounded-2xl bg-white px-3 py-2.5 ring-1 ring-cream-200">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-forest-800 text-sm font-bold text-gold-300">
+          {(ligne.nomAffiche !== "—" ? ligne.nomAffiche : ligne.email).slice(0, 1).toUpperCase()}
+        </span>
+        <div className="min-w-0">
+          <p className="font-semibold text-forest-900">{ligne.nomAffiche}</p>
+          <p className="text-xs text-ink-700/70 [overflow-wrap:anywhere]">{ligne.email}</p>
+        </div>
+      </div>
+      <ul className="space-y-0.5">
+        {!estSoi && (
+          <li>
+            <button type="button" onClick={() => ouvrir("habilitation")} className={rangee}>
+              <ShieldCheck size={19} className="shrink-0 text-forest-600" /> Habilitation (rôle, pays, rattachement)
+            </button>
+          </li>
+        )}
+        <li>
+          <button type="button" onClick={() => ouvrir("apercu")} className={rangee}>
+            <Eye size={19} className="shrink-0 text-ink-700/60" /> Aperçu du profil
+          </button>
+        </li>
+        <li>
+          <button type="button" onClick={() => ouvrir("edition")} className={rangee}>
+            <Pencil size={19} className="shrink-0 text-ink-700/60" /> Modifier l&apos;utilisateur
+          </button>
+        </li>
+        {!estSoi && (
+          <li>
+            <Link href={`/app/vie-scolaire/communication?avec=${ligne.id}`} className={rangee}>
+              <MessageSquare size={19} className="shrink-0 text-forest-600" /> Envoyer un message
+            </Link>
+          </li>
+        )}
+        {peutIncarner && gerable && (
+          <li>
+            <form action={voirCommeUtilisateur}>
+              <input type="hidden" name="utilisateurId" value={ligne.id} />
+              <button type="submit" className={rangee}>
+                <ScanEye size={19} className="shrink-0 text-indigo-600" /> Se connecter en tant que cet utilisateur
+              </button>
+            </form>
+          </li>
+        )}
+        {gerable && ligne.statut !== "actif" && (
+          <li>
+            <button type="button" onClick={() => onStatut("actif")} disabled={pending} className={rangee}>
+              <BadgeCheck size={19} className="shrink-0 text-forest-600" /> Activer
+            </button>
+          </li>
+        )}
+        {gerable && ligne.statut !== "suspendu" && (
+          <li>
+            <button type="button" onClick={() => onStatut("suspendu")} disabled={pending} className={rangee}>
+              <Ban size={19} className="shrink-0 text-ink-700/60" /> Suspendre
+            </button>
+          </li>
+        )}
+        {gerable && ligne.statut !== "archive" && (
+          <li>
+            <button type="button" onClick={() => onStatut("archive")} disabled={pending} className={rangee}>
+              <Archive size={19} className="shrink-0 text-ink-700/60" /> Archiver
+            </button>
+          </li>
+        )}
+      </ul>
+      {gerable && (
+        <div className="mt-3 border-t border-cream-200 pt-3">
+          {confirme ? (
+            <div className="space-y-2 rounded-2xl border border-red-200 bg-red-50 p-3">
+              <p className="flex items-start gap-2 text-sm font-semibold text-red-700">
+                <AlertTriangle size={17} className="mt-0.5 shrink-0" /> Supprimer définitivement ce compte ?
+              </p>
+              <button
+                type="button"
+                onClick={onSupprimer}
+                disabled={pending}
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-red-600 font-semibold text-white active:bg-red-700 disabled:opacity-60"
+              >
+                {pending ? <Loader2 size={17} className="animate-spin" /> : <Trash2 size={17} />} Supprimer définitivement
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirme(false)}
+                className="flex min-h-12 w-full items-center justify-center rounded-full border border-cream-300 bg-white font-medium text-ink-700/80 active:bg-cream-100"
+              >
+                Annuler
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setConfirme(true)} className={`${rangee} text-red-600`}>
+              <Trash2 size={19} className="shrink-0" /> Supprimer le compte…
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -469,7 +668,9 @@ function CoqueModale({ children, onClose, largeur = "w-[min(34rem,calc(100vw-2re
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={{ duration: 0.2 }}
-        className={`fixed left-1/2 top-1/2 z-50 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-cream-200 bg-white p-6 shadow-soft ${largeur}`}
+        // Téléphone : feuille ancrée en bas (hauteur en dvh : la barre de Safari et le clavier ne
+        // masquent plus le pied), pied de modale collant — voir les classes « mobile:sticky ».
+        className={`fixed left-1/2 top-1/2 z-50 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-cream-200 bg-white p-6 shadow-soft ${largeur} mobile:inset-x-0 mobile:top-auto mobile:bottom-0 mobile:w-full mobile:max-w-none mobile:max-h-[92dvh] mobile:translate-x-0 mobile:translate-y-0 mobile:overscroll-contain mobile:rounded-b-none mobile:p-5 mobile:pb-0`}
       >
         {children}
       </motion.div>
@@ -489,7 +690,7 @@ function TeteUtilisateur({ ligne, onClose }: { ligne: LigneCompte; onClose: () =
           <p className="truncate text-xs text-ink-700/60">{ligne.email}</p>
         </div>
       </div>
-      <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+      <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
         <X size={18} />
       </button>
     </div>
@@ -737,15 +938,40 @@ function ModaleHabilitation({
 
       {erreur && <p className="mt-3 text-sm font-medium text-red-600">{erreur}</p>}
 
-      <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">Nouveau rôle</p>
-      <p className="mt-2 text-xs font-semibold text-gold-700">Rôles Administrateurs Spécialisés</p>
-      <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">Nouveau rôle</p>
+      {/* Téléphone : les ~31 boutons de rôle repoussaient pays, rattachement et « Modifier » à
+          environ 900 px — une liste native (sélecteur du système), groupée de la même façon. */}
+      <div className="mt-1.5 lg:hidden print:hidden">
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value as RoleId)}
+          aria-label="Nouveau rôle"
+          className="h-12 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-base text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        >
+          <optgroup label="Rôles Administrateurs Spécialisés">
+            {ROLES_ADMINS_SPECIALISES.map((r) => (
+              <option key={r} value={r}>
+                {appliquerTermeApfc(appliquerTerme(ROLES[r].libelle, terme), termeApfc)}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Rôles Standards">
+            {ROLES_ORDONNES.filter((r) => !ROLES_ADMINS_SPECIALISES.includes(r.id)).map((r) => (
+              <option key={r.id} value={r.id}>
+                {appliquerTermeApfc(appliquerTerme(r.libelle, terme), termeApfc)}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+      </div>
+      <p className="mt-2 text-xs font-semibold text-gold-700 mobile:hidden">Rôles Administrateurs Spécialisés</p>
+      <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-3 mobile:hidden">
         {ROLES_ADMINS_SPECIALISES.map((r) => (
           <BoutonRole key={r} r={r} />
         ))}
       </div>
-      <p className="mt-3 text-xs font-semibold text-ink-700/60">Rôles Standards</p>
-      <div className="mt-1.5 grid grid-cols-2 gap-2">
+      <p className="mt-3 text-xs font-semibold text-ink-700/60 mobile:hidden">Rôles Standards</p>
+      <div className="mt-1.5 grid grid-cols-2 gap-2 mobile:hidden">
         {ROLES_ORDONNES.filter((r) => !ROLES_ADMINS_SPECIALISES.includes(r.id)).map((r) => (
           <BoutonRole key={r.id} r={r.id} />
         ))}
@@ -755,7 +981,7 @@ function ModaleHabilitation({
           qui couvrent tous les pays — on ne les rattache donc ni à un pays ni à une structure. */}
       {portee !== "global" && (
         <>
-          <p className="mt-5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">Pays</p>
+          <p className="mt-5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">Pays</p>
           <div className="mt-1.5">
             <SelecteurPays name="pays" valeur={pays} onSelect={(p) => setPays(p.nom)} />
           </div>
@@ -765,7 +991,7 @@ function ModaleHabilitation({
       {/* Rattachement — n'apparaît que selon le périmètre du rôle choisi. */}
       {(portee === "etablissement" || portee === "region") && contexte && contexte.regions.length > 0 && (
         <>
-          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">
             Direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}
           </p>
           <div className="mt-1.5">
@@ -796,7 +1022,7 @@ function ModaleHabilitation({
 
       {portee === "etablissement" && (
         <>
-          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">
             Rattacher à un ou plusieurs établissements <span className="text-gold-700">(obligatoire)</span>
           </p>
           <div className="mt-1.5">
@@ -830,7 +1056,7 @@ function ModaleHabilitation({
                   >
                     {e.nom}
                     {i === 0 && (
-                      <span className="rounded-full bg-forest-800 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-cream-50">
+                      <span className="rounded-full bg-forest-800 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-cream-50 mobile:text-xs">
                         principal
                       </span>
                     )}
@@ -838,7 +1064,7 @@ function ModaleHabilitation({
                       type="button"
                       onClick={() => setEtabsSel((l) => l.filter((x) => x.id !== e.id))}
                       aria-label={`Retirer ${e.nom}`}
-                      className="rounded-full p-0.5 text-forest-700/60 hover:bg-forest-100 hover:text-forest-900"
+                      className="rounded-full p-0.5 text-forest-700/60 hover:bg-forest-100 hover:text-forest-900 mobile:p-2"
                     >
                       <X size={12} />
                     </button>
@@ -867,7 +1093,7 @@ function ModaleHabilitation({
 
       {portee === "diocese" && (
         <>
-          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">
             Diocèse de rattachement (SEDEC)
           </p>
           <div className="mt-1.5">
@@ -898,7 +1124,7 @@ function ModaleHabilitation({
 
       {(portee === "cafop" || portee === "apfc") && (
         <>
-          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">
             Rattacher à {portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : `une ${appliquerTermeApfc("APFC", termeApfc)}`}
           </p>
           <div className="mt-1.5">
@@ -934,9 +1160,9 @@ function ModaleHabilitation({
         </p>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+      <div className="mt-5 flex flex-wrap items-center justify-end gap-2 mobile:sticky mobile:bottom-0 mobile:z-10 mobile:-mx-5 mobile:flex-col-reverse mobile:items-stretch mobile:border-t mobile:border-cream-100 mobile:bg-white mobile:px-5 mobile:pt-3 mobile:pb-[calc(1rem+var(--marge-sure-bas))]">
         {perimetreManquant && hintPerimetre && (
-          <span className="mr-auto inline-flex items-center gap-1.5 text-xs font-medium text-gold-700">
+          <span className="mr-auto inline-flex items-center gap-1.5 text-xs font-medium text-gold-700 mobile:order-last mobile:mr-0">
             <AlertTriangle size={13} className="shrink-0" /> {hintPerimetre}
           </span>
         )}
@@ -947,7 +1173,7 @@ function ModaleHabilitation({
           onClick={enregistrer}
           disabled={pending || perimetreManquant}
           title={perimetreManquant ? hintPerimetre : undefined}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60 mobile:justify-center"
         >
           {pending ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />} Modifier
         </button>
@@ -988,7 +1214,7 @@ function ModaleApercu({ ligne, onClose, onModifier }: { ligne: LigneCompte; onCl
     { libelle: "Pays", valeur: <DrapeauPays pays={ligne.pays} /> },
     {
       libelle: "Identifiant technique",
-      valeur: <code className="rounded bg-cream-100 px-1.5 py-0.5 text-[0.7rem] text-ink-700/70">{ligne.id}</code>,
+      valeur: <code className="rounded bg-cream-100 px-1.5 py-0.5 text-[0.7rem] text-ink-700/70 mobile:break-all mobile:text-xs">{ligne.id}</code>,
     },
   ];
   return (
@@ -998,7 +1224,7 @@ function ModaleApercu({ ligne, onClose, onModifier }: { ligne: LigneCompte; onCl
           <h2 className="font-display text-xl font-bold text-forest-900">Aperçu du profil</h2>
           <p className="mt-0.5 text-xs text-ink-700/60">Récapitulatif du compte utilisateur.</p>
         </div>
-        <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+        <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
           <X size={18} />
         </button>
       </div>
@@ -1022,11 +1248,11 @@ function ModaleApercu({ ligne, onClose, onModifier }: { ligne: LigneCompte; onCl
         ))}
       </div>
 
-      <div className="mt-5 flex justify-end gap-2">
+      <div className="mt-5 flex justify-end gap-2 mobile:sticky mobile:bottom-0 mobile:z-10 mobile:-mx-5 mobile:flex-col-reverse mobile:items-stretch mobile:border-t mobile:border-cream-100 mobile:bg-white mobile:px-5 mobile:pt-3 mobile:pb-[calc(1rem+var(--marge-sure-bas))]">
         <button onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
           Fermer
         </button>
-        <button onClick={onModifier} className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700">
+        <button onClick={onModifier} className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:justify-center">
           <Pencil size={14} /> Modifier
         </button>
       </div>
@@ -1110,7 +1336,7 @@ function ModaleEdition({
     <CoqueModale onClose={onClose}>
       <div className="flex items-start justify-between">
         <h2 className="font-display text-xl font-bold text-forest-900">Modifier l&apos;utilisateur</h2>
-        <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+        <button onClick={onClose} aria-label="Fermer" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
           <X size={18} />
         </button>
       </div>
@@ -1148,7 +1374,7 @@ function ModaleEdition({
       {/* Réinitialisation du mot de passe : l'admin le choisit, ou en fait générer un. */}
       {!estSoi && (
         <div className="mt-5 border-t border-cream-100 pt-4">
-          <p className="flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+          <p className="flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs">
             <KeyRound size={13} /> Mot de passe
           </p>
           <p className="mt-1 text-xs text-ink-700/60">
@@ -1161,13 +1387,13 @@ function ModaleEdition({
               onChange={(e) => setMdp(e.target.value)}
               placeholder="Nouveau mot de passe (vide = généré)"
               autoComplete="off"
-              className={`${champ} min-w-0 flex-1`}
+              className={`${champ} min-w-0 flex-1 mobile:basis-full`}
             />
             <button
               type="button"
               onClick={reinitialiser}
               disabled={mdpPending}
-              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-cream-300 px-5 text-sm font-semibold text-forest-800 hover:bg-cream-100 disabled:opacity-60"
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-cream-300 px-5 text-sm font-semibold text-forest-800 hover:bg-cream-100 disabled:opacity-60 mobile:w-full mobile:justify-center"
             >
               {mdpPending ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />} Réinitialiser
             </button>
@@ -1175,16 +1401,17 @@ function ModaleEdition({
           {mdpRetour && (
             <div className={`mt-2 rounded-2xl border p-3 ${mdpRetour.ok ? "border-forest-200 bg-forest-50" : "border-red-200 bg-red-50"}`}>
               <p className={`text-xs font-medium ${mdpRetour.ok ? "text-forest-800" : "text-red-700"}`}>{mdpRetour.message}</p>
+              {/* Téléphone : un mot de passe choisi (longueur libre, insécable) passe à la ligne au lieu de déborder. */}
               {mdpRetour.motDePasse && (
-                <div className="mt-2 flex items-center gap-2">
-                  <code className="rounded-lg bg-white px-3 py-1.5 font-mono text-sm text-forest-900">{mdpRetour.motDePasse}</code>
+                <div className="mt-2 flex items-center gap-2 mobile:flex-wrap">
+                  <code className="rounded-lg bg-white px-3 py-1.5 font-mono text-sm text-forest-900 mobile:min-w-0 mobile:[overflow-wrap:anywhere]">{mdpRetour.motDePasse}</code>
                   <button
                     type="button"
                     onClick={() => {
                       navigator.clipboard?.writeText(mdpRetour.motDePasse!);
                       setMdpCopie(true);
                     }}
-                    className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-medium text-forest-700 hover:bg-white"
+                    className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-medium text-forest-700 hover:bg-white mobile:h-11 mobile:px-4"
                   >
                     {mdpCopie ? <Check size={13} /> : <Copy size={13} />} {mdpCopie ? "Copié" : "Copier"}
                   </button>
@@ -1195,14 +1422,14 @@ function ModaleEdition({
         </div>
       )}
 
-      <div className="mt-5 flex justify-end gap-2">
+      <div className="mt-5 flex justify-end gap-2 mobile:sticky mobile:bottom-0 mobile:z-10 mobile:-mx-5 mobile:flex-col-reverse mobile:items-stretch mobile:border-t mobile:border-cream-100 mobile:bg-white mobile:px-5 mobile:pt-3 mobile:pb-[calc(1rem+var(--marge-sure-bas))]">
         <button onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
           Annuler
         </button>
         <button
           onClick={enregistrer}
           disabled={pending}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60 mobile:justify-center"
         >
           {pending ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />} Enregistrer
         </button>

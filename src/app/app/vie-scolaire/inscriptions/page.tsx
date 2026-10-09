@@ -6,6 +6,8 @@ import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
 import { InscriptionForm } from "./form";
+import { FormulaireReplieMobile } from "../_mobile/formulaire-replie";
+import { SupprimerConfirmeMobile } from "../_mobile/supprimer-confirme";
 import { desinscrire } from "./actions";
 
 export const metadata: Metadata = { title: "Inscriptions" };
@@ -101,12 +103,15 @@ export default async function InscriptionsPage({
         </Card>
       ) : (
         <>
-          <Card>
-            <h2 className="mb-4 font-display text-lg font-bold text-forest-900">
-              Inscrire un élève
-            </h2>
-            <InscriptionForm etablissementId={etabId} classes={data.classes} />
-          </Card>
+          {/* Téléphone : formulaire replié, la liste des inscrits passe au premier écran. */}
+          <FormulaireReplieMobile libelle="Inscrire un élève">
+            <Card>
+              <h2 className="mb-4 font-display text-lg font-bold text-forest-900">
+                Inscrire un élève
+              </h2>
+              <InscriptionForm etablissementId={etabId} classes={data.classes} />
+            </Card>
+          </FormulaireReplieMobile>
 
           <Card>
             <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
@@ -117,16 +122,18 @@ export default async function InscriptionsPage({
             ) : (
               <ul className="divide-y divide-cream-100">
                 {data.inscriptions.map((i) => (
-                  <li key={i.id} className="flex items-center justify-between py-3">
-                    <div>
-                      <p className="text-sm font-medium text-forest-900">
+                  <li key={i.id} className="flex items-center justify-between py-3 mobile:flex-wrap mobile:gap-3">
+                    <div className="mobile:min-w-0 mobile:flex-1">
+                      <p className="text-sm font-medium text-forest-900 mobile:wrap-break-word">
                         {nomComplet(i.eleve)}
                       </p>
-                      <p className="text-xs text-ink-700/60">
-                        {i.classe.nom} · {i.classe.niveau.nom} · {i.eleve.email}
+                      {/* Téléphone : l'e-mail (insécable) passe sur sa propre ligne et peut se couper. */}
+                      <p className="text-xs text-ink-700/60 mobile:text-ink-700/70">
+                        {i.classe.nom} · {i.classe.niveau.nom}<span className="mobile:hidden"> · </span>
+                        <span className="mobile:block mobile:break-all">{i.eleve.email}</span>
                       </p>
                     </div>
-                    <form action={desinscrire}>
+                    <form action={desinscrire} className="mobile:hidden">
                       <input type="hidden" name="id" value={i.id} />
                       <button
                         type="submit"
@@ -136,6 +143,11 @@ export default async function InscriptionsPage({
                         <Trash2 size={15} />
                       </button>
                     </form>
+                    {/* Téléphone : corbeille de 44 px, désinscription confirmée par un second appui
+                        (la confirmation passe sur sa propre ligne). */}
+                    <div className="lg:hidden print:hidden has-[form]:basis-full">
+                      <SupprimerConfirmeMobile action={desinscrire} id={i.id} libelle="Désinscrire" />
+                    </div>
                   </li>
                 ))}
               </ul>

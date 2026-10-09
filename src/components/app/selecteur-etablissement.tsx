@@ -24,7 +24,7 @@ export function SelecteurEtablissement({
           <select
             name="etab"
             defaultValue={etabId ?? ""}
-            className="h-11 w-full rounded-xl border border-cream-300 bg-white px-4 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="h-11 w-full rounded-xl border border-cream-300 bg-white px-4 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
           >
             <option value="" disabled>
               Sélectionner un établissement…
@@ -38,7 +38,7 @@ export function SelecteurEtablissement({
         </div>
         <button
           type="submit"
-          className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+          className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:w-full"
         >
           Afficher
         </button>

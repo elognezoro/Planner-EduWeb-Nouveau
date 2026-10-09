@@ -201,7 +201,7 @@ export default async function StatsParClassePage({
                 <select
                   name="classe"
                   defaultValue={classeSel?.id ?? ""}
-                  className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                  className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
                 >
                   <option value="" disabled>
                     Choisir…
@@ -215,7 +215,7 @@ export default async function StatsParClassePage({
               </div>
               <button
                 type="submit"
-                className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+                className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:w-full"
               >
                 Afficher
               </button>
@@ -224,7 +224,8 @@ export default async function StatsParClassePage({
 
           {classeSel && (
             <>
-              <div className="grid gap-4 sm:grid-cols-3">
+              {/* Téléphone : KPI en 2 colonnes compactes, le dernier en pleine largeur. */}
+              <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
                 <StatCard libelle="Élèves" valeur={effectif} icone={<Users size={22} />} />
                 <StatCard libelle="Notes saisies" valeur={nbNotes} icone={<BookOpen size={22} />} ton="gold" />
                 <StatCard
@@ -247,6 +248,8 @@ export default async function StatsParClassePage({
                     nomSerie="Élèves"
                     couleur="#246a48"
                     vide="Aucune note pour calculer les moyennes."
+                    ordonne
+                    unite="élèves"
                   />
                 </Bloc>
               </div>

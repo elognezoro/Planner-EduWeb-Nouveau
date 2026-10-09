@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ClipboardList, Users, CheckCircle2, Gauge, BookOpen } from "lucide-react";
+import { ArrowLeft, ClipboardList, Users, CheckCircle2, Gauge, BookOpen, ChevronDown } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
@@ -108,7 +108,7 @@ export default async function TravauxPage({ searchParams }: { searchParams: Prom
         titre="Travaux des participants"
         description="Taux d'exécution et liste nominative des tâches effectuées par cours."
         action={
-          <Link href={`${BASE}/formations`} className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300">
+          <Link href={`${BASE}/formations`} className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300 mobile:hidden">
             <ArrowLeft className="h-4 w-4" /> Formations
           </Link>
         }
@@ -129,7 +129,7 @@ export default async function TravauxPage({ searchParams }: { searchParams: Prom
         </div>
       </form>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
         <StatCard libelle="Participants" valeur={nbParticipants} icone={<Users className="h-5 w-5" />} />
         <StatCard libelle="Taux d'exécution moyen" valeur={`${tauxMoyen}%`} icone={<Gauge className="h-5 w-5" />} ton="gold" />
         <StatCard libelle="Ont terminé" valeur={nbTermines} icone={<CheckCircle2 className="h-5 w-5" />} />
@@ -153,9 +153,9 @@ export default async function TravauxPage({ searchParams }: { searchParams: Prom
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-forest-900">
                       {p.nom}
-                      {p.termine && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800"><CheckCircle2 className="h-3 w-3" /> Terminé</span>}
+                      {p.termine && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800 mobile:text-xs"><CheckCircle2 className="h-3 w-3" /> Terminé</span>}
                     </p>
-                    <p className="truncate text-xs text-ink-700/55">{p.email}</p>
+                    <p className="truncate text-xs text-ink-700/55 mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{p.email}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-medium text-ink-700/60">{p.nbFaites}/{totalTaches} tâche{totalTaches > 1 ? "s" : ""}</span>
@@ -164,11 +164,26 @@ export default async function TravauxPage({ searchParams }: { searchParams: Prom
                   </div>
                 </div>
                 {p.taches.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
+                  <div className="mt-2 flex flex-wrap gap-1.5 mobile:hidden">
                     {p.taches.map((t, k) => (
                       <span key={k} className="inline-flex items-center gap-1 rounded-full border border-forest-200 bg-forest-50/60 px-2.5 py-0.5 text-[0.7rem] text-forest-800"><CheckCircle2 className="h-3 w-3 text-forest-600" /> {t}</span>
                     ))}
                   </div>
+                )}
+                {/* Téléphone : les tâches faites sont repliées (un mur de pastilles de 11 px pour
+                    20 participants × 15 tâches) ; on les déplie à la demande, en 14 px. */}
+                {p.taches.length > 0 && (
+                  <details className="group mt-2 hidden mobile:block print:hidden">
+                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-forest-700 [&::-webkit-details-marker]:hidden">
+                      <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+                      Voir les {p.taches.length} tâche{p.taches.length > 1 ? "s" : ""} faite{p.taches.length > 1 ? "s" : ""}
+                    </summary>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {p.taches.map((t, k) => (
+                        <span key={k} className="inline-flex items-center gap-1 rounded-full border border-forest-200 bg-forest-50/60 px-2.5 py-1 text-xs text-forest-800"><CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-forest-600" /> {t}</span>
+                      ))}
+                    </div>
+                  </details>
                 )}
               </li>
             ))}

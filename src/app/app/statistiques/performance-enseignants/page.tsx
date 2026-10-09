@@ -108,7 +108,14 @@ export default async function PerformanceEnseignantsPage({
   const graph = enseignants
     .filter((e) => e.moyenne != null)
     .slice(0, 12)
-    .map((e) => ({ label: e.nom.split(" ")[0] ?? e.nom, valeur: e.moyenne as number }));
+    // Téléphone seulement : nom complet (homonymes distincts), nombre de classes, rouge sous 10/20.
+    .map((e) => ({
+      label: e.nom.split(" ")[0] ?? e.nom,
+      valeur: e.moyenne as number,
+      libelleComplet: e.nom,
+      detail: `${e.classes} classe(s)`,
+      couleur: (e.moyenne as number) < 10 ? "#dc2626" : undefined,
+    }));
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -127,7 +134,8 @@ export default async function PerformanceEnseignantsPage({
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          {/* Téléphone : KPI en 2 colonnes compactes, le dernier en pleine largeur. */}
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
             <StatCard libelle="Enseignants" valeur={enseignants.length} icone={<Users size={22} />} />
             <StatCard libelle="Classes encadrées" valeur={enseignants.reduce((s, e) => s + e.classes, 0)} icone={<GraduationCap size={22} />} ton="gold" />
             <StatCard libelle="Moyenne globale /20" valeur={moyenneGlobale ?? "—"} icone={<Gauge size={22} />} />
@@ -135,7 +143,7 @@ export default async function PerformanceEnseignantsPage({
 
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">Moyenne encadrée par enseignant</h2>
-            <ChartBarVertical data={graph} nomSerie="Moyenne /20" couleur="#246a48" vide="Aucune note pour estimer la performance." />
+            <ChartBarVertical data={graph} nomSerie="Moyenne /20" couleur="#246a48" vide="Aucune note pour estimer la performance." max={20} decimales={1} unite="/20" />
           </Card>
 
           <Card>

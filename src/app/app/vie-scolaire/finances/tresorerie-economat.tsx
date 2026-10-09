@@ -14,6 +14,7 @@ import {
   Smartphone, Wallet, X,
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
+import { MontantTuile } from "./montant-mobile";
 import { nombreEnLettres, type EnteteFinances } from "./scolarite-onglets";
 import { FormAlert, Input, Label, Select, SubmitButton } from "@/components/ui/form";
 import { ComboboxRecherche } from "@/components/app/combobox-recherche";
@@ -48,16 +49,17 @@ function CarteSolde({ mode, recettes, depenses }: { mode: string; recettes: numb
   const net = recettes - depenses;
   const Icone = ICONE_MODE[mode] ?? Wallet;
   return (
-    <div className="rounded-2xl border border-cream-200 bg-white p-4">
+    <div className="rounded-2xl border border-cream-200 bg-white p-4 mobile:p-3">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-forest-900">
         <Icone size={16} className="text-forest-600" /> {LIBELLE_MODE[mode] ?? mode}
       </div>
+      {/* Téléphone : montants abrégés (la tuile ne fait que ~130 px de large). */}
       <dl className="space-y-1 text-xs text-ink-700/70">
-        <div className="flex justify-between"><dt>Recettes</dt><dd className="font-medium text-forest-700">{fcfa(recettes)}</dd></div>
-        <div className="flex justify-between"><dt>Dépenses</dt><dd className="font-medium text-red-600">{fcfa(depenses)}</dd></div>
+        <div className="flex justify-between mobile:gap-2"><dt>Recettes</dt><dd className="font-medium text-forest-700 mobile:tabular-nums"><MontantTuile montant={recettes} /></dd></div>
+        <div className="flex justify-between mobile:gap-2"><dt>Dépenses</dt><dd className="font-medium text-red-600 mobile:tabular-nums"><MontantTuile montant={depenses} /></dd></div>
       </dl>
-      <p className={`mt-2 border-t border-cream-100 pt-2 text-right font-display text-lg font-bold ${net >= 0 ? "text-forest-800" : "text-red-700"}`}>
-        {fcfa(net)}
+      <p className={`mt-2 border-t border-cream-100 pt-2 text-right font-display text-lg font-bold ${net >= 0 ? "text-forest-800" : "text-red-700"} mobile:text-base mobile:tabular-nums`}>
+        <MontantTuile montant={net} />
       </p>
     </div>
   );
@@ -203,7 +205,7 @@ function BoutonAnnulerOperation({ id, version }: { id: string; version: number }
     <div className="flex flex-col items-end gap-1.5">
       <input
         value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Motif d'annulation…" maxLength={300}
-        className="w-48 rounded-xl border border-cream-300 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="w-48 rounded-xl border border-cream-300 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-full mobile:text-base"
       />
       {erreur && <p className="text-xs text-red-600">{erreur}</p>}
       <div className="flex items-center gap-1.5">
@@ -286,7 +288,7 @@ function JournalOperations({ operations, peutEcrire }: { operations: OperationVu
         <Filter size={14} className="text-ink-700/40" />
         <select
           value={filtreSens} onChange={(e) => setFiltreSens(e.target.value)}
-          className="h-9 rounded-xl border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-9 rounded-xl border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:flex-1 mobile:text-base"
         >
           <option value="tous">Tous les sens</option>
           <option value="recette">Recettes</option>
@@ -294,14 +296,14 @@ function JournalOperations({ operations, peutEcrire }: { operations: OperationVu
         </select>
         <select
           value={filtreMode} onChange={(e) => setFiltreMode(e.target.value)}
-          className="h-9 rounded-xl border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-9 rounded-xl border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:flex-1 mobile:text-base"
         >
           <option value="tous">Tous les modes</option>
           {MODES.map((m) => <option key={m} value={m}>{LIBELLE_MODE[m]}</option>)}
         </select>
         <input
           value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Rechercher…"
-          className="h-9 min-w-[140px] flex-1 rounded-xl border border-cream-300 bg-white px-3 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-9 min-w-[140px] flex-1 rounded-xl border border-cream-300 bg-white px-3 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0 mobile:basis-full mobile:text-base"
         />
       </div>
 
@@ -315,7 +317,7 @@ function JournalOperations({ operations, peutEcrire }: { operations: OperationVu
         <p className="text-sm text-ink-700/60">Aucune opération ne correspond à ces filtres.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-[760px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Date</th>
@@ -330,14 +332,14 @@ function JournalOperations({ operations, peutEcrire }: { operations: OperationVu
             <tbody className="divide-y divide-cream-100">
               {filtrees.map((o) => (
                 <tr key={o.id} className={o.annule ? "opacity-60" : ""}>
-                  <td className="whitespace-nowrap py-2 pr-2">{formatDate(o.date)}</td>
-                  <td className="py-2 pr-2">
+                  <td data-label="Date" className="whitespace-nowrap py-2 pr-2">{formatDate(o.date)}</td>
+                  <td data-label="Sens" className="py-2 pr-2">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${o.sens === "recette" ? "bg-forest-100 text-forest-800" : "bg-red-100 text-red-700"}`}>
                       {o.sens === "recette" ? "Recette" : "Dépense"}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap py-2 pr-2 text-xs text-ink-700/70">{o.categorie} — {libelleCategorie(o.categorie)}</td>
-                  <td className="py-2 pr-2">
+                  <td data-label="Catégorie" className="whitespace-nowrap py-2 pr-2 text-xs text-ink-700/70">{o.categorie} — {libelleCategorie(o.categorie)}</td>
+                  <td data-label="Libellé" className="py-2 pr-2">
                     {o.libelle}
                     {o.annule && (
                       <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-600">
@@ -345,10 +347,10 @@ function JournalOperations({ operations, peutEcrire }: { operations: OperationVu
                       </span>
                     )}
                   </td>
-                  <td className={`whitespace-nowrap py-2 pr-2 text-right font-medium ${o.sens === "recette" ? "text-forest-700" : "text-red-700"}`}>
+                  <td data-label="Montant" className={`whitespace-nowrap py-2 pr-2 text-right font-medium ${o.sens === "recette" ? "text-forest-700" : "text-red-700"}`}>
                     {o.sens === "recette" ? "+" : "−"}{fcfa(o.montant)}
                   </td>
-                  <td className="whitespace-nowrap py-2 pr-2 text-xs text-ink-700/70">{LIBELLE_MODE[o.mode] ?? o.mode}</td>
+                  <td data-label="Mode" className="whitespace-nowrap py-2 pr-2 text-xs text-ink-700/70">{LIBELLE_MODE[o.mode] ?? o.mode}</td>
                   {peutEcrire && (
                     <td className="py-2 text-right">
                       {!o.annule && <BoutonAnnulerOperation id={o.id} version={o.version} />}
@@ -584,15 +586,15 @@ function LigneArticle({
     <>
       <tr className={!article.actif ? "opacity-50" : ""}>
         <td className="py-2 pr-2 font-medium text-forest-900">{article.nom}</td>
-        <td className="py-2 pr-2 text-xs text-ink-700/70">{article.categorie ?? "—"}</td>
-        <td className="py-2 pr-2 text-right">{fcfa(article.prixVente)}</td>
-        <td className="py-2 pr-2 text-right text-ink-700/70">{article.prixAchat != null ? fcfa(article.prixAchat) : "—"}</td>
-        <td className="py-2 pr-2 text-right">
+        <td data-label="Catégorie" className="py-2 pr-2 text-xs text-ink-700/70">{article.categorie ?? "—"}</td>
+        <td data-label="Prix vente" className="py-2 pr-2 text-right">{fcfa(article.prixVente)}</td>
+        <td data-label="Prix achat" className="py-2 pr-2 text-right text-ink-700/70">{article.prixAchat != null ? fcfa(article.prixAchat) : "—"}</td>
+        <td data-label="Stock" className="py-2 pr-2 text-right">
           <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${enAlerte ? "bg-red-100 text-red-700" : "bg-cream-200 text-forest-800"}`}>
             {article.stock}
           </span>
         </td>
-        <td className="py-2 pr-2 text-center">
+        <td data-label="Actif" className="py-2 pr-2 text-center">
           {article.actif ? <Check size={15} className="mx-auto text-forest-600" /> : <X size={15} className="mx-auto text-ink-700/40" />}
         </td>
         {peutEcrire && (
@@ -678,7 +680,7 @@ function BlocArticles({
         <p className="text-sm text-ink-700/60">Aucun article enregistré.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-[760px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Nom</th>
@@ -735,7 +737,7 @@ function HistoriqueMouvements({ mouvements, entete }: { mouvements: MouvementVue
         <p className="text-sm text-ink-700/60">Aucun mouvement enregistré.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-[760px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Date</th>
@@ -752,15 +754,15 @@ function HistoriqueMouvements({ mouvements, entete }: { mouvements: MouvementVue
                 const b = BADGE_MOUVEMENT[m.type] ?? BADGE_MOUVEMENT.ajustement;
                 return (
                   <tr key={m.id}>
-                    <td className="whitespace-nowrap py-2 pr-2">{formatDate(m.date)}</td>
-                    <td className="py-2 pr-2 font-medium text-forest-900">{m.articleNom}</td>
-                    <td className="py-2 pr-2"><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${b.classe}`}>{b.libelle}</span></td>
-                    <td className="py-2 pr-2 text-right">{m.quantite}</td>
-                    <td className="py-2 pr-2 text-right">{m.montant != null ? fcfa(m.montant) : "—"}</td>
-                    <td className="py-2 text-xs text-ink-700/70">
+                    <td data-label="Date" className="whitespace-nowrap py-2 pr-2">{formatDate(m.date)}</td>
+                    <td data-label="Article" className="py-2 pr-2 font-medium text-forest-900">{m.articleNom}</td>
+                    <td data-label="Type" className="py-2 pr-2"><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${b.classe}`}>{b.libelle}</span></td>
+                    <td data-label="Quantité" className="py-2 pr-2 text-right">{m.quantite}</td>
+                    <td data-label="Montant" className="py-2 pr-2 text-right">{m.montant != null ? fcfa(m.montant) : "—"}</td>
+                    <td data-label="Acheteur / mode" className="py-2 text-xs text-ink-700/70">
                       {[m.acheteur, m.mode ? (LIBELLE_MODE[m.mode] ?? m.mode) : null].filter(Boolean).join(" · ") || "—"}
                     </td>
-                    <td className="py-2 pr-2 text-right">
+                    <td data-label="Reçu" className="py-2 pr-2 text-right">
                       {m.type === "vente" ? (
                         <button
                           type="button"
@@ -804,7 +806,7 @@ function ApercuRecuVente({
   const dateLisible = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(mouvement.date));
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -812,10 +814,10 @@ function ApercuRecuVente({
           #apercu-recu-vente-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; }
         }
       `}</style>
-      <div id="apercu-recu-vente-impression" className="mx-auto my-8 w-full max-w-lg rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="apercu-recu-vente-impression" className="mx-auto my-8 w-full max-w-lg rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Aperçu du reçu de vente</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
             <X size={18} />
           </button>
         </div>

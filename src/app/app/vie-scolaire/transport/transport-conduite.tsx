@@ -107,7 +107,7 @@ export function TransportConduite({
               value={busId}
               onChange={(e) => setBusId(e.target.value)}
               disabled={enCours}
-              className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-60"
+              className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-60 mobile:min-h-11 mobile:text-base"
             >
               {buses.map((b) => (
                 <option key={b.id} value={b.id}>
@@ -124,7 +124,7 @@ export function TransportConduite({
               <button
                 type="button"
                 onClick={demarrer}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:h-14 mobile:w-full mobile:justify-center mobile:text-base"
               >
                 <Play size={16} /> Démarrer l'émission
               </button>
@@ -132,7 +132,7 @@ export function TransportConduite({
               <button
                 type="button"
                 onClick={arreter}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-red-600 px-6 text-sm font-semibold text-cream-50 hover:bg-red-700"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-red-600 px-6 text-sm font-semibold text-cream-50 hover:bg-red-700 mobile:h-14 mobile:w-full mobile:justify-center mobile:text-base"
               >
                 <Square size={16} /> Arrêter
               </button>

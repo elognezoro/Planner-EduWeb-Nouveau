@@ -118,18 +118,23 @@ export function EditeurRiche({
     sync();
   };
 
-  const btn = "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-forest-800 hover:bg-forest-50";
+  // Téléphone : cibles de 44 px (au lieu de 32).
+  const btn = "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:w-11";
 
   return (
     <div className="rounded-xl border border-cream-300 bg-white focus-within:border-forest-400 focus-within:ring-2 focus-within:ring-forest-200">
-      {/* Barre d'outils */}
-      <div className="flex flex-wrap items-center gap-0.5 border-b border-cream-200 px-2 py-1.5">
+      {/* Barre d'outils — Téléphone : UNE seule rangée qui défile au doigt (au lieu de 4 rangées
+          empilées au-dessus d'une zone de saisie réduite à presque rien, clavier ouvert). « w-0 min-w-full » :
+          la rangée prend la largeur de l'éditeur sans jamais l'élargir (pas de défilement de page).
+          « mobile:relative » : la rangée devient le bloc conteneur de l'input couleur « sr-only » (absolu),
+          qui est alors rogné avec elle au lieu d'élargir la page. */}
+      <div className="flex flex-wrap items-center gap-0.5 border-b border-cream-200 px-2 py-1.5 rangee-defilante-mobile mobile:relative mobile:w-0 mobile:min-w-full mobile:px-1 mobile:py-1">
         <select
           aria-label="Hiérarchie des titres"
           title="Hiérarchie des titres"
           defaultValue=""
           onChange={(e) => { if (e.target.value) cmd("formatBlock", e.target.value); e.target.value = ""; }}
-          className="h-8 rounded-lg border border-cream-200 bg-white px-1.5 text-xs text-forest-800"
+          className="h-8 rounded-lg border border-cream-200 bg-white px-1.5 text-xs text-forest-800 mobile:h-11 mobile:px-2 mobile:text-sm!"
         >
           <option value="" disabled>Titre…</option>
           <option value="H2">Titre</option>
@@ -149,15 +154,15 @@ export function EditeurRiche({
             key={c.v}
             type="button"
             onClick={() => cmd("foreColor", c.v)}
-            className="inline-flex h-8 w-6 shrink-0 items-center justify-center rounded-lg hover:bg-forest-50"
+            className="inline-flex h-8 w-6 shrink-0 items-center justify-center rounded-lg hover:bg-forest-50 mobile:h-11 mobile:w-10"
             title={`Couleur : ${c.t}`}
             aria-label={`Couleur de police ${c.t}`}
           >
-            <span className="h-4 w-4 rounded-full border border-cream-300" style={{ backgroundColor: c.v }} />
+            <span className="h-4 w-4 rounded-full border border-cream-300 mobile:h-5 mobile:w-5" style={{ backgroundColor: c.v }} />
           </button>
         ))}
-        <label className="inline-flex h-8 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg hover:bg-forest-50" title="Couleur personnalisée" aria-label="Couleur de police personnalisée">
-          <span className="h-4 w-4 rounded-full border border-cream-300" style={{ background: "conic-gradient(from 0deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)" }} />
+        <label className="inline-flex h-8 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg hover:bg-forest-50 mobile:h-11 mobile:w-10" title="Couleur personnalisée" aria-label="Couleur de police personnalisée">
+          <span className="h-4 w-4 rounded-full border border-cream-300 mobile:h-5 mobile:w-5" style={{ background: "conic-gradient(from 0deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)" }} />
           <input type="color" defaultValue="#1f5134" onChange={(e) => cmd("foreColor", e.target.value)} className="sr-only" />
         </label>
         <span className="mx-1 h-5 w-px bg-cream-200" />

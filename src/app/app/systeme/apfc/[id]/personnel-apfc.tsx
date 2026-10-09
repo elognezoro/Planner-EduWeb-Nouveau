@@ -17,7 +17,7 @@ import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 import { ouvrirVersLeHaut } from "@/components/ui/direction-deroulante";
 
 const initial: EtatForm = { ok: false };
-const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 // Casse « live » (sans rognage, pour autoriser la saisie d'espaces).
 const majLive = (s: string) => s.toUpperCase();
 const titreLive = (s: string) => s.toLowerCase().replace(/(^|[\s\-'’])([a-zà-ÿ])/g, (_m, sep: string, c: string) => sep + c.toUpperCase());
@@ -88,7 +88,7 @@ function SelecteurDisciplines({
           if (!ouvert) setVersLeHaut(ouvrirVersLeHaut(ev.currentTarget));
           setOuvert((o) => !o);
         }}
-        className={`${compact ? "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300" : champCls} flex items-center justify-between text-left`}
+        className={`${compact ? "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300 mobile:h-11 mobile:text-base" : champCls} flex items-center justify-between text-left`}
       >
         <span className={`truncate ${valeurs.length === 0 ? "text-ink-700/45" : "text-ink-700/85"}`}>
           {valeurs.length === 0 ? "— (aucune)" : `${valeurs.length} sélectionnée${valeurs.length > 1 ? "s" : ""}`}
@@ -133,7 +133,10 @@ function ListeDeroulanteMultiple({
   );
 }
 
-const champLigneCls = "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300";
+const champLigneCls = "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300 mobile:h-11 mobile:text-base";
+/** Téléphone (ligne en modification, en carte) : libellé visible au-dessus de chaque champ —
+ *  l'en-tête du tableau y est masqué. Absent (display:none) sur ordinateur et à l'impression. */
+const libelleCarteCls = "hidden mobile:mb-1 mobile:block mobile:text-xs mobile:font-semibold mobile:text-ink-700/75";
 
 /**
  * Ligne du tableau — MODIFICATION en ligne (crayon → champs dans la ligne, Entrée = valider,
@@ -218,20 +221,25 @@ function LignePersonnel({
   if (edition) {
     return (
       <>
-        <tr className="border-b border-cream-100 bg-forest-50/40 last:border-0">
+        <tr className="border-b border-cream-100 bg-forest-50/40 last:border-0 mobile:bg-forest-50!">
           <td className="px-3 py-2">
+            <span aria-hidden="true" className={libelleCarteCls}>Nom</span>
             <input value={nom} onChange={(e) => setNom(majLive(e.target.value))} onKeyDown={toucheLigne} autoFocus aria-label={`Nom de ${nomComplet}`} className={champLigneCls} />
           </td>
           <td className="px-3 py-2">
+            <span aria-hidden="true" className={libelleCarteCls}>Prénoms</span>
             <input value={prenoms} onChange={(e) => setPrenoms(titreLive(e.target.value))} onKeyDown={toucheLigne} aria-label={`Prénoms de ${nomComplet}`} className={champLigneCls} />
           </td>
           <td className="px-3 py-2">
+            <span aria-hidden="true" className={libelleCarteCls}>Fonction</span>
             <input value={fonction} onChange={(e) => setFonction(e.target.value)} onKeyDown={toucheLigne} aria-label={`Fonction de ${nomComplet}`} className={champLigneCls} />
           </td>
           <td className="px-3 py-2">
+            <span aria-hidden="true" className={libelleCarteCls}>Disciplines</span>
             <SelecteurDisciplines name="disciplines-edition" options={disciplinesRef} valeurs={disciplines} onChange={setDisciplines} compact />
           </td>
           <td className="px-3 py-2">
+            <span aria-hidden="true" className={libelleCarteCls}>Contact</span>
             <span className="block space-y-1">
               <input value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={toucheLigne} type="email" placeholder="nom@exemple.ci" aria-label={`E-mail de ${nomComplet}`} className={champLigneCls} />
               <input value={telephone} onChange={(e) => setTelephone(e.target.value)} onKeyDown={toucheLigne} placeholder="01 02 03 04 05" aria-label={`Téléphone de ${nomComplet}`} className={champLigneCls} />
@@ -242,10 +250,10 @@ function LignePersonnel({
               <Loader2 size={14} className="mx-auto animate-spin text-forest-600" />
             ) : (
               <span className="inline-flex items-center gap-1">
-                <button type="button" onClick={enregistrer} title="Enregistrer" aria-label={`Enregistrer ${nomComplet}`} className="rounded-lg p-1 text-forest-700 hover:bg-forest-100">
+                <button type="button" onClick={enregistrer} title="Enregistrer" aria-label={`Enregistrer ${nomComplet}`} className="rounded-lg p-1 text-forest-700 hover:bg-forest-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
                   <Check size={14} />
                 </button>
-                <button type="button" onClick={annulerEdition} title="Annuler" aria-label="Annuler la modification" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100">
+                <button type="button" onClick={annulerEdition} title="Annuler" aria-label="Annuler la modification" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
                   <X size={14} />
                 </button>
               </span>
@@ -263,21 +271,21 @@ function LignePersonnel({
 
   return (
     <tr className="border-b border-cream-100 last:border-0">
-      <td className="px-3 py-2 font-medium text-forest-900">{p.nom}</td>
-      <td className="px-3 py-2 text-ink-700/80">{p.prenoms ?? "—"}</td>
-      <td className="px-3 py-2 text-ink-700/70">{p.fonction ?? "—"}</td>
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 font-medium text-forest-900 mobile:font-semibold">{p.nom}</td>
+      <td data-label="Prénoms" className="px-3 py-2 text-ink-700/80">{p.prenoms ?? "—"}</td>
+      <td data-label="Fonction" className="px-3 py-2 text-ink-700/70">{p.fonction ?? "—"}</td>
+      <td data-label="Disciplines" className="px-3 py-2">
         {p.disciplines.length === 0 ? (
           <span className="text-ink-700/50">—</span>
         ) : (
-          <span className="flex flex-wrap gap-1">
+          <span className="flex flex-wrap gap-1 mobile:justify-end">
             {p.disciplines.map((d) => (
               <span key={d} className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{d}</span>
             ))}
           </span>
         )}
       </td>
-      <td className="px-3 py-2 text-ink-700/70">
+      <td data-label="Contact" className="px-3 py-2 text-ink-700/70">
         {p.email ?? "—"}
         {p.telephone && <span className="block text-xs text-ink-700/50">{p.telephone}</span>}
       </td>
@@ -285,19 +293,19 @@ function LignePersonnel({
         {confirme ? (
           <span className="inline-flex items-center gap-1 whitespace-nowrap">
             <span className="text-xs font-medium text-red-700">Retirer ?</span>
-            <button type="button" disabled={occupe} onClick={onSupprimer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={onSupprimer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               {pending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
             </button>
-            <button type="button" onClick={() => setConfirme(false)} title="Annuler" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100">
+            <button type="button" onClick={() => setConfirme(false)} title="Annuler" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               <X size={14} />
             </button>
           </span>
         ) : (
           <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
-            <button type="button" disabled={occupe} onClick={ouvrirEdition} title={`Modifier ${nomComplet}`} aria-label={`Modifier ${nomComplet}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-forest-50 hover:text-forest-700 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={ouvrirEdition} title={`Modifier ${nomComplet}`} aria-label={`Modifier ${nomComplet}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-forest-50 hover:text-forest-700 disabled:opacity-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               <Pencil size={14} />
             </button>
-            <button type="button" disabled={occupe} onClick={() => setConfirme(true)} title={`Retirer ${nomComplet}`} aria-label={`Retirer ${nomComplet}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={() => setConfirme(true)} title={`Retirer ${nomComplet}`} aria-label={`Retirer ${nomComplet}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               <Trash2 size={14} />
             </button>
           </span>
@@ -362,13 +370,14 @@ function ImportPersonnelCSV({ apfcId, disciplinesRef, terme }: { apfcId: string;
     <div className="mt-3 space-y-3 border-t border-cream-100 pt-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-forest-900">{appliquerTermeApfc("Importer le personnel (CSV)", terme)}</p>
-        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100">
+        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:px-4">
           <FileDown size={13} /> Télécharger le modèle
         </button>
       </div>
 
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
+      {/* Téléphone : zone plus basse et formulation au doigt (pas de glisser-déposer). */}
       <div
         onDragOver={(e) => { e.preventDefault(); setSurvole(true); }}
         onDragLeave={() => setSurvole(false)}
@@ -377,12 +386,15 @@ function ImportPersonnelCSV({ apfcId, disciplinesRef, terme }: { apfcId: string;
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fichierRef.current?.click(); } }}
-        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors mobile:py-4 ${
           survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"
         }`}
       >
         <Upload size={20} className="mx-auto mb-1 text-forest-500" />
-        <p className="text-sm font-medium text-forest-900">Glissez-déposez le fichier CSV ici</p>
+        <p className="text-sm font-medium text-forest-900">
+          <span className="mobile:hidden">Glissez-déposez le fichier CSV ici</span>
+          <span className="hidden mobile:inline">Touchez pour choisir un fichier CSV</span>
+        </p>
         <p className="text-xs text-ink-700/55">ou cliquez pour parcourir{nomFichier ? ` · ${nomFichier}` : ""}</p>
       </div>
       <input ref={fichierRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { void chargerFichier(e.target.files?.[0]); e.target.value = ""; }} />
@@ -398,7 +410,7 @@ function ImportPersonnelCSV({ apfcId, disciplinesRef, terme }: { apfcId: string;
         onChange={(e) => { setTexte(e.target.value); setNomFichier(""); }}
         rows={3}
         placeholder={"Ou collez le CSV ici…\nnom;prenoms;fonction;disciplines;email;telephone\nKOUAMÉ;Jean Marc;Formateur;Français|Histoire-Géographie;;"}
-        className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
       />
 
       {analyse && !analyse.ok && <FormAlert ton="erreur">{analyse.messageFatal}</FormAlert>}
@@ -458,7 +470,7 @@ function ImportPersonnelCSV({ apfcId, disciplinesRef, terme }: { apfcId: string;
       <form action={action} className="flex justify-end">
         <input type="hidden" name="apfcId" value={apfcId} />
         <input type="hidden" name="texte" value={texte} />
-        <SubmitButton className="w-auto px-6" disabled={!importable}>
+        <SubmitButton className="w-auto px-6 mobile:w-full" disabled={!importable}>
           <Upload size={14} /> {importable ? `Importer ${analyse!.nbValides} personne(s)` : "Importer"}
         </SubmitButton>
       </form>
@@ -517,9 +529,11 @@ export function PersonnelApfc({
         Annuaire selon le profil disciplinaire (conseillers pédagogiques, formateurs…), avec les disciplines rattachées.
       </p>
 
+      {/* Téléphone : une carte par personne (« libellé : valeur ») ; en modification, les champs
+          s'empilent pleine largeur dans la carte. */}
       {trie.length > 0 && (
-        <div className="mb-4 max-h-72 overflow-auto rounded-xl border border-cream-100">
-          <table className="w-full border-collapse text-sm">
+        <div className="mb-4 max-h-72 overflow-auto rounded-xl border border-cream-100 mobile:max-h-none mobile:overflow-visible mobile:border-0">
+          <table className="tableau-cartes-mobile w-full border-collapse text-sm">
             <thead className="sticky top-0 bg-cream-50">
               <tr className="border-b border-cream-200 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
                 <th className="px-3 py-2">Nom</th>
@@ -556,7 +570,7 @@ export function PersonnelApfc({
         <Champ label="E-mail"><input name="email" type="email" placeholder="nom@exemple.ci" className={champCls} /></Champ>
         <Champ label="Téléphone"><input name="telephone" placeholder="01 02 03 04 05" className={champCls} /></Champ>
         <div className="flex items-end sm:col-span-2 lg:col-span-3 lg:justify-end">
-          <SubmitButton className="w-auto px-6"><Plus size={15} /> Ajouter</SubmitButton>
+          <SubmitButton className="w-auto px-6 mobile:w-full"><Plus size={15} /> Ajouter</SubmitButton>
         </div>
       </form>
 

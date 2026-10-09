@@ -6,9 +6,10 @@ import { Plus, Trash2, BookText, Clock, Target, ListTree, X, Loader2, CalendarCl
 import { creerSeanceCafop, supprimerSeanceCafop, type EtatForm } from "@/lib/formation/actions";
 import { grouperParCompetence, type ComposanteModule } from "@/lib/formation/structure-module";
 import { FormAlert } from "@/components/ui/form";
+import { ReplieMobile } from "@/app/app/inspection/replie-mobile";
 
 const initial: EtatForm = { ok: false };
-const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 const NIVEAUX = [1, 2, 3];
 
 // Casse « live » : le titre en MAJUSCULES ; sous-titres et objectifs avec seulement la 1re lettre en majuscule.
@@ -113,7 +114,7 @@ function ListeDeroulanteMultiple({
                   <p className="px-2 pb-0.5 pt-1.5 text-[0.65rem] font-bold uppercase tracking-wide text-gold-800">{s.titre}</p>
                 )}
                 {s.options.map((o) => (
-                  <label key={o} className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-cream-50 ${s.titre ? "ml-2" : ""}`}>
+                  <label key={o} className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-cream-50 mobile:min-h-11 ${s.titre ? "ml-2" : ""}`}>
                     <input type="checkbox" checked={valeurs.includes(o)} onChange={() => basculer(o)} className="h-4 w-4 rounded border-cream-300 text-forest-700 focus:ring-forest-300" />
                     <span className="text-ink-700/85">{o}</span>
                   </label>
@@ -221,8 +222,8 @@ function FormulaireSeance({
         />
       </div>
 
-      {/* Date, horaires, groupe */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Date, horaires, groupe — téléphone : 2 × 2. */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2">
         <Champ label="Date"><input name="date" type="date" required className={champCls} /></Champ>
         <Champ label="Heure de début"><input name="heureDebut" type="time" className={champCls} /></Champ>
         <Champ label="Heure de fin"><input name="heureFin" type="time" className={champCls} /></Champ>
@@ -240,7 +241,7 @@ function FormulaireSeance({
       <div className="rounded-xl border border-cream-200 bg-cream-50/50 p-3">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-sm font-semibold text-forest-900"><ListTree size={15} /> Sous-titres</span>
-          <button type="button" onClick={() => setSousTitres((l) => [...l, { niveau: 1, texte: "" }])} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+          <button type="button" onClick={() => setSousTitres((l) => [...l, { niveau: 1, texte: "" }])} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-4">
             <Plus size={13} /> Ajouter un sous-titre
           </button>
         </div>
@@ -249,12 +250,13 @@ function FormulaireSeance({
         ) : (
           <ul className="space-y-1.5">
             {sousTitres.map((st, i) => (
-              <li key={i} className="flex items-center gap-2" style={{ marginLeft: `${(st.niveau - 1) * 1.25}rem` }}>
-                <select value={st.niveau} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, niveau: Number(e.target.value) } : x)))} className="h-9 shrink-0 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400">
+              // Téléphone : niveau et × sur la 1re ligne, le champ prend toute la largeur dessous.
+              <li key={i} className="flex items-center gap-2 mobile:flex-wrap" style={{ marginLeft: `${(st.niveau - 1) * 1.25}rem` }}>
+                <select value={st.niveau} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, niveau: Number(e.target.value) } : x)))} className="h-9 shrink-0 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:text-base">
                   {NIVEAUX.map((n) => <option key={n} value={n}>Niveau {n}</option>)}
                 </select>
-                <input value={st.texte} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, texte: phraseLive(e.target.value) } : x)))} placeholder={`Sous-titre de niveau ${st.niveau}`} className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
-                <button type="button" onClick={() => setSousTitres((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600" aria-label="Retirer le sous-titre"><X size={15} /></button>
+                <input value={st.texte} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, texte: phraseLive(e.target.value) } : x)))} placeholder={`Sous-titre de niveau ${st.niveau}`} className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0 mobile:order-last mobile:basis-full" />
+                <button type="button" onClick={() => setSousTitres((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:ml-auto" aria-label="Retirer le sous-titre"><X size={15} /></button>
               </li>
             ))}
           </ul>
@@ -265,7 +267,7 @@ function FormulaireSeance({
       <div className="rounded-xl border border-cream-200 bg-cream-50/50 p-3">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 text-sm font-semibold text-forest-900"><Target size={15} /> Objectifs</span>
-          <button type="button" onClick={() => setObjectifs((l) => [...l, ""])} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+          <button type="button" onClick={() => setObjectifs((l) => [...l, ""])} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-4">
             <Plus size={13} /> Ajouter un objectif
           </button>
         </div>
@@ -276,8 +278,8 @@ function FormulaireSeance({
             {objectifs.map((o, i) => (
               <li key={i} className="flex items-center gap-2">
                 <span className="shrink-0 text-xs font-semibold text-forest-700">{i + 1}.</span>
-                <input value={o} onChange={(e) => setObjectifs((l) => l.map((x, j) => (j === i ? phraseLive(e.target.value) : x)))} placeholder="Objectif visé" className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
-                <button type="button" onClick={() => setObjectifs((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600" aria-label="Retirer l'objectif"><X size={15} /></button>
+                <input value={o} onChange={(e) => setObjectifs((l) => l.map((x, j) => (j === i ? phraseLive(e.target.value) : x)))} placeholder="Objectif visé" className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0" />
+                <button type="button" onClick={() => setObjectifs((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Retirer l'objectif"><X size={15} /></button>
               </li>
             ))}
           </ul>
@@ -294,14 +296,14 @@ function FormulaireSeance({
         <textarea name="exercices" rows={2} maxLength={500} placeholder="Énoncé ou consignes des exercices (500 caractères maximum)…" className="w-full rounded-lg border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
         <label className="mt-2 flex flex-wrap items-center gap-2">
           <span className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg border border-cream-300 bg-cream-100 px-2.5 text-xs font-semibold text-forest-800"><Link2 size={13} /> CAFOP en ligne</span>
-          <input name="exercicesUrl" type="url" placeholder="https://cfpl2.eduweb.ci" className="h-9 min-w-[14rem] flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
+          <input name="exercicesUrl" type="url" placeholder="https://cfpl2.eduweb.ci" className="h-9 min-w-[14rem] flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0 mobile:basis-full" />
         </label>
       </div>
 
-      <div className="max-w-xs"><Champ label="Prochaine séance"><input name="prochaineSeance" type="date" className={champCls} /></Champ></div>
+      <div className="max-w-xs mobile:max-w-none"><Champ label="Prochaine séance"><input name="prochaineSeance" type="date" className={champCls} /></Champ></div>
 
       <div className="flex justify-end">
-        <button type="submit" disabled={pending} className="inline-flex h-11 w-auto items-center justify-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 disabled:pointer-events-none disabled:opacity-70">
+        <button type="submit" disabled={pending} className="inline-flex h-11 w-auto items-center justify-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 disabled:pointer-events-none disabled:opacity-70 mobile:w-full">
           {pending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={15} />} Enregistrer la séance
         </button>
       </div>
@@ -347,13 +349,17 @@ export function CahierTexteCafop({
 
   return (
     <div className="space-y-6">
+      {/* Téléphone : le formulaire (≈ 1 500 px) est replié derrière « Nouvelle séance » ; les séances
+          enregistrées, que l'on consulte, viennent tout de suite après. */}
       {!lectureSeule && (
-        <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+        <ReplieMobile libelle="Nouvelle séance">
+        <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft mobile:p-4">
           <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
           <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, les composantes et les thèmes (choix multiples), puis structurez le contenu enseigné.</p>
           {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
           <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} disciplines={disciplines} action={enregistrer} pending={pendingSave} />
         </section>
+        </ReplieMobile>
       )}
 
       <section className="rounded-2xl border border-cream-200 bg-white shadow-soft">
@@ -369,7 +375,7 @@ export function CahierTexteCafop({
               const composantesMulti = (s.composantes as string[] | null) ?? null;
               const themesMulti = (s.themes as string[] | null) ?? null;
               return (
-              <li key={s.id} className="flex items-start justify-between gap-3 px-5 py-4">
+              <li key={s.id} className="flex items-start justify-between gap-3 px-5 py-4 mobile:gap-1 mobile:px-4">
                 <div className="min-w-0">
                   <p className="flex flex-wrap items-center gap-2 font-semibold text-forest-900">
                     {s.titre}
@@ -419,7 +425,7 @@ export function CahierTexteCafop({
                   )}
                 </div>
                 {!lectureSeule && (
-                  <button type="button" disabled={pendingSuppr} onClick={() => startSuppr(async () => { const r = await supprimerSeanceCafop(s.id); if (r.ok) router.refresh(); })} title="Supprimer" className="shrink-0 text-ink-700/40 hover:text-red-600 disabled:opacity-50">
+                  <button type="button" disabled={pendingSuppr} onClick={() => startSuppr(async () => { const r = await supprimerSeanceCafop(s.id); if (r.ok) router.refresh(); })} title="Supprimer" aria-label={`Supprimer la séance ${s.titre}`} className="shrink-0 text-ink-700/40 hover:text-red-600 disabled:opacity-50 mobile:-mr-2 mobile:-mt-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
                     <Trash2 size={15} />
                   </button>
                 )}

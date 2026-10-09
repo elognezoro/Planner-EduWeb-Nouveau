@@ -45,17 +45,18 @@ export function SelecteurEtablissementFinances({
   }
 
   return (
-    <Card>
+    <Card className="mobile:p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <p className="inline-flex items-center gap-2 text-sm font-semibold text-forest-900">
+        <p className="inline-flex items-center gap-2 text-sm font-semibold text-forest-900 mobile:flex-wrap">
           <Building2 size={16} className="text-forest-600" />
           {actuel ? (
-            <>Finances de : <span className="rounded-full bg-forest-50 px-3 py-1">{actuel.nom}</span></>
+            <>Finances de : <span className="rounded-full bg-forest-50 px-3 py-1 mobile:wrap-break-word">{actuel.nom}</span></>
           ) : (
             "Choisissez un établissement pour consulter ses finances."
           )}
         </p>
-        <div className="relative min-w-[280px] flex-1">
+        {/* Téléphone : le champ prend toute la largeur (280 px minimum débordaient de la carte). */}
+        <div className="relative min-w-[280px] flex-1 mobile:min-w-0 mobile:basis-full">
           <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
           <input
             value={recherche}
@@ -67,7 +68,7 @@ export function SelecteurEtablissementFinances({
               setOuvert(true);
             }}
             onBlur={() => setTimeout(() => setOuvert(false), 150)}
-            className="w-full rounded-2xl border border-cream-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="w-full rounded-2xl border border-cream-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:min-h-11 mobile:text-base"
           />
           {ouvert && (
             <div className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-2xl border border-cream-200 bg-white p-1 shadow-soft">
@@ -80,7 +81,7 @@ export function SelecteurEtablissementFinances({
                     type="button"
                     onMouseDown={(ev) => ev.preventDefault()}
                     onClick={() => choisir(e.id)}
-                    className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-forest-50"
+                    className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-forest-50 mobile:min-h-11"
                   >
                     <span className="font-medium text-forest-900">{e.nom}</span>
                     {e.ville && <span className="text-xs text-ink-700/55">{e.ville}</span>}

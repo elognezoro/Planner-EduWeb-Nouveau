@@ -10,6 +10,7 @@ import {
   enregistrerParcours, basculerPublicationParcours, supprimerParcours,
   ajouterEtape, retirerEtape, deplacerEtape,
 } from "@/app/app/aide-formation/parcours-actions";
+import { FormulaireEnFeuille, useConfirmationMobile } from "@/app/app/aide-formation/outils-mobiles";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -33,17 +34,24 @@ export function FormBadge({ badge }: { badge?: { id: string; nom: string; descri
   const [ouvert, setOuvert] = useState(false);
   useFerme(etat,() => { setOuvert(false); router.refresh(); });
 
-  if (!ouvert) {
-    return badge ? (
-      <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700" title="Modifier"><Pencil size={14} /></button>
-    ) : (
-      <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-9 items-center gap-2 rounded-full border border-forest-300 bg-white px-3 text-sm font-semibold text-forest-800 hover:bg-forest-50"><Plus size={14} /> Nouveau badge</button>
-    );
-  }
+  const declencheur = badge ? (
+    <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center" title="Modifier"><Pencil size={14} /></button>
+  ) : (
+    <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-9 items-center gap-2 rounded-full border border-forest-300 bg-white px-3 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-4"><Plus size={14} /> Nouveau badge</button>
+  );
+  // Téléphone : le formulaire se dépliait dans le coin « shrink-0 » de la carte du badge (nom
+  // écrasé, débordement horizontal) → feuille montante. Ordinateur : inchangé.
   return (
+    <FormulaireEnFeuille
+      ouvert={ouvert}
+      onFermer={() => setOuvert(false)}
+      titre={badge ? "Modifier le badge" : "Nouveau badge"}
+      declencheur={declencheur}
+      rendre={() => (
     <form action={action} className="space-y-3 rounded-2xl border border-forest-200 bg-white p-4 shadow-soft">
       {badge && <input type="hidden" name="id" value={badge.id} />}
-      <div className="flex items-center justify-between">
+      {/* Titre et fermeture déjà portés par la feuille sur téléphone. */}
+      <div className="flex items-center justify-between mobile:hidden">
         <h4 className="font-display text-sm font-bold text-forest-900">{badge ? "Modifier le badge" : "Nouveau badge"}</h4>
         <button type="button" onClick={() => setOuvert(false)} className="rounded-lg p-1 text-ink-700/40 hover:bg-cream-100"><X size={16} /></button>
       </div>
@@ -56,8 +64,10 @@ export function FormBadge({ badge }: { badge?: { id: string; nom: string; descri
           <select name="couleur" defaultValue={badge?.couleur ?? "gold"} className={champ}>{COULEURS_BADGE.map((c) => <option key={c.v} value={c.v}>{c.libelle}</option>)}</select>
         </div>
       </div>
-      <div className="flex justify-end"><SubmitButton className="w-auto px-5"><Check size={15} /> Enregistrer</SubmitButton></div>
+      <div className="flex justify-end"><SubmitButton className="w-auto px-5 mobile:w-full"><Check size={15} /> Enregistrer</SubmitButton></div>
     </form>
+      )}
+    />
   );
 }
 
@@ -74,17 +84,24 @@ export function FormParcours({ opts, parcours }: {
   const [ouvert, setOuvert] = useState(false);
   useFerme(etat,() => { setOuvert(false); router.refresh(); });
 
-  if (!ouvert) {
-    return parcours ? (
-      <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-cream-100"><Pencil size={13} /> Fiche</button>
-    ) : (
-      <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700"><Plus size={15} /> Nouveau parcours</button>
-    );
-  }
+  const declencheur = parcours ? (
+    <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:min-h-11 mobile:justify-center mobile:px-4"><Pencil size={13} /> Fiche</button>
+  ) : (
+    <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 mobile:h-11"><Plus size={15} /> Nouveau parcours</button>
+  );
+  // Téléphone : la fiche se dépliait dans l'action de l'en-tête de page, à côté de « Publier »
+  // (formulaire comprimé) → feuille montante. Ordinateur : inchangé.
   return (
+    <FormulaireEnFeuille
+      ouvert={ouvert}
+      onFermer={() => setOuvert(false)}
+      titre={parcours ? "Modifier le parcours" : "Nouveau parcours"}
+      declencheur={declencheur}
+      rendre={() => (
     <form action={action} className="space-y-3 rounded-2xl border border-forest-200 bg-white p-4 shadow-soft">
       {parcours && <input type="hidden" name="id" value={parcours.id} />}
-      <div className="flex items-center justify-between">
+      {/* Titre et fermeture déjà portés par la feuille sur téléphone. */}
+      <div className="flex items-center justify-between mobile:hidden">
         <h4 className="font-display text-sm font-bold text-forest-900">{parcours ? "Modifier le parcours" : "Nouveau parcours"}</h4>
         <button type="button" onClick={() => setOuvert(false)} className="rounded-lg p-1 text-ink-700/40 hover:bg-cream-100"><X size={16} /></button>
       </div>
@@ -106,8 +123,10 @@ export function FormParcours({ opts, parcours }: {
         </div>
       </div>
       <ChampRoles roles={opts.roles} defaut={parcours?.publicCible ?? []} />
-      <div className="flex justify-end"><SubmitButton className="w-auto px-5"><Check size={15} /> Enregistrer</SubmitButton></div>
+      <div className="flex justify-end"><SubmitButton className="w-auto px-5 mobile:w-full"><Check size={15} /> Enregistrer</SubmitButton></div>
     </form>
+      )}
+    />
   );
 }
 
@@ -115,9 +134,11 @@ function ChampRoles({ roles, defaut }: { roles: OptionRole[]; defaut: string[] }
   return (
     <div>
       <label className={label}>Public visé <span className="font-normal text-ink-700/50">(aucun coché = tous les rôles)</span></label>
-      <div className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto rounded-xl border border-cream-200 p-2 sm:grid-cols-3">
+      {/* Téléphone : liste à une colonne de cases de 44 px, sans zone défilante imbriquée
+          (le formulaire est déjà dans une feuille qui défile). */}
+      <div className="grid max-h-40 grid-cols-2 gap-1.5 overflow-y-auto rounded-xl border border-cream-200 p-2 sm:grid-cols-3 mobile:max-h-none mobile:grid-cols-1 mobile:gap-0 mobile:overflow-visible">
         {roles.map((r) => (
-          <label key={r.id} className="flex items-center gap-1.5 text-xs text-ink-800">
+          <label key={r.id} className="flex items-center gap-1.5 text-xs text-ink-800 mobile:min-h-11 mobile:gap-3 mobile:text-sm">
             <input type="checkbox" name="publicCible" value={r.id} defaultChecked={defaut.includes(r.id)} className="accent-forest-600" />
             {r.libelle}
           </label>
@@ -132,7 +153,7 @@ export function BoutonPublierParcours({ id, publie }: { id: string; publie: bool
   const [pending, start] = useTransition();
   return (
     <button type="button" disabled={pending} onClick={() => start(async () => { await basculerPublicationParcours(id, !publie); router.refresh(); })}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-40 ${publie ? "bg-forest-100 text-forest-800 hover:bg-forest-200" : "bg-gold-500 text-forest-950 hover:bg-gold-400"}`}>
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-40 mobile:min-h-11 mobile:justify-center mobile:px-4 ${publie ? "bg-forest-100 text-forest-800 hover:bg-forest-200" : "bg-gold-500 text-forest-950 hover:bg-gold-400"}`}>
       {publie ? "Dépublier" : "Publier"}
     </button>
   );
@@ -157,7 +178,7 @@ export function FormEtape({ parcoursId, coursDispo }: { parcoursId: string; cour
           {coursDispo.map((c) => <option key={c.id} value={c.id}>{c.titre}</option>)}
         </select>
       </div>
-      <SubmitButton className="w-auto px-5"><Plus size={15} /> Ajouter</SubmitButton>
+      <SubmitButton className="w-auto px-5 mobile:w-full"><Plus size={15} /> Ajouter</SubmitButton>
       {etat.message && !etat.ok && <p className="w-full text-sm font-medium text-red-600">{etat.message}</p>}
     </form>
   );
@@ -167,24 +188,32 @@ export function BoutonsOrdreEtape({ id }: { id: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const go = (sens: "haut" | "bas") => start(async () => { await deplacerEtape(id, sens); router.refresh(); });
+  // Téléphone : flèches côte à côte, 44 px chacune, en tête de la 2e ligne de la carte (order).
   return (
-    <div className="flex flex-col">
-      <button type="button" disabled={pending} onClick={() => go("haut")} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40"><ChevronUp size={15} /></button>
-      <button type="button" disabled={pending} onClick={() => go("bas")} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40"><ChevronDown size={15} /></button>
+    <div className="flex flex-col mobile:order-1 mobile:flex-row mobile:gap-1">
+      <button type="button" disabled={pending} onClick={() => go("haut")} aria-label="Monter le cours" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200 mobile:text-ink-700/60"><ChevronUp size={15} className="mobile:size-[18px]" /></button>
+      <button type="button" disabled={pending} onClick={() => go("bas")} aria-label="Descendre le cours" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200 mobile:text-ink-700/60"><ChevronDown size={15} className="mobile:size-[18px]" /></button>
     </div>
   );
 }
 
-export const SupprimerEtapeBtn = ({ id }: { id: string }) => <BoutonSupprimer action={retirerEtape} id={id} confirmation="Retirer ce cours du parcours ?" />;
+export const SupprimerEtapeBtn = ({ id }: { id: string }) => <BoutonSupprimer action={retirerEtape} id={id} confirmation="Retirer ce cours du parcours ?" libelleConfirmation="Retirer" />;
 
 // ── Bouton supprimer générique ──────────────────────────────
 
-function BoutonSupprimer({ action, id, confirmation }: { action: (id: string) => Promise<{ ok: boolean }>; id: string; confirmation: string }) {
+// « libelleConfirmation » : verbe du bouton de la feuille de confirmation (téléphone seulement ;
+// « Supprimer » par défaut). Ignoré sur ordinateur, où window.confirm est conservé.
+function BoutonSupprimer({ action, id, confirmation, libelleConfirmation }: { action: (id: string) => Promise<{ ok: boolean }>; id: string; confirmation: string; libelleConfirmation?: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  // Téléphone : confirmation dans une feuille montante (window.confirm conservé sur ordinateur).
+  const { confirmer, feuille } = useConfirmationMobile();
   return (
-    <button type="button" disabled={pending} title="Supprimer"
-      onClick={async () => { if (window.confirm(confirmation)) { setPending(true); await action(id); router.refresh(); } }}
-      className="rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"><Trash2 size={14} /></button>
+    <>
+      <button type="button" disabled={pending} title="Supprimer"
+        onClick={() => confirmer(confirmation, async () => { setPending(true); await action(id); router.refresh(); }, { libelle: libelleConfirmation })}
+        className="rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center"><Trash2 size={14} /></button>
+      {feuille}
+    </>
   );
 }

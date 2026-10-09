@@ -6,6 +6,7 @@ import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { etatFournisseurSMS } from "@/lib/sms/fournisseur";
 import { PageHeader, Card, StatCard, Badge } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
+import { TexteRepliableMobile } from "@/components/app/texte-repliable-mobile";
 import { chargerParametrage } from "@/lib/alertes/moteur";
 import { PARAMETRAGE_DEFAUT } from "@/lib/alertes/modeles";
 import { AlerteForm } from "./form";
@@ -152,7 +153,8 @@ export default async function AlertesSmsPage({
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          {/* Téléphone : les 3 compteurs sur une ligne, en tuiles compactes (icône masquée). */}
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-3 mobile:gap-2 mobile:*:flex-col mobile:*:gap-1 mobile:*:px-2 mobile:*:py-3 mobile:*:text-center mobile:[&>div>span]:hidden mobile:[&_p]:hyphens-auto mobile:[&_p]:wrap-break-word">
             <StatCard libelle="Alertes envoyées" valeur={kpis.total} icone={<Megaphone size={22} />} />
             <StatCard libelle="Réellement envoyées" valeur={kpis.envoyes} icone={<Send size={22} />} />
             <StatCard libelle="Simulées (démo)" valeur={kpis.simules} icone={<MessageSquareWarning size={22} />} ton="gold" />
@@ -197,13 +199,15 @@ export default async function AlertesSmsPage({
                   <li key={a.id} className="flex items-start justify-between gap-3 py-3">
                     <div className="min-w-0">
                       <p className="flex items-center gap-2 text-sm">
-                        <span className="rounded-full bg-cream-200 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800">
+                        <span className="rounded-full bg-cream-200 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800 mobile:text-xs">
                           {LIBELLE_TYPE[a.type] ?? a.type}
                         </span>
                         <span className="font-mono text-xs text-ink-700/60">{masquerTel(a.telephone)}</span>
                       </p>
-                      <p className="mt-1 truncate text-sm text-ink-900">{a.contenu}</p>
-                      <p className="mt-0.5 text-[0.65rem] text-ink-700/45">{dateHeure(a.date)}</p>
+                      {/* Téléphone : SMS limité à 3 lignes, « Lire la suite » s'il dépasse (pas de survol au
+                          doigt). Ordinateur/impression : même <p> tronqué qu'avant. */}
+                      <TexteRepliableMobile className="mt-1 truncate text-sm text-ink-900 mobile:whitespace-normal">{a.contenu}</TexteRepliableMobile>
+                      <p className="mt-0.5 text-[0.65rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">{dateHeure(a.date)}</p>
                     </div>
                     <Badge ton={a.statut === "envoye" ? "succes" : a.statut === "echec" ? "refus" : "attente"}>
                       {a.statut === "envoye" ? "Envoyé" : a.statut === "echec" ? "Échec" : "Simulé"}

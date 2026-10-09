@@ -1,6 +1,8 @@
 "use client";
 
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { useEcranMobile, useImpressionDepuisEcranMobile } from "@/lib/mobile/appareil";
+import { ClassementBarres } from "@/components/app/mobile/graphiques-mobiles";
 
 /**
  * Graphique des statistiques générales de la supervision APFC : barres HORIZONTALES
@@ -28,7 +30,22 @@ export function ChartTopAntennes({
   data: { nom: string; valeur: number }[];
   nomSerie: string;
 }) {
+  const mobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
   if (data.length === 0) return null;
+  // Téléphone : l'axe des noms (172 px) ne laissait qu'environ 50 px aux barres. Classement
+  // lisible (noms complets, valeurs affichées) ; l'ordinateur et le papier gardent le Recharts.
+  // « Établissements couverts » → « établissements » : le titre du bloc précise déjà la série.
+  if (mobile) {
+    return (
+      <ClassementBarres
+        donnees={data.map((d) => ({ libelle: d.nom, valeur: d.valeur, couleur: "#34855c" }))}
+        unite={nomSerie.split(" ")[0].toLowerCase()}
+        limite={10}
+      />
+    );
+  }
   // Hauteur proportionnelle au nombre de barres : compacte mais jamais écrasée.
   const hauteur = Math.max(150, data.length * 32 + 36);
   return (
@@ -53,7 +70,7 @@ export function ChartTopAntennes({
           interval={0}
         />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#f0f8f3" }} />
-        <Bar dataKey="valeur" name={nomSerie} fill="#34855c" radius={[0, 4, 4, 0]} maxBarSize={18} />
+        <Bar isAnimationActive={impression ? false : undefined} dataKey="valeur" name={nomSerie} fill="#34855c" radius={[0, 4, 4, 0]} maxBarSize={18} />
       </BarChart>
     </ResponsiveContainer>
   );

@@ -121,14 +121,14 @@ export default async function GrilleImprimablePage({ params }: { params: Promise
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Link
           href={`/app/inspection/visites/${visite.id}/grille`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:min-h-11"
         >
           <ArrowLeft size={15} /> Retour à la grille
         </Link>
         <BoutonImprimerEdt />
       </div>
 
-      <div className="grille-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8">
+      <div className="grille-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8 mobile:p-4">
         <style
           dangerouslySetInnerHTML={{
             __html: `@media print { @page { size: A4 portrait; margin: 10mm; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .grille-feuille { border: 0 !important; box-shadow: none !important; padding: 0 !important; } }`,
@@ -205,6 +205,10 @@ export default async function GrilleImprimablePage({ params }: { params: Promise
         <p className="mt-4 text-xs text-ink-700/65">
           Échelle d&apos;appréciation : {ECHELLE.map((e) => `${e.code} = ${e.libelle}`).join(" · ")}.
         </p>
+        {/* Téléphone seulement (jamais imprimé) : la fiche garde ses tableaux officiels. */}
+        <p className="mt-2 hidden rounded-lg bg-cream-50 px-3 py-2 text-xs text-ink-700/70 mobile:block">
+          Fiche au format papier : faites glisser les tableaux du doigt pour les parcourir, ou utilisez « Imprimer » pour l&apos;enregistrer en PDF.
+        </p>
 
         {/* Les 4 compétences : la case de l'appréciation retenue est cochée (✓), les autres vides. */}
         {COMPETENCES.map((comp) => (
@@ -279,7 +283,7 @@ export default async function GrilleImprimablePage({ params }: { params: Promise
                 {s.texte ? (
                   <p className="mt-1 whitespace-pre-wrap text-sm text-ink-900">{s.texte}</p>
                 ) : (
-                  <p aria-hidden className="mt-1 tracking-widest text-ink-700/45">
+                  <p aria-hidden className="mt-1 tracking-widest text-ink-700/45 mobile:overflow-hidden mobile:whitespace-nowrap">
                     …………………………………………………………………………………………………………………………
                   </p>
                 )}

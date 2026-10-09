@@ -10,6 +10,7 @@ import {
   regenererTokenInvitationCours,
   supprimerInvitationCours,
 } from "./invitation-cours-actions";
+import { BoutonPartagerMobile, useConfirmationMobile } from "./outils-mobiles";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -44,18 +45,25 @@ function LigneLien({ inv }: { inv: LienInvitation }) {
       /* presse-papiers indisponible : l'utilisateur peut sélectionner le champ */
     }
   };
-  const agir = (fn: () => Promise<unknown>, confirmer?: string) => {
-    if (confirmer && !window.confirm(confirmer)) return;
-    start(async () => { await fn(); router.refresh(); });
+  // Téléphone : confirmation dans une feuille montante (window.confirm conservé sur ordinateur).
+  const { confirmer: demanderConfirmation, feuille } = useConfirmationMobile();
+  const agir = (fn: () => Promise<unknown>, confirmer?: string, libelle?: string) => {
+    const lancer = () => start(async () => { await fn(); router.refresh(); });
+    if (confirmer) demanderConfirmation(confirmer, lancer, libelle ? { libelle, danger: false } : undefined);
+    else lancer();
   };
 
   return (
     <div className={`rounded-xl border p-3 ${inv.actif ? "border-cream-200 bg-white" : "border-cream-200 bg-cream-50/60 opacity-70"}`}>
-      <div className="flex flex-wrap items-center gap-2">
-        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={`${champ} flex-1 min-w-[220px] font-mono text-xs`} />
-        <button type="button" onClick={copier} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-3 py-2 text-xs font-semibold text-white hover:bg-forest-700">
+      {/* Téléphone : champ en 16 px (pas de zoom iOS au toucher), « Copier » et « Partager »
+          côte à côte sous le lien. Le « ! » est nécessaire : « .cours-agrandi .text-xs », hors
+          couche, battrait sinon les tailles mobile: (le composant est rendu dans .cours-agrandi). */}
+      <div className="flex flex-wrap items-center gap-2 mobile:grid mobile:grid-cols-2">
+        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={`${champ} flex-1 min-w-[220px] font-mono text-xs mobile:col-span-2 mobile:h-11 mobile:min-w-0 mobile:text-base!`} />
+        <button type="button" onClick={copier} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-3 py-2 text-xs font-semibold text-white hover:bg-forest-700 mobile:min-h-11 mobile:justify-center mobile:text-sm!">
           {copie ? <Check size={14} /> : <Copy size={14} />} {copie ? "Copié" : "Copier"}
         </button>
+        <BoutonPartagerMobile url={url} titre="Lien d'inscription à la formation" />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-700/60">
         {inv.roleCible === "formateur" && <span className="rounded-full bg-gold-100 px-2 py-0.5 font-semibold text-gold-800">Formateur / Tuteur</span>}
@@ -63,17 +71,18 @@ function LigneLien({ inv }: { inv: LienInvitation }) {
         {inv.placesMax != null && <span>plafond : {inv.placesMax} place(s)</span>}
         {inv.expiration && <span>expire le {new Date(inv.expiration).toLocaleDateString("fr-FR")}</span>}
       </div>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap gap-2 mobile:grid mobile:grid-cols-2 mobile:[&>button]:min-h-11 mobile:[&>button]:justify-center mobile:[&>button]:text-sm">
         <button type="button" disabled={pending} onClick={() => agir(() => basculerInvitationCours(inv.id))} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-ink-800 hover:bg-cream-100 disabled:opacity-50">
           <Power size={12} /> {inv.actif ? "Désactiver" : "Réactiver"}
         </button>
-        <button type="button" disabled={pending} onClick={() => agir(() => regenererTokenInvitationCours(inv.id), "Générer un nouveau lien ? L'ancien cessera de fonctionner.")} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-ink-800 hover:bg-cream-100 disabled:opacity-50">
+        <button type="button" disabled={pending} onClick={() => agir(() => regenererTokenInvitationCours(inv.id), "Générer un nouveau lien ? L'ancien cessera de fonctionner.", "Générer un nouveau lien")} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-ink-800 hover:bg-cream-100 disabled:opacity-50">
           <RefreshCw size={12} /> Nouveau lien
         </button>
-        <button type="button" disabled={pending} onClick={() => agir(() => supprimerInvitationCours(inv.id), "Supprimer ce lien d'inscription ?")} className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50">
+        <button type="button" disabled={pending} onClick={() => agir(() => supprimerInvitationCours(inv.id), "Supprimer ce lien d'inscription ?")} className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 mobile:col-span-2">
           {pending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} Supprimer
         </button>
       </div>
+      {feuille}
     </div>
   );
 }
@@ -87,7 +96,7 @@ export function GestionLiensInscription({ coursId, invitations, nbInscritsViaLie
 
   return (
     <details className="rounded-3xl border border-cream-200 bg-white p-4 shadow-soft">
-      <summary className="flex cursor-pointer list-none items-center gap-2 font-display text-sm font-bold text-forest-900">
+      <summary className="flex cursor-pointer list-none items-center gap-2 font-display text-sm font-bold text-forest-900 mobile:min-h-11 mobile:[&::-webkit-details-marker]:hidden">
         <Link2 size={16} className="text-forest-600" /> Lien d&apos;inscription à partager {invitations.length > 0 ? `(${invitations.length})` : ""}
       </summary>
       <div className="mt-3 space-y-3">
@@ -108,7 +117,7 @@ export function GestionLiensInscription({ coursId, invitations, nbInscritsViaLie
         )}
 
         {!ouvert ? (
-          <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-2 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-700">
+          <button type="button" onClick={() => setOuvert(true)} className="inline-flex items-center gap-2 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-700 mobile:min-h-11 mobile:w-full mobile:justify-center">
             <Plus size={15} /> Générer un lien d&apos;inscription
           </button>
         ) : (
@@ -117,7 +126,7 @@ export function GestionLiensInscription({ coursId, invitations, nbInscritsViaLie
             {roleCible && <input type="hidden" name="roleCible" value={roleCible} />}
             <div className="flex items-center justify-between">
               <h3 className="font-display text-sm font-bold text-forest-900">Nouveau lien d&apos;inscription</h3>
-              <button type="button" onClick={() => setOuvert(false)} className="rounded-lg p-1 text-ink-700/40 hover:bg-cream-100"><X size={16} /></button>
+              <button type="button" onClick={() => setOuvert(false)} className="rounded-lg p-1 text-ink-700/40 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"><X size={16} /></button>
             </div>
             {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
             <div className="grid gap-3 sm:grid-cols-2">
@@ -130,7 +139,7 @@ export function GestionLiensInscription({ coursId, invitations, nbInscritsViaLie
                 <input name="expiration" type="date" className={champ} />
               </label>
             </div>
-            <div className="flex justify-end"><SubmitButton className="w-auto px-5">Générer le lien</SubmitButton></div>
+            <div className="flex justify-end"><SubmitButton className="w-auto px-5 mobile:w-full">Générer le lien</SubmitButton></div>
           </form>
         )}
       </div>

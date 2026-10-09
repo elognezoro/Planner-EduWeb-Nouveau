@@ -60,7 +60,11 @@ export function BusMap({
       const leaflet = await import("leaflet");
       if (cancelled || !ref.current || mapRef.current) return;
       const start: [number, number] = center ? [center.lat, center.lng] : FALLBACK;
-      const map = leaflet.map(ref.current, { zoomControl: true }).setView(start, 13);
+      // Téléphone / tablette au doigt : pas de déplacement à un doigt (il bloquait le défilement
+      // de la page) ; le pincement zoome toujours, et la carte se recentre sur les cars.
+      const tactileCompact =
+        window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(min-width: 64rem)").matches;
+      const map = leaflet.map(ref.current, { zoomControl: true, dragging: !tactileCompact }).setView(start, 13);
       leaflet
         .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,

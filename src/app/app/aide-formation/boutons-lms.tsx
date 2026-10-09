@@ -12,7 +12,7 @@ export function BoutonInscription({ coursId, slug, inscrit, clos = false }: { co
   // Inscriptions closes et non déjà inscrit : plus de nouvelle inscription possible (cohérent avec le serveur).
   if (!inscrit && clos) {
     return (
-      <span className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-full border border-cream-300 bg-cream-50 px-5 text-sm font-semibold text-ink-700/60" title="La date de clôture des inscriptions est dépassée.">
+      <span className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-full border border-cream-300 bg-cream-50 px-5 text-sm font-semibold text-ink-700/60 mobile:h-11 mobile:w-full mobile:justify-center" title="La date de clôture des inscriptions est dépassée.">
         <Lock size={15} /> Inscriptions closes
       </span>
     );
@@ -27,7 +27,8 @@ export function BoutonInscription({ coursId, slug, inscrit, clos = false }: { co
           router.push(`/app/aide-formation/cours/${slug}`);
         })
       }
-      className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60"
+      // Téléphone : appel à l'action pleine largeur de 44 px en pied de carte du catalogue.
+      className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60 mobile:h-11 mobile:w-full mobile:justify-center"
     >
       {pending ? <Loader2 size={15} className="animate-spin" /> : <PlayCircle size={16} />}
       {inscrit ? "Continuer" : "Commencer"}
@@ -44,7 +45,9 @@ export function BoutonLecon({ moduleId, termine }: { moduleId: string; termine: 
       type="button"
       disabled={pending}
       onClick={() => start(async () => { await marquerModule(moduleId, !termine); router.refresh(); })}
-      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors disabled:opacity-60 ${
+      // Téléphone : cible de 44 px. Le « ! » est nécessaire : « .cours-agrandi .text-xs », hors
+      // couche, battrait sinon mobile:text-sm (le bouton est rendu dans .cours-agrandi).
+      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors disabled:opacity-60 mobile:min-h-11 mobile:text-sm! ${
         termine ? "bg-forest-600 text-white hover:bg-forest-700" : "border border-cream-300 text-ink-700/70 hover:bg-cream-100"
       }`}
     >
@@ -72,7 +75,7 @@ export function BoutonSession({ sessionId, inscrit, complet }: { sessionId: stri
             else { setMessage(null); router.refresh(); }
           })
         }
-        className={`inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors disabled:opacity-60 ${
+        className={`inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors disabled:opacity-60 mobile:h-11 ${
           inscrit ? "border border-cream-300 text-ink-700/70 hover:bg-cream-100" : "bg-forest-600 text-white hover:bg-forest-700"
         }`}
       >

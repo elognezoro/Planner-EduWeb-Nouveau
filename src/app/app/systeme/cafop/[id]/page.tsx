@@ -72,7 +72,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
+      <EnteteCafop compactMobile ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="config" terme={terme} />
       <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} enseignants={enseignants} profsPrincipaux={profsPrincipaux} paysArmoiries={pays} terme={terme} lectureSeule={lectureSeule} />
     </div>

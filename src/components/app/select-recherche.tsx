@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 
 /** Normalise pour une recherche insensible à la casse et aux accents. */
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -50,6 +51,22 @@ export function SelectRecherche({
   const [surbrillance, setSurbrillance] = useState(0);
   const conteneur = useRef<HTMLDivElement>(null);
   const listeId = useId();
+  const ecranMobile = useEcranMobile();
+
+  /** Téléphone : le clavier masque le bas de l'écran. Si la liste n'a pas la place de s'ouvrir
+   *  sous le champ, on remonte le champ en haut de la zone visible (sous l'en-tête mobile). */
+  const degagerPourLaListe = () => {
+    if (!ecranMobile) return;
+    window.setTimeout(() => {
+      const el = conteneur.current;
+      if (!el) return;
+      // Bas de la zone réellement visible (clavier déduit), dans le repère de getBoundingClientRect.
+      const vv = window.visualViewport;
+      const basVisible = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      // 240 px ≈ hauteur maximale de la liste (max-h-56) + sa marge.
+      if (el.getBoundingClientRect().bottom + 240 > basVisible) el.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 300);
+  };
 
   // Fermeture au clic extérieur ; le champ reflète alors la sélection (ou se vide).
   // En mode valeurLibre, le texte tapé EST une valeur valide : on ne l'efface jamais.
@@ -89,7 +106,7 @@ export function SelectRecherche({
   const proposeLibre = texteLibre !== "" && !options.some((o) => norm(o.nom) === norm(texteLibre));
 
   return (
-    <div ref={conteneur} className={cn("relative", className)}>
+    <div ref={conteneur} className={cn("relative mobile:scroll-mt-[calc(4.5rem+var(--marge-sure-haut,0px))]", className)}>
       <div className="relative">
         <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
         <input
@@ -109,7 +126,10 @@ export function SelectRecherche({
             setOuvert(true);
             setSurbrillance(0);
           }}
-          onFocus={() => setOuvert(true)}
+          onFocus={() => {
+            setOuvert(true);
+            degagerPourLaListe();
+          }}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") { e.preventDefault(); setOuvert(true); setSurbrillance((s) => Math.min(s + 1, filtres.length - 1)); }
             else if (e.key === "ArrowUp") { e.preventDefault(); setSurbrillance((s) => Math.max(s - 1, 0)); }
@@ -119,8 +139,11 @@ export function SelectRecherche({
           }}
           className={cn(
             "w-full border border-cream-300 bg-white text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70",
+            // Téléphone : champ de 44 px de haut (cible tactile), place pour le bouton d'effacement agrandi.
+            "mobile:h-11",
             grand ? "h-11 rounded-2xl pl-9" : "h-9 rounded-lg pl-8",
-            effacable && selection.id ? (grand ? "pr-14" : "pr-12") : grand ? "pr-9" : "pr-8",
+            effacable && selection.id ? (grand ? "pr-14 mobile:pr-16" : "pr-12 mobile:pr-16") : grand ? "pr-9" : "pr-8",
+            effacable && !selection.id && valeurLibre && query && "mobile:pr-16",
           )}
         />
         {effacable && !disabled && (selection.id || (valeurLibre && query)) && (
@@ -129,7 +152,7 @@ export function SelectRecherche({
             onClick={effacer}
             aria-label="Effacer la sélection"
             className={cn(
-              "absolute top-1/2 -translate-y-1/2 rounded-full p-0.5 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700",
+              "absolute top-1/2 -translate-y-1/2 rounded-full p-0.5 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700 mobile:p-2",
               grand ? "right-8" : "right-7",
             )}
           >
@@ -148,7 +171,7 @@ export function SelectRecherche({
               <button
                 type="button"
                 onClick={() => choisir({ id: texteLibre, nom: texteLibre })}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-forest-800 hover:bg-forest-50"
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:py-2.5"
               >
                 Utiliser « {texteLibre} »
               </button>
@@ -165,10 +188,12 @@ export function SelectRecherche({
                   onClick={() => choisir(o)}
                   className={cn(
                     "flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm",
+                    // Téléphone : options de 44 px, noms longs (établissements) sur plusieurs lignes.
+                    "mobile:min-h-11 mobile:py-2.5",
                     i === surbrillance ? "bg-forest-50 text-forest-900" : "text-ink-800 hover:bg-cream-100",
                   )}
                 >
-                  <span className="truncate">{o.nom}</span>
+                  <span className="truncate mobile:whitespace-normal mobile:leading-snug mobile:[overflow-wrap:anywhere]">{o.nom}</span>
                   {o.id === selection.id && <Check size={14} className="shrink-0 text-forest-600" />}
                 </button>
               </li>

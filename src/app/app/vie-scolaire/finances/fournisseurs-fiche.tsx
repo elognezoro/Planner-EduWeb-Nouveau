@@ -84,10 +84,10 @@ export function SectionFournisseursRiche({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-2 mobile:[&>div]:p-3 mobile:[&_p+p]:tabular-nums mobile:[&_p+p]:wrap-anywhere">
         {stats.map((s) => (
           <div key={s.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55">{s.libelle}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/75">{s.libelle}</p>
             <p className={`mt-1 font-display text-base font-bold ${s.alerte ? "text-amber-700" : "text-forest-900"}`}>{s.valeur}</p>
           </div>
         ))}
@@ -117,7 +117,7 @@ export function SectionFournisseursRiche({
             <button
               type="button"
               onClick={() => { setEnEdition(null); setFormOuvert((v) => !v); }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-3.5 py-1.5 text-xs font-semibold text-cream-50 hover:bg-forest-700"
+              className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-3.5 py-1.5 text-xs font-semibold text-cream-50 hover:bg-forest-700 mobile:min-h-11 mobile:px-4"
             >
               <Plus size={13} /> Nouveau fournisseur
             </button>
@@ -292,8 +292,9 @@ function FicheFournisseur({
     <li className="rounded-2xl border border-cream-200 bg-white p-3.5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900">
-            <button type="button" onClick={() => setOuverte((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50" aria-label="Fiche">
+          {/* Téléphone : pastilles en 14 px, flèche d'ouverture de la fiche de 44 px. */}
+          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900 mobile:[&>span]:text-xs">
+            <button type="button" onClick={() => setOuverte((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50 mobile:-my-2 mobile:-ml-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Fiche">
               {ouverte ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
             <span className="font-mono text-xs">{f.code}</span> {f.raisonSociale}
@@ -333,7 +334,7 @@ function FicheFournisseur({
           </p>
         </div>
         {peutGerer && (
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 mobile:w-full mobile:gap-2 mobile:[&_button]:min-h-11 mobile:[&_button]:px-3.5 mobile:[&_button]:text-xs">
             {f.statut !== "archive" && (
               <button type="button" onClick={onModifier} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
                 <Pencil size={11} /> Modifier
@@ -357,8 +358,8 @@ function FicheFournisseur({
               />
             ))}
             {(transitions.includes("suspendu") || transitions.includes("archive")) && (
-              <span className="inline-flex items-center gap-1">
-                <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-8 w-32 text-xs" />
+              <span className="inline-flex items-center gap-1 mobile:w-full mobile:flex-wrap mobile:gap-2">
+                <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif…" className="h-8 w-32 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
                 {transitions.includes("suspendu") && (
                   <BoutonActionConfirmee
                     libelle="Suspendre" icone={Ban} ton="danger" action={changerEtatFournisseur}
@@ -390,13 +391,13 @@ function FicheFournisseur({
 
       {ouverte && (
         <div className="mt-3 space-y-3 rounded-xl bg-cream-50/70 p-3">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 rangee-defilante-mobile">
             {volets.map((v) => (
               <button
                 key={v.cle}
                 type="button"
                 onClick={() => setVolet(v.cle)}
-                className={`inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[11px] font-semibold ${
+                className={`inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[11px] font-semibold mobile:h-11 mobile:text-xs ${
                   volet === v.cle ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-100"
                 }`}
               >
@@ -492,7 +493,7 @@ function VoletContacts({
           <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cream-200 bg-white px-2.5 py-1.5">
             <span>
               <strong>{c.nom}</strong>{c.fonction ? ` (${c.fonction})` : ""} — {[c.telephone, c.email].filter(Boolean).join(" · ") || "—"}
-              {c.principal && <span className="ml-1.5 rounded-full bg-forest-50 px-1.5 py-0.5 text-[10px] font-bold text-forest-800">PRINCIPAL</span>}
+              {c.principal && <span className="ml-1.5 rounded-full bg-forest-50 px-1.5 py-0.5 text-[10px] font-bold text-forest-800 mobile:text-xs">PRINCIPAL</span>}
             </span>
             {peutGerer && (
               <BoutonActionConfirmee
@@ -507,11 +508,11 @@ function VoletContacts({
           <form action={actionContact} className="grid gap-2 rounded-lg border border-cream-200 bg-white p-2.5 sm:grid-cols-2">
             <input type="hidden" name="etablissementId" value={etablissementId} />
             <input type="hidden" name="fournisseurId" value={f.id} />
-            <Input name="nom" required maxLength={80} placeholder="Nom *" className="h-8 text-xs" />
-            <Input name="fonction" maxLength={80} placeholder="Fonction" className="h-8 text-xs" />
-            <Input name="telephone" maxLength={30} placeholder="Téléphone" className="h-8 text-xs" />
-            <Input name="email" type="email" maxLength={120} placeholder="E-mail" className="h-8 text-xs" />
-            <Select name="principal" defaultValue="non" className="h-8 text-xs">
+            <Input name="nom" required maxLength={80} placeholder="Nom *" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="fonction" maxLength={80} placeholder="Fonction" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="telephone" maxLength={30} placeholder="Téléphone" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="email" type="email" maxLength={120} placeholder="E-mail" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Select name="principal" defaultValue="non" className="h-8 text-xs mobile:h-11 mobile:text-base">
               <option value="non">Contact secondaire</option>
               <option value="oui">Contact PRINCIPAL</option>
             </Select>
@@ -528,7 +529,7 @@ function VoletContacts({
             <span>
               <strong>{c.banque}</strong>{c.agence ? ` (${c.agence})` : ""} —{" "}
               {[c.numeroCompte, c.iban, c.mobileMoney ? `MM ${c.mobileMoney}` : null].filter(Boolean).join(" · ") || "—"}
-              {c.principal && <span className="ml-1.5 rounded-full bg-forest-50 px-1.5 py-0.5 text-[10px] font-bold text-forest-800">PRINCIPAL</span>}
+              {c.principal && <span className="ml-1.5 rounded-full bg-forest-50 px-1.5 py-0.5 text-[10px] font-bold text-forest-800 mobile:text-xs">PRINCIPAL</span>}
             </span>
             {peutGerer && (
               <BoutonActionConfirmee
@@ -543,13 +544,13 @@ function VoletContacts({
           <form action={actionCompte} className="grid gap-2 rounded-lg border border-cream-200 bg-white p-2.5 sm:grid-cols-2">
             <input type="hidden" name="etablissementId" value={etablissementId} />
             <input type="hidden" name="fournisseurId" value={f.id} />
-            <Input name="banque" required maxLength={80} placeholder="Banque *" className="h-8 text-xs" />
-            <Input name="agence" maxLength={80} placeholder="Agence" className="h-8 text-xs" />
-            <Input name="numeroCompte" maxLength={40} placeholder="N° de compte" className="h-8 text-xs" />
-            <Input name="iban" maxLength={40} placeholder="IBAN" className="h-8 text-xs" />
-            <Input name="swift" maxLength={20} placeholder="SWIFT/BIC" className="h-8 text-xs" />
-            <Input name="mobileMoney" maxLength={30} placeholder="Mobile Money Business" className="h-8 text-xs" />
-            <Select name="principal" defaultValue="non" className="h-8 text-xs">
+            <Input name="banque" required maxLength={80} placeholder="Banque *" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="agence" maxLength={80} placeholder="Agence" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="numeroCompte" maxLength={40} placeholder="N° de compte" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="iban" maxLength={40} placeholder="IBAN" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="swift" maxLength={20} placeholder="SWIFT/BIC" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Input name="mobileMoney" maxLength={30} placeholder="Mobile Money Business" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+            <Select name="principal" defaultValue="non" className="h-8 text-xs mobile:h-11 mobile:text-base">
               <option value="non">Compte secondaire</option>
               <option value="oui">Compte PRINCIPAL</option>
             </Select>
@@ -580,8 +581,8 @@ function VoletDocuments({
           <span>
             <strong>{libelleDocument(d.type)}</strong> v{d.numeroVersion}
             {d.reference ? ` · ${d.reference}` : ""} · émis {dateFr(d.dateEmission)} · expire {dateFr(d.dateExpiration)}
-            {d.expire && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600">EXPIRÉ (RM-1003)</span>}
-            {d.expireBientot && <span className="ml-1.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">EXPIRE BIENTÔT</span>}
+            {d.expire && <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600 mobile:text-xs">EXPIRÉ (RM-1003)</span>}
+            {d.expireBientot && <span className="ml-1.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 mobile:text-xs">EXPIRE BIENTÔT</span>}
           </span>
           {peutGerer && (
             <BoutonActionConfirmee
@@ -597,12 +598,12 @@ function VoletDocuments({
         <form action={action} className="grid gap-2 rounded-lg border border-cream-200 bg-white p-2.5 sm:grid-cols-2 lg:grid-cols-5">
           <input type="hidden" name="etablissementId" value={etablissementId} />
           <input type="hidden" name="fournisseurId" value={f.id} />
-          <Select name="type" defaultValue="rccm" className="h-8 text-xs">
+          <Select name="type" defaultValue="rccm" className="h-8 text-xs mobile:h-11 mobile:text-base">
             {TYPES_DOCUMENT_FOURNISSEUR.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}
           </Select>
-          <Input name="reference" maxLength={120} placeholder="Référence" className="h-8 text-xs" />
-          <Input name="dateEmission" type="date" className="h-8 text-xs" />
-          <Input name="dateExpiration" type="date" className="h-8 text-xs" />
+          <Input name="reference" maxLength={120} placeholder="Référence" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+          <Input name="dateEmission" type="date" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+          <Input name="dateExpiration" type="date" className="h-8 text-xs mobile:h-11 mobile:text-base" />
           <SubmitButton>Ajouter</SubmitButton>
           {etat.message && <div className="sm:col-span-2 lg:col-span-5"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
         </form>
@@ -639,7 +640,7 @@ function VoletContrats({
               <strong>{c.reference}</strong> — {c.objet} · du {dateFr(c.dateDebut)} au {dateFr(c.dateFin)}
               {c.montant !== null ? ` · ${fcfa(c.montant)}` : ""}
               {" "}· {RENOUVELLEMENTS_CONTRAT.find((r) => r.code === c.renouvellement)?.libelle}
-              <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${badge.classe}`}>{badge.libelle}</span>
+              <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${badge.classe}`}>{badge.libelle}</span>
             </span>
             {peutGerer && (
               <BoutonActionConfirmee
@@ -656,23 +657,23 @@ function VoletContrats({
         <form action={action} className="grid gap-2 rounded-lg border border-cream-200 bg-white p-2.5 sm:grid-cols-2 lg:grid-cols-4">
           <input type="hidden" name="etablissementId" value={etablissementId} />
           <input type="hidden" name="fournisseurId" value={f.id} />
-          <Input name="reference" required maxLength={60} placeholder="Référence *" className="h-8 text-xs" />
-          <Input name="objet" required maxLength={200} placeholder="Objet *" className="h-8 text-xs" />
+          <Input name="reference" required maxLength={60} placeholder="Référence *" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+          <Input name="objet" required maxLength={200} placeholder="Objet *" className="h-8 text-xs mobile:h-11 mobile:text-base" />
           <div>
-            <Label htmlFor={`ct-debut-${f.id}`} className="text-[10px]">Début *</Label>
-            <Input id={`ct-debut-${f.id}`} name="dateDebut" type="date" required className="h-8 text-xs" />
+            <Label htmlFor={`ct-debut-${f.id}`} className="text-[10px] mobile:text-xs">Début *</Label>
+            <Input id={`ct-debut-${f.id}`} name="dateDebut" type="date" required className="h-8 text-xs mobile:h-11 mobile:text-base" />
           </div>
           <div>
-            <Label htmlFor={`ct-fin-${f.id}`} className="text-[10px]">Fin</Label>
-            <Input id={`ct-fin-${f.id}`} name="dateFin" type="date" className="h-8 text-xs" />
+            <Label htmlFor={`ct-fin-${f.id}`} className="text-[10px] mobile:text-xs">Fin</Label>
+            <Input id={`ct-fin-${f.id}`} name="dateFin" type="date" className="h-8 text-xs mobile:h-11 mobile:text-base" />
           </div>
-          <Input name="montant" type="number" min={1} placeholder="Montant (FCFA)" className="h-8 text-xs" />
-          <Input name="conditionsPaiement" maxLength={160} placeholder="Conditions de paiement" className="h-8 text-xs" />
-          <Input name="penalites" maxLength={200} placeholder="Pénalités" className="h-8 text-xs" />
-          <Select name="renouvellement" defaultValue="aucun" className="h-8 text-xs">
+          <Input name="montant" type="number" min={1} placeholder="Montant (FCFA)" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+          <Input name="conditionsPaiement" maxLength={160} placeholder="Conditions de paiement" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+          <Input name="penalites" maxLength={200} placeholder="Pénalités" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+          <Select name="renouvellement" defaultValue="aucun" className="h-8 text-xs mobile:h-11 mobile:text-base">
             {RENOUVELLEMENTS_CONTRAT.map((r) => <option key={r.code} value={r.code}>{r.libelle}</option>)}
           </Select>
-          <Input name="documentReference" maxLength={120} placeholder="Réf. du document signé" className="h-8 text-xs" />
+          <Input name="documentReference" maxLength={120} placeholder="Réf. du document signé" className="h-8 text-xs mobile:h-11 mobile:text-base" />
           <SubmitButton>Enregistrer le contrat</SubmitButton>
           {etat.message && <div className="sm:col-span-2 lg:col-span-4"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
         </form>
@@ -720,16 +721,16 @@ function VoletEvaluations({
         <form action={action} className="grid gap-2 rounded-lg border border-cream-200 bg-white p-2.5 sm:grid-cols-2 lg:grid-cols-4">
           <input type="hidden" name="etablissementId" value={etablissementId} />
           <input type="hidden" name="fournisseurId" value={f.id} />
-          <Input name="periode" required maxLength={40} placeholder="Période évaluée * (ex : 2025-2026 T1)" className="h-8 text-xs sm:col-span-2" />
+          <Input name="periode" required maxLength={40} placeholder="Période évaluée * (ex : 2025-2026 T1)" className="h-8 text-xs sm:col-span-2 mobile:h-11 mobile:text-base" />
           {CRITERES_EVALUATION.map((c) => (
             <div key={c.cle}>
-              <Label htmlFor={`ev-${c.cle}-${f.id}`} className="text-[10px]">{c.libelle}</Label>
-              <Select id={`ev-${c.cle}-${f.id}`} name={c.cle} defaultValue="3" className="h-8 text-xs">
+              <Label htmlFor={`ev-${c.cle}-${f.id}`} className="text-[10px] mobile:text-xs">{c.libelle}</Label>
+              <Select id={`ev-${c.cle}-${f.id}`} name={c.cle} defaultValue="3" className="h-8 text-xs mobile:h-11 mobile:text-base">
                 {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
               </Select>
             </div>
           ))}
-          <Input name="commentaire" maxLength={300} placeholder="Commentaire" className="h-8 text-xs sm:col-span-2" />
+          <Input name="commentaire" maxLength={300} placeholder="Commentaire" className="h-8 text-xs sm:col-span-2 mobile:h-11 mobile:text-base" />
           <SubmitButton>Évaluer</SubmitButton>
           {etat.message && <div className="sm:col-span-2 lg:col-span-4"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
         </form>
@@ -759,14 +760,14 @@ function VoletLitiges({
         <form action={action} className="grid gap-2 rounded-lg border border-cream-200 bg-white p-2.5 sm:grid-cols-2 lg:grid-cols-4">
           <input type="hidden" name="etablissementId" value={etablissementId} />
           <input type="hidden" name="fournisseurId" value={f.id} />
-          <Select name="type" defaultValue="retard_livraison" className="h-8 text-xs">
+          <Select name="type" defaultValue="retard_livraison" className="h-8 text-xs mobile:h-11 mobile:text-base">
             {TYPES_LITIGE_FOURNISSEUR.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}
           </Select>
-          <Select name="gravite" defaultValue="moyenne" className="h-8 text-xs">
+          <Select name="gravite" defaultValue="moyenne" className="h-8 text-xs mobile:h-11 mobile:text-base">
             {GRAVITES_LITIGE.map((g) => <option key={g.code} value={g.code}>{g.libelle}</option>)}
           </Select>
-          <Input name="responsable" maxLength={80} placeholder="Responsable du suivi" className="h-8 text-xs" />
-          <Input name="description" required maxLength={400} placeholder="Description *" className="h-8 text-xs sm:col-span-2 lg:col-span-3" />
+          <Input name="responsable" maxLength={80} placeholder="Responsable du suivi" className="h-8 text-xs mobile:h-11 mobile:text-base" />
+          <Input name="description" required maxLength={400} placeholder="Description *" className="h-8 text-xs sm:col-span-2 lg:col-span-3 mobile:h-11 mobile:text-base" />
           <SubmitButton>Ouvrir le litige</SubmitButton>
           {etat.message && <div className="sm:col-span-2 lg:col-span-4"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
         </form>
@@ -791,16 +792,16 @@ function LigneLitige({
         <span>
           <strong>{libelleLitige(l.type)}</strong> ({GRAVITES_LITIGE.find((g) => g.code === l.gravite)?.libelle ?? l.gravite})
           — {l.description} · {dateFr(l.date)}
-          <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${l.statut === "ouvert" ? "bg-red-50 text-red-600" : "bg-forest-50 text-forest-800"}`}>
+          <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${l.statut === "ouvert" ? "bg-red-50 text-red-600" : "bg-forest-50 text-forest-800"}`}>
             {l.statut === "ouvert" ? "OUVERT" : `RÉSOLU le ${dateFr(l.dateCloture)}`}
           </span>
           {l.solution ? ` · Solution : ${l.solution}` : ""}
         </span>
         {peutGerer && (
-          <span className="flex flex-wrap items-center gap-1.5">
+          <span className="flex flex-wrap items-center gap-1.5 mobile:w-full">
             {l.statut === "ouvert" && (
               <>
-                <Input value={solution} onChange={(e) => setSolution(e.target.value)} maxLength={400} placeholder="Solution apportée…" className="h-7 w-44 text-xs" />
+                <Input value={solution} onChange={(e) => setSolution(e.target.value)} maxLength={400} placeholder="Solution apportée…" className="h-7 w-44 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
                 <BoutonActionConfirmee
                   libelle="Résoudre" icone={Check} ton="primaire" action={resoudreLitigeFournisseur}
                   champs={{ etablissementId, id: l.id, version: String(l.version), solution }}
@@ -809,7 +810,7 @@ function LigneLitige({
                 />
               </>
             )}
-            <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif retrait…" className="h-7 w-32 text-xs" />
+            <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif retrait…" className="h-7 w-32 text-xs mobile:h-11 mobile:w-full mobile:text-base" />
             <BoutonActionConfirmee
               libelle="Retirer" icone={Trash2} ton="danger" action={retirerLitigeFournisseur}
               champs={{ etablissementId, id: l.id, version: String(l.version), motif }}

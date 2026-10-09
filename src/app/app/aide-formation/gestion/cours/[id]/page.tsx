@@ -37,8 +37,9 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Gestion du contenu</Link>
-      <PageHeader titre={cours.titre} description={`Fiche du cours et leçons · ${cours.statut === "publie" ? "Publié" : "Brouillon"}`} />
+      {/* Téléphone : doublon du bouton retour de l'en-tête mobile → masqué. */}
+      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Gestion du contenu</Link>
+      <PageHeader titre={cours.titre} titreMobile="Édition du cours" titreVisibleMobile description={`Fiche du cours et leçons · ${cours.statut === "publie" ? "Publié" : "Brouillon"}`} />
 
       <section className="space-y-2">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink-700/55">Fiche du cours</h2>
@@ -47,7 +48,7 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
       </section>
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mobile:flex-wrap mobile:gap-2">
           <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink-700/55">Leçons ({cours.modules.length})</h2>
           <FormModule coursId={cours.id} />
         </div>
@@ -58,21 +59,26 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
             {cours.modules.map((m, i) => {
               const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
               return (
-                <Card key={m.id} className="flex items-center gap-3 py-3">
+                // Téléphone : 1re ligne = icône + titre sur toute la largeur ; 2e ligne = flèches
+                // d'ordre (order-1) puis actions alignées à droite (order-2). Le groupe d'actions est en
+                // « display: contents » sur ordinateur et à l'impression : mise en page inchangée.
+                <Card key={m.id} className="flex items-center gap-3 py-3 mobile:flex-wrap mobile:gap-2 mobile:px-4">
                   <BoutonsOrdreModule id={m.id} />
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-700"><Icone size={15} /></span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-forest-900"><span className="text-ink-700/40">{i + 1}.</span> {m.titre}</p>
-                    <p className="text-xs text-ink-700/55">{m.type}{m.dureeMinutes ? ` · ${m.dureeMinutes} min` : ""}{m.fichierNom ? ` · ${m.fichierNom}` : ""}</p>
+                  <div className="min-w-0 flex-1 mobile:basis-[calc(100%-2.5rem)]">
+                    <p className="truncate font-medium text-forest-900 mobile:line-clamp-2 mobile:whitespace-normal"><span className="text-ink-700/40">{i + 1}.</span> {m.titre}</p>
+                    <p className="text-xs text-ink-700/55 mobile:[overflow-wrap:anywhere]">{m.type}{m.dureeMinutes ? ` · ${m.dureeMinutes} min` : ""}{m.fichierNom ? ` · ${m.fichierNom}` : ""}</p>
                   </div>
-                  {m.type === "quiz" && (
-                    <Link href={`${BASE}/gestion/cours/${cours.id}/quiz/${m.id}`} className="inline-flex items-center gap-1 rounded-full border border-forest-300 bg-white px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50"><ListChecks size={13} /> Questions</Link>
-                  )}
-                  {m.type === "devoir" && (
-                    <Link href={`${BASE}/gestion/cours/${cours.id}/devoir/${m.id}`} className="inline-flex items-center gap-1 rounded-full border border-forest-300 bg-white px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50"><FileCheck2 size={13} /> Consigne</Link>
-                  )}
-                  <FormModule coursId={cours.id} module={m} />
-                  <SupprimerModuleBtn id={m.id} />
+                  <div className="contents mobile:order-2 mobile:flex mobile:flex-1 mobile:items-center mobile:justify-end mobile:gap-1">
+                    {m.type === "quiz" && (
+                      <Link href={`${BASE}/gestion/cours/${cours.id}/quiz/${m.id}`} className="inline-flex items-center gap-1 rounded-full border border-forest-300 bg-white px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5"><ListChecks size={13} /> Questions</Link>
+                    )}
+                    {m.type === "devoir" && (
+                      <Link href={`${BASE}/gestion/cours/${cours.id}/devoir/${m.id}`} className="inline-flex items-center gap-1 rounded-full border border-forest-300 bg-white px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-3.5"><FileCheck2 size={13} /> Consigne</Link>
+                    )}
+                    <FormModule coursId={cours.id} module={m} />
+                    <SupprimerModuleBtn id={m.id} />
+                  </div>
                 </Card>
               );
             })}

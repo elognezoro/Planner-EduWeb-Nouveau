@@ -42,29 +42,30 @@ export async function WidgetAbsences({
         <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
           <CalendarX2 size={18} className="text-forest-600" /> Mes autorisations d&apos;absence
         </h3>
-        <Link href="/app/vie-scolaire/absences" className="inline-flex items-center gap-1 text-xs font-semibold text-forest-700 hover:text-forest-900">
+        <Link href="/app/vie-scolaire/absences" className="inline-flex items-center gap-1 text-xs font-semibold text-forest-700 hover:text-forest-900 mobile:-my-2 mobile:min-h-11 mobile:shrink-0 mobile:px-1">
           Ouvrir <ArrowUpRight size={13} />
         </Link>
       </div>
       {aValider > 0 && (
         <Link
           href="/app/vie-scolaire/absences"
-          className="mb-3 flex items-center gap-2 rounded-xl border border-gold-300 bg-gold-50 px-3 py-2 text-sm font-medium text-gold-800 hover:bg-gold-100"
+          className="mb-3 flex items-center gap-2 rounded-xl border border-gold-300 bg-gold-50 px-3 py-2 text-sm font-medium text-gold-800 hover:bg-gold-100 mobile:min-h-11"
         >
           <ClipboardCheck size={15} /> {aValider} demande(s) à valider
         </Link>
       )}
       <div className="grid grid-cols-3 gap-2">
         {chiffres.map((c) => (
-          <div key={c.libelle} className="rounded-xl border border-cream-200 bg-white p-2.5 text-center">
+          <div key={c.libelle} className="rounded-xl border border-cream-200 bg-white p-2.5 text-center mobile:px-1.5">
             <span className="block font-display text-lg font-bold text-forest-900">{c.valeur.toLocaleString("fr-FR")}</span>
-            <span className="text-[0.68rem] leading-tight text-ink-700/60">{c.libelle}</span>
+            {/* Téléphone : libellé à 14 px (au lieu de 11). */}
+            <span className="text-[0.68rem] leading-tight text-ink-700/60 mobile:block mobile:text-xs mobile:leading-snug mobile:text-ink-700/70">{c.libelle}</span>
           </div>
         ))}
       </div>
       <Link
         href="/app/vie-scolaire/absences"
-        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-xs font-semibold text-cream-50 hover:bg-forest-700"
+        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-xs font-semibold text-cream-50 hover:bg-forest-700 mobile:min-h-11 mobile:w-full mobile:justify-center mobile:text-sm"
       >
         <CalendarX2 size={14} /> Demander une absence
       </Link>

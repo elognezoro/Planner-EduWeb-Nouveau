@@ -88,22 +88,23 @@ export function OngletDepenses({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mobile:grid-cols-2 mobile:gap-2 mobile:[&>div]:p-3 mobile:[&_p+p]:tabular-nums mobile:[&_p+p]:wrap-anywhere">
         {stats.map((s) => (
           <div key={s.libelle} className="rounded-2xl border border-cream-200 bg-white p-3 shadow-soft">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55">{s.libelle}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs mobile:normal-case mobile:tracking-normal mobile:text-ink-700/75">{s.libelle}</p>
             <p className={`mt-1 font-display text-sm font-bold ${s.alerte ? "text-amber-700" : "text-forest-900"}`}>{s.valeur}</p>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      {/* Téléphone : sous-onglets sur une ligne qui défile au doigt (au lieu de murs de pastilles). */}
+      <div className="flex flex-wrap gap-1.5 rangee-defilante-mobile">
         {sections.map((s) => (
           <button
             key={s.cle}
             type="button"
             onClick={() => setSection(s.cle)}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors ${
+            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-xs font-semibold transition-colors mobile:h-11 mobile:text-sm ${
               section === s.cle ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-100"
             }`}
           >
@@ -258,11 +259,12 @@ function LigneDepense({
   const peutDecider = d.approbationDirectionRequise ? droits.approuver : droits.valider;
 
   return (
-    <li className="rounded-2xl border border-cream-200 bg-white p-3.5">
+    <li className="rounded-2xl border border-cream-200 bg-white p-3.5 mobile:p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900">
-            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50" aria-label="Détail">
+          {/* Téléphone : pastilles de statut en 14 px, flèche de détail de 44 px. */}
+          <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-forest-900 mobile:[&>span]:text-xs">
+            <button type="button" onClick={() => setDetail((v) => !v)} className="rounded-full p-0.5 text-forest-700 hover:bg-forest-50 mobile:-my-2 mobile:-ml-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Détail">
               {detail ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
             {d.numero ?? "Brouillon"} · {d.objet}
@@ -272,13 +274,13 @@ function LigneDepense({
             {d.approbationDirectionRequise && d.statut === "soumise" && <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-600">Approbation direction</span>}
             {d.urgence !== "normale" && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">{d.urgence === "critique" ? "CRITIQUE" : "Urgente"}</span>}
           </p>
-          <p className="mt-0.5 text-xs text-ink-700/60">
+          <p className="mt-0.5 text-xs text-ink-700/60 mobile:text-ink-700/75">
             {LIBELLE_TYPE_DEPENSE[d.type] ?? d.type} · {d.categorie} — {d.categorieLibelle} · {fcfa(d.montantValide ?? d.montantEstime)}
             {" · "}demandé par {d.demandeurNom}{d.decideParNom ? ` · décidé par ${d.decideParNom}` : ""}
             {d.datePaiement ? ` · payé le ${dateFr(d.datePaiement)} (${LIBELLE_MODE[d.mode ?? ""] ?? d.mode})` : ""}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 mobile:w-full mobile:gap-2 mobile:empty:hidden mobile:[&_button]:min-h-11 mobile:[&_button]:px-3.5 mobile:[&_button]:text-xs">
           {(d.statut === "approuvee" || d.statut === "payee" || d.statut === "cloturee") && (
             <button type="button" onClick={onImprimer} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50"><Printer size={11} /> Ordre</button>
           )}
@@ -290,22 +292,24 @@ function LigneDepense({
           )}
           {peutDecider && d.statut === "soumise" && (
             <>
-              <span className="inline-flex items-center gap-1">
-                <Input value={montantValide} onChange={(e) => setMontantValide(e.target.value)} type="number" min={1} max={d.montantEstime} className="h-8 w-28 text-xs" title="Montant validé" />
+              {/* Téléphone : chaque champ garde 128 px ; la confirmation passe en dessous au lieu de l'écraser. */}
+              <span className="inline-flex items-center gap-1 mobile:w-full mobile:flex-wrap mobile:gap-2">
+                <Input value={montantValide} onChange={(e) => setMontantValide(e.target.value)} type="number" min={1} max={d.montantEstime} className="h-8 w-28 text-xs mobile:h-11 mobile:w-auto mobile:min-w-32 mobile:flex-1 mobile:text-base" title="Montant validé" />
                 <BoutonActionConfirmee libelle="Approuver" icone={Check} ton="primaire" action={deciderDepense} champs={{ etablissementId, id: d.id, version: String(d.version), decision: "approuver", montantValide }} onSucces={(m) => onMessage(m ?? "Approuvée.")} />
               </span>
-              <span className="inline-flex items-center gap-1">
-                <Input value={motifRefus} onChange={(e) => setMotifRefus(e.target.value)} maxLength={300} placeholder="Motif refus…" className="h-8 w-32 text-xs" />
+              <span className="inline-flex items-center gap-1 mobile:w-full mobile:flex-wrap mobile:gap-2">
+                <Input value={motifRefus} onChange={(e) => setMotifRefus(e.target.value)} maxLength={300} placeholder="Motif refus…" className="h-8 w-32 text-xs mobile:h-11 mobile:w-auto mobile:min-w-32 mobile:flex-1 mobile:text-base" />
                 <BoutonActionConfirmee libelle="Refuser" icone={Ban} ton="danger" action={deciderDepense} champs={{ etablissementId, id: d.id, version: String(d.version), decision: "refuser", motifRefus }} desactive={motifRefus.trim().length === 0} onSucces={(m) => { onMessage(m ?? "Refusée."); setMotifRefus(""); }} />
               </span>
             </>
           )}
           {droits.payer && d.statut === "approuvee" && (
-            <span className="inline-flex flex-wrap items-center gap-1">
-              <Select value={mode} onChange={(e) => setMode(e.target.value)} className="h-8 w-28 text-xs">
+            // Téléphone : le mode occupe sa propre ligne (lisible) ; « Réf. » partage la suivante avec Décaisser.
+            <span className="inline-flex flex-wrap items-center gap-1 mobile:w-full mobile:gap-2">
+              <Select value={mode} onChange={(e) => setMode(e.target.value)} className="h-8 w-28 text-xs mobile:h-11 mobile:w-full mobile:basis-full mobile:text-base">
                 {MODES_DEPENSE.map((m) => <option key={m} value={m}>{LIBELLE_MODE[m] ?? m}</option>)}
               </Select>
-              <Input value={reference} onChange={(e) => setReference(e.target.value)} maxLength={80} placeholder="Réf." className="h-8 w-24 text-xs" />
+              <Input value={reference} onChange={(e) => setReference(e.target.value)} maxLength={80} placeholder="Réf." className="h-8 w-24 text-xs mobile:h-11 mobile:w-auto mobile:min-w-32 mobile:flex-1 mobile:text-base" />
               <BoutonActionConfirmee libelle="Décaisser" icone={Wallet} ton="primaire" action={payerDepense} champs={{ etablissementId, id: d.id, version: String(d.version), mode, reference }} onSucces={(m) => onMessage(m ?? "Décaissée.")} />
             </span>
           )}
@@ -415,20 +419,20 @@ function LigneAvance({ etablissementId, avance: a, droits, onMessage }: { etabli
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span>
           <strong className="text-forest-900">{a.numero}</strong> · {a.beneficiaireNom} — {a.objet} · {fcfa(a.montant)} · {a.categorie}
-          <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${a.statut === "decaissee" ? "bg-amber-50 text-amber-700" : a.statut === "regularisee" ? "bg-forest-50 text-forest-800" : "bg-red-50 text-red-600"}`}>
+          <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold mobile:text-xs ${a.statut === "decaissee" ? "bg-amber-50 text-amber-700" : a.statut === "regularisee" ? "bg-forest-50 text-forest-800" : "bg-red-50 text-red-600"}`}>
             {a.statut === "decaissee" ? "À régulariser" : a.statut === "regularisee" ? "Régularisée" : "Annulée"}
           </span>
           {a.statut === "regularisee" && a.montantJustifie !== null && <span className="ml-1.5 text-xs text-ink-700/60">justifié {fcfa(a.montantJustifie)} · {a.soldeType}</span>}
         </span>
         {droits.valider && a.statut === "decaissee" && (
-          <span className="inline-flex flex-wrap items-center gap-1">
-            <Input value={justifie} onChange={(e) => setJustifie(e.target.value)} type="number" min={0} placeholder="Montant justifié" className="h-8 w-32 text-xs" />
+          <span className="inline-flex flex-wrap items-center gap-1 mobile:w-full mobile:gap-2">
+            <Input value={justifie} onChange={(e) => setJustifie(e.target.value)} type="number" min={0} placeholder="Montant justifié" className="h-8 w-32 text-xs mobile:h-11 mobile:w-auto mobile:min-w-32 mobile:flex-1 mobile:text-base" />
             <BoutonActionConfirmee libelle="Régulariser" icone={Check} ton="primaire" action={regulariserAvance} champs={{ etablissementId, id: a.id, version: String(a.version), montantJustifie: justifie }} desactive={justifie === ""} onSucces={(m) => { onMessage(m ?? "Régularisée."); setJustifie(""); }} />
           </span>
         )}
         {droits.payer && a.statut === "decaissee" && (
-          <span className="inline-flex items-center gap-1">
-            <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif annul." className="h-8 w-28 text-xs" />
+          <span className="inline-flex items-center gap-1 mobile:w-full mobile:flex-wrap mobile:gap-2">
+            <Input value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={300} placeholder="Motif annul." className="h-8 w-28 text-xs mobile:h-11 mobile:w-auto mobile:min-w-32 mobile:flex-1 mobile:text-base" />
             <BoutonActionConfirmee libelle="Annuler" icone={Ban} ton="danger" action={annulerAvance} champs={{ etablissementId, id: a.id, version: String(a.version), motif }} desactive={motif.trim().length === 0} onSucces={(m) => { onMessage(m ?? "Annulée."); setMotif(""); }} />
           </span>
         )}
@@ -544,12 +548,12 @@ function SectionRecurrentes({ etablissementId, donnees, droits }: { etablissemen
 function OrdreDepenseImprimable({ depense: d, entete, onFermer }: { depense: DepenseVue; entete: EnteteEtablissement; onFermer: () => void }) {
   const montant = d.montantValide ?? d.montantEstime;
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`@media print { body * { visibility: hidden; } #ordre-depense-impression, #ordre-depense-impression * { visibility: visible; } #ordre-depense-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; } @page { size: A4 portrait; margin: 12mm; } }`}</style>
-      <div id="ordre-depense-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="ordre-depense-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Ordre de dépense</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer"><X size={16} /></button>
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer"><X size={16} /></button>
         </div>
         <EnTeteOfficielDoc etab={entete} titre="ORDRE DE DÉPENSE" sousTitre={`${d.numero ?? ""} — ${LIBELLE_TYPE_DEPENSE[d.type] ?? d.type}`} />
         <div className="mt-4 space-y-1.5 text-sm">

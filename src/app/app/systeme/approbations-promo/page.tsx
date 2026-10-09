@@ -130,21 +130,21 @@ export default async function ApprobationsPromoPage({
         </Card>
       ) : (
         <>
-          {/* Compteurs */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Compteurs — téléphone : deux tuiles compactes par rangée. */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
             <KpiCard index={0} libelle="En attente" valeur={compte.en_attente} ton={compte.en_attente > 0 ? "gold" : "cream"} icone={<Clock4 size={22} />} href={`${BASE}?filtre=en_attente`} />
             <KpiCard index={1} libelle="Approuvées" valeur={compte.approuvee} ton="forest" icone={<CheckCircle2 size={22} />} href={`${BASE}?filtre=approuvee`} />
             <KpiCard index={2} libelle="Refusées" valeur={compte.refusee} ton={compte.refusee > 0 ? "red" : "cream"} icone={<XCircle size={22} />} href={`${BASE}?filtre=refusee`} />
             <KpiCard index={3} libelle="Total demandes" valeur={compte.total} icone={<Ticket size={22} />} href={`${BASE}?filtre=tous`} />
           </div>
 
-          {/* Onglets */}
-          <div className="flex flex-wrap gap-2">
+          {/* Onglets — téléphone : une seule rangée qui défile au doigt, jusqu'au bord de l'écran. */}
+          <div className="rangee-defilante-mobile flex flex-wrap gap-2 mobile:-mx-4 mobile:px-4">
             {onglets.map((o) => (
               <Link
                 key={o.v}
                 href={`${BASE}?filtre=${o.v}`}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors mobile:inline-flex mobile:min-h-11 mobile:items-center ${
                   filtre === o.v
                     ? "border-forest-700 bg-white font-semibold text-forest-900 shadow-sm"
                     : "border-cream-300 bg-cream-50/60 text-ink-700/65 hover:bg-white"
@@ -167,7 +167,7 @@ export default async function ApprobationsPromoPage({
           ) : (
             <div className="space-y-4">
               {demandes.map((d) => (
-                <Card key={d.id} className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <Card key={d.id} className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mobile:flex-col mobile:items-stretch mobile:p-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-forest-900">{d.demandeur}</p>
@@ -180,7 +180,7 @@ export default async function ApprobationsPromoPage({
                         </Badge>
                       )}
                     </div>
-                    <p className="mt-1 truncate text-sm text-ink-700/65">{d.email}</p>
+                    <p className="mt-1 truncate text-sm text-ink-700/65 mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{d.email}</p>
                     {d.etablissementNom && (
                       <p className="mt-1 text-sm text-ink-700/65">
                         Établissement : <span className="font-medium">{d.etablissementNom}</span>

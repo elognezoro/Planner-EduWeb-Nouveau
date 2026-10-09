@@ -14,6 +14,7 @@ import {
   type EtatForm,
 } from "./actions";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
 import { UNITES_ESSAI } from "@/lib/premium/essai";
 
 const initial: EtatForm = { ok: false };
@@ -57,7 +58,7 @@ export function ConfigForm({
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-8">Enregistrer</SubmitButton>
+      <SubmitButton className="w-auto px-8 mobile:w-full">Enregistrer</SubmitButton>
     </form>
   );
 }
@@ -97,7 +98,7 @@ export function EssaiDefautForm({
           <Input id="essaiHeure" name="essaiHeure" type="time" defaultValue={heure ?? ""} />
         </div>
       </div>
-      <SubmitButton className="w-auto px-8">Enregistrer le défaut d&apos;essai</SubmitButton>
+      <SubmitButton className="w-auto px-8 mobile:w-full">Enregistrer le défaut d&apos;essai</SubmitButton>
     </form>
   );
 }
@@ -126,7 +127,7 @@ export function DeconnexionInactiviteForm({
         « Rester connecté ». S&apos;applique à tous les utilisateurs, à leur prochain
         chargement de page.
       </p>
-      <label className="flex items-center gap-2 text-sm text-ink-800">
+      <label className="flex items-center gap-2 text-sm text-ink-800 mobile:min-h-11">
         <input
           type="checkbox"
           name="inactiviteActive"
@@ -147,7 +148,7 @@ export function DeconnexionInactiviteForm({
           <p className="mt-1 text-xs text-ink-700/55">Entre 15 et 300 secondes — au moins 30 s de moins que le délai.</p>
         </div>
       </div>
-      <SubmitButton className="w-auto px-8">Enregistrer</SubmitButton>
+      <SubmitButton className="w-auto px-8 mobile:w-full">Enregistrer</SubmitButton>
     </form>
   );
 }
@@ -237,6 +238,53 @@ export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; 
   const [nouveauNom, setNouveauNom] = useState(nom);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // Téléphone : crayon et × (cibles de 17 à 20 px, à 8 px de la pastille voisine) cèdent la place
+  // à un appui sur toute la pastille, qui ouvre une feuille montante « Renommer / Supprimer ».
+  const [feuille, setFeuille] = useState(false);
+  const [nomFeuille, setNomFeuille] = useState(nom);
+  const [confirmeFeuille, setConfirmeFeuille] = useState(false);
+
+  function ouvrirFeuille() {
+    setNomFeuille(nom);
+    setConfirmeFeuille(false);
+    setMessage(null);
+    setFeuille(true);
+  }
+
+  function renommerFeuille() {
+    const propre = nomFeuille.trim();
+    if (!propre || propre === nom) {
+      setFeuille(false);
+      return;
+    }
+    start(async () => {
+      const fd = new FormData();
+      fd.set("disciplineId", id);
+      fd.set("nom", propre);
+      const res = await renommerDiscipline({ ok: false }, fd);
+      if (res.ok) {
+        setMessage(null);
+        setFeuille(false);
+      } else {
+        setMessage(res.message ?? "Erreur technique.");
+      }
+    });
+  }
+
+  function supprimerFeuille() {
+    start(async () => {
+      const fd = new FormData();
+      fd.set("disciplineId", id);
+      const res = await supprimerDiscipline({ ok: false }, fd);
+      setConfirmeFeuille(false);
+      if (res.ok) {
+        setMessage(null);
+        setFeuille(false);
+      } else {
+        setMessage(res.message ?? "Erreur technique.");
+      }
+    });
+  }
 
   function supprimer() {
     start(async () => {
@@ -316,14 +364,14 @@ export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; 
             </>
           )}
         </span>
-        {message && <span className="mt-1 max-w-64 text-[0.65rem] leading-tight text-red-600">{message}</span>}
+        {message && <span className="mt-1 max-w-64 text-[0.65rem] leading-tight text-red-600 mobile:text-xs">{message}</span>}
       </li>
     );
   }
 
   return (
-    <li className="inline-flex flex-col">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-200 py-1 pl-3 pr-1.5 text-sm text-forest-800">
+    <li className="inline-flex flex-col mobile:relative">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-200 py-1 pl-3 pr-1.5 text-sm text-forest-800 mobile:min-h-11 mobile:pr-3">
         <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: couleur ?? "#999" }} />
         {nom}
         {!pending && !confirme && (
@@ -338,7 +386,7 @@ export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; 
             }}
             aria-label={`Renommer ${nom}`}
             title={`Renommer ${nom}`}
-            className="rounded-full p-0.5 text-ink-700/45 hover:bg-forest-50 hover:text-forest-700"
+            className="rounded-full p-0.5 text-ink-700/45 hover:bg-forest-50 hover:text-forest-700 mobile:hidden"
           >
             <Pencil size={12} />
           </button>
@@ -346,7 +394,7 @@ export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; 
         {pending ? (
           <Loader2 size={13} className="animate-spin text-forest-600" />
         ) : confirme ? (
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1 mobile:hidden">
             <button
               type="button"
               onClick={supprimer}
@@ -371,13 +419,80 @@ export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; 
             }}
             aria-label={`Supprimer ${nom}`}
             title={`Supprimer ${nom}`}
-            className="rounded-full p-0.5 text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+            className="rounded-full p-0.5 text-ink-700/45 hover:bg-red-50 hover:text-red-600 mobile:hidden"
           >
             <X size={13} />
           </button>
         )}
       </span>
-      {message && <span className="mt-1 max-w-64 text-[0.65rem] leading-tight text-red-600">{message}</span>}
+      {message && <span className="mt-1 max-w-64 text-[0.65rem] leading-tight text-red-600 mobile:text-xs">{message}</span>}
+      {/* Téléphone : toute la pastille est la cible (44 px de haut). */}
+      <button
+        type="button"
+        onClick={ouvrirFeuille}
+        aria-haspopup="dialog"
+        aria-label={`Renommer ou supprimer ${nom}`}
+        className="absolute inset-0 rounded-full lg:hidden print:hidden"
+      />
+      <FeuilleBas ouvert={feuille} onFermer={() => setFeuille(false)} titre={nom}>
+        <div className="space-y-4 px-2 pb-2">
+          {message && <p className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{message}</p>}
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-forest-900">Renommer la discipline</span>
+            <input
+              value={nomFeuille}
+              onChange={(e) => setNomFeuille(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") renommerFeuille();
+              }}
+              className="h-12 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-base text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={renommerFeuille}
+            disabled={pending}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-forest-800 font-semibold text-cream-50 active:bg-forest-700 disabled:opacity-60"
+          >
+            {pending && !confirmeFeuille ? <Loader2 size={17} className="animate-spin" /> : <Pencil size={16} />} Renommer
+          </button>
+          <div className="border-t border-cream-200 pt-4">
+            {confirmeFeuille ? (
+              <div className="space-y-2 rounded-2xl border border-red-200 bg-red-50 p-3">
+                <p className="text-sm font-semibold text-red-700">
+                  Supprimer « {nom} » ? Refusé si la discipline est utilisée (affectations, notes, cahier de texte).
+                </p>
+                <button
+                  type="button"
+                  onClick={supprimerFeuille}
+                  disabled={pending}
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-red-600 font-semibold text-white active:bg-red-700 disabled:opacity-60"
+                >
+                  {pending ? <Loader2 size={17} className="animate-spin" /> : <X size={17} />} Confirmer la suppression
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmeFeuille(false)}
+                  className="flex min-h-12 w-full items-center justify-center rounded-full border border-cream-300 bg-white font-medium text-ink-700/80 active:bg-cream-100"
+                >
+                  Annuler
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmeFeuille(true);
+                  setMessage(null);
+                }}
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-red-200 bg-white font-semibold text-red-600 active:bg-red-50"
+              >
+                <X size={17} /> Supprimer la discipline…
+              </button>
+            )}
+          </div>
+        </div>
+      </FeuilleBas>
     </li>
   );
 }

@@ -117,7 +117,7 @@ export function SallesBlock({
               }`}
             >
               <span className="block text-sm font-semibold text-forest-900">{opt.t}</span>
-              <span className="mt-0.5 block text-[0.7rem] leading-snug text-ink-700/60">{opt.d}</span>
+              <span className="mt-0.5 block text-[0.7rem] leading-snug text-ink-700/60 mobile:text-xs">{opt.d}</span>
             </button>
           ))}
         </div>
@@ -135,38 +135,40 @@ export function SallesBlock({
           const resume = s.classeIds.map((cid) => nomClasse.get(cid) ?? "?").join(" · ");
           return (
             <div key={s.id ?? `nouvelle-${i}`} className="overflow-hidden rounded-2xl border border-cream-200 bg-cream-50/50">
-              {/* En-tête d'accordéon : bascule + résumé + suppression */}
+              {/* En-tête d'accordéon : bascule + résumé + suppression.
+                  Téléphone : sur 2 lignes — le nom (ligne 1) n'est plus écrasé à 0 px par le type et
+                  le résumé, qui passent en ligne 2, alignés sous le nom. */}
               <div className="flex items-center gap-2 px-3 py-2.5">
                 <button
                   type="button"
                   onClick={() => basculer(i)}
                   aria-expanded={!!s.ouverte}
-                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                  className="flex min-w-0 flex-1 items-center gap-2 text-left mobile:min-h-11 mobile:flex-wrap mobile:gap-y-1"
                 >
                   <ChevronDown
                     size={16}
                     className={`shrink-0 text-ink-700/45 transition-transform ${s.ouverte ? "" : "-rotate-90"}`}
                   />
                   <DoorClosed size={15} className="shrink-0 text-forest-700/70" />
-                  <span className="truncate font-semibold text-forest-900">
+                  <span className="truncate font-semibold text-forest-900 mobile:basis-[calc(100%-32px-1rem)]">
                     {s.nom.trim() || <span className="italic text-ink-700/45">Nouvelle salle</span>}
                   </span>
-                  <span className="shrink-0 rounded-full bg-cream-100 px-2 py-0.5 text-[0.65rem] font-medium text-ink-700/60">
+                  <span className="shrink-0 rounded-full bg-cream-100 px-2 py-0.5 text-[0.65rem] font-medium text-ink-700/60 mobile:ml-[calc(31px+1rem)] mobile:text-xs">
                     {LIBELLE_TYPE.get(s.type) ?? s.type}
                   </span>
                   {s.classeIds.length > 0 ? (
-                    <span className="truncate text-xs text-ink-700/55">
+                    <span className="truncate text-xs text-ink-700/55 mobile:min-w-0 mobile:flex-1">
                       {s.classeIds.length} classe(s) : {resume}
                     </span>
                   ) : (
-                    <span className="shrink-0 text-xs italic text-ink-700/40">aucune classe affectée</span>
+                    <span className="shrink-0 text-xs italic text-ink-700/40 mobile:min-w-0 mobile:flex-1 mobile:truncate">aucune classe affectée</span>
                   )}
                 </button>
                 <button
                   type="button"
                   onClick={() => supprimer(i)}
                   aria-label="Supprimer cette salle"
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cream-300 text-ink-700/60 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cream-300 text-ink-700/60 hover:border-red-200 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
                 >
                   <Trash2 size={15} />
                 </button>
@@ -213,7 +215,7 @@ export function SallesBlock({
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <label className="block">
-                      <span className="mb-1 block text-[0.7rem] font-medium text-ink-700/60">1<sup>re</sup> classe (matin)</span>
+                      <span className="mb-1 block text-[0.7rem] font-medium text-ink-700/60 mobile:text-xs">1<sup>re</sup> classe (matin)</span>
                       <Select value={c0} onChange={(e) => setSlot(i, 0, e.target.value)}>
                         <option value="">— aucune —</option>
                         {optionsSlot(c0).map((c) => (
@@ -224,7 +226,7 @@ export function SallesBlock({
                       </Select>
                     </label>
                     <label className="block">
-                      <span className="mb-1 block text-[0.7rem] font-medium text-ink-700/60">
+                      <span className="mb-1 block text-[0.7rem] font-medium text-ink-700/60 mobile:text-xs">
                         2<sup>e</sup> classe (après-midi) <span className="text-ink-700/40">— optionnel</span>
                       </span>
                       <Select value={c1} onChange={(e) => setSlot(i, 1, e.target.value)} disabled={!c0}>
@@ -247,7 +249,7 @@ export function SallesBlock({
       <button
         type="button"
         onClick={ajouter}
-        className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50"
+        className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11"
       >
         <Plus size={15} /> Ajouter une salle
       </button>
@@ -256,7 +258,7 @@ export function SallesBlock({
         <input type="hidden" name="etablissementId" value={etablissementId} />
         <input type="hidden" name="salles" value={chargeUtile} />
         <input type="hidden" name="salleAttribueeSouple" value={modeSouple ? "1" : "0"} />
-        <SubmitButton className="w-auto px-6">
+        <SubmitButton className="w-auto px-6 mobile:w-full">
           <Save size={16} /> Enregistrer les salles
         </SubmitButton>
         <span className="inline-flex items-center gap-1.5 text-xs text-ink-700/55">

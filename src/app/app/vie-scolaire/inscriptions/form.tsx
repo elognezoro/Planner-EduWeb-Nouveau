@@ -32,11 +32,11 @@ export function InscriptionForm({
       <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
         <div>
           <Label htmlFor="email">E-mail de l&apos;élève</Label>
-          <Input id="email" name="email" type="email" required placeholder="eleve@exemple.ci" />
+          <Input id="email" name="email" type="email" required placeholder="eleve@exemple.ci" className="mobile:text-base" />
         </div>
         <div>
           <Label htmlFor="classeId">Classe</Label>
-          <Select id="classeId" name="classeId" defaultValue="" required>
+          <Select id="classeId" name="classeId" defaultValue="" required className="mobile:text-base">
             <option value="" disabled>
               Choisir…
             </option>
@@ -48,7 +48,7 @@ export function InscriptionForm({
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-8">Inscrire l&apos;élève</SubmitButton>
+      <SubmitButton className="w-auto px-8 mobile:w-full">Inscrire l&apos;élève</SubmitButton>
     </form>
   );
 }

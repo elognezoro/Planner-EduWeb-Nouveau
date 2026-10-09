@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { BoutonPartagerMobile } from "@/app/app/aide-formation/outils-mobiles";
 
 /** Champ en lecture seule + bouton « Copier » pour le lien d'invitation. */
 export function CopierLien({ lien }: { lien: string }) {
@@ -36,6 +37,8 @@ export function CopierLien({ lien }: { lien: string }) {
       >
         {copie ? <Check size={16} /> : <Copy size={16} />} {copie ? "Copié !" : "Copier le lien"}
       </button>
+      {/* Téléphone : on partage plutôt un lien par WhatsApp ou SMS (feuille de partage du système). */}
+      <BoutonPartagerMobile url={lien} titre="Rejoignez EduWeb Planner" className="h-11 rounded-lg" />
     </div>
   );
 }

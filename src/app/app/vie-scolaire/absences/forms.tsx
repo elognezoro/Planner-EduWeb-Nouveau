@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import { CalendarPlus, Loader2, Plus, X } from "lucide-react";
 import { soumettreDemande, analyserAbsence, type EtatForm, type AnalyseAbsence } from "./actions";
 import { Label, Input, SubmitButton, FormAlert } from "@/components/ui/form";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 
 const initial: EtatForm = { ok: false };
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -18,6 +19,8 @@ export function DemandeAbsenceForm() {
   const [rattrapage, setRattrapage] = useState<string[]>([]);
   const [nouvelleDate, setNouvelleDate] = useState("");
   const [pending, startTransition] = useTransition();
+  // Nom accessible réservé au téléphone : faux au rendu serveur, sur ordinateur et à l'impression.
+  const ecranMobile = useEcranMobile();
 
   const datesValides = estIsoJour(dateDebut) && estIsoJour(dateFin) && dateFin >= dateDebut;
 
@@ -61,11 +64,11 @@ export function DemandeAbsenceForm() {
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="dateDebut">Du</Label>
-          <Input id="dateDebut" name="dateDebut" type="date" required value={dateDebut} onChange={(e) => majDates(e.target.value, dateFin)} />
+          <Input id="dateDebut" name="dateDebut" type="date" required value={dateDebut} onChange={(e) => majDates(e.target.value, dateFin)} className="mobile:text-base" />
         </div>
         <div>
           <Label htmlFor="dateFin">Au</Label>
-          <Input id="dateFin" name="dateFin" type="date" required value={dateFin} min={dateDebut || undefined} onChange={(e) => majDates(dateDebut, e.target.value)} />
+          <Input id="dateFin" name="dateFin" type="date" required value={dateFin} min={dateDebut || undefined} onChange={(e) => majDates(dateDebut, e.target.value)} className="mobile:text-base" />
         </div>
       </div>
       {dateDebut && dateFin && !datesValides && (
@@ -77,7 +80,7 @@ export function DemandeAbsenceForm() {
         <textarea
           id="motif" name="motif" rows={2} maxLength={400}
           placeholder="Ex. : convocation administrative, raison de santé, événement familial…"
-          className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
         />
       </div>
 
@@ -117,7 +120,7 @@ export function DemandeAbsenceForm() {
                     return (
                       <button
                         type="button" key={s.id} onClick={() => toggleSuppleant(s.id)}
-                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${actif ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-forest-800 hover:bg-forest-50"}`}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition mobile:min-h-11 mobile:px-4 mobile:text-sm ${actif ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-forest-800 hover:bg-forest-50"}`}
                         title={`${s.disciplines.join(", ")}${s.cycles.length ? " · " + s.cycles.join(", ") : ""}`}
                       >
                         {s.nom}
@@ -138,7 +141,7 @@ export function DemandeAbsenceForm() {
                   {rattrapage.map((iso) => (
                     <li key={iso} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-forest-800">
                       {iso}
-                      <button type="button" onClick={() => setRattrapage((prev) => prev.filter((x) => x !== iso))} className="text-ink-700/50 hover:text-red-600">
+                      <button type="button" onClick={() => setRattrapage((prev) => prev.filter((x) => x !== iso))} aria-label={ecranMobile ? `Retirer le ${iso}` : undefined} className="text-ink-700/50 hover:text-red-600 mobile:-my-2 mobile:-mr-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
                         <X size={13} />
                       </button>
                     </li>
@@ -148,9 +151,9 @@ export function DemandeAbsenceForm() {
               <div className="flex flex-wrap items-center gap-2">
                 <input
                   type="date" value={nouvelleDate} min={dateDebut || undefined} onChange={(e) => setNouvelleDate(e.target.value)}
-                  className="rounded-2xl border border-cream-300 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                  className="rounded-2xl border border-cream-300 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0 mobile:flex-1 mobile:text-base"
                 />
-                <button type="button" onClick={ajouterDate} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-2 text-xs font-medium text-forest-800 hover:bg-forest-50">
+                <button type="button" onClick={ajouterDate} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-2 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:text-sm">
                   <Plus size={14} /> Ajouter
                 </button>
               </div>
@@ -159,7 +162,7 @@ export function DemandeAbsenceForm() {
         </div>
       )}
 
-      <SubmitButton className="inline-flex w-auto items-center gap-2 px-6" disabled={!datesValides}>
+      <SubmitButton className="inline-flex w-auto items-center gap-2 px-6 mobile:w-full" disabled={!datesValides}>
         <CalendarPlus size={16} /> Envoyer la demande
       </SubmitButton>
     </form>

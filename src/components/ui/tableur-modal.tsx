@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Plus, Minus, Table2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 
 /**
  * Tableur simple (type Excel) inséré dans l'éditeur riche : grille éditable + formules
@@ -132,6 +134,10 @@ export function TableurModal({ onInsert, onClose }: { onInsert: (html: string) =
     return d;
   });
   const [entete, setEntete] = useState(true);
+  // Téléphone uniquement : fenêtre montée sur <body> (portail). Ouverte depuis un éditeur placé
+  // dans une feuille montante (transform → bloc conteneur des « fixed ») ou sous la barre
+  // d'onglets, elle serait sinon rognée ou recouverte. Ordinateur : placement DOM inchangé.
+  const ecranMobile = useEcranMobile();
   const rows = g.length;
   const cols = g[0]?.length ?? 0;
 
@@ -142,14 +148,18 @@ export function TableurModal({ onInsert, onClose }: { onInsert: (html: string) =
   const addCol = () => setG((p) => p.map((row) => [...row, ""]));
   const delCol = () => setG((p) => (cols > 1 ? p.map((row) => row.slice(0, -1)) : p));
 
-  const btn = "inline-flex items-center gap-1 rounded-lg border border-cream-300 px-2 py-1 text-xs font-semibold text-forest-800 hover:bg-cream-100";
+  // Téléphone : la fenêtre est portée sur <body>, donc hors de « .cours-agrandi » (plancher de 15 px
+  // des formations) ; « mobile:text-[0.9375rem] » rétablit ces 15 px sur les petits textes.
+  const btn = "inline-flex items-center gap-1 rounded-lg border border-cream-300 px-2 py-1 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:min-h-11 mobile:px-3 mobile:text-[0.9375rem]";
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 p-4" role="dialog" aria-modal="true" onMouseDown={onClose}>
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-5 shadow-soft" onMouseDown={(e) => e.stopPropagation()}>
+  // Téléphone : feuille ancrée en bas (à portée du pouce), hauteur bornée à la zone VISIBLE (dvh),
+  // zone sûre du bas respectée, cibles de 44 px. Ordinateur et impression : inchangés.
+  const fenetre = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 p-4 mobile:z-[70] mobile:items-end mobile:p-0" role="dialog" aria-modal="true" onMouseDown={onClose}>
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-5 shadow-soft mobile:max-h-[92dvh] mobile:overscroll-contain mobile:rounded-b-none mobile:rounded-t-3xl mobile:p-4 mobile:pb-[calc(1rem+var(--marge-sure-bas,0px))]" onMouseDown={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900"><Table2 size={18} className="text-forest-600" /> Insérer un tableur</h3>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-ink-700/60 hover:bg-cream-100" aria-label="Fermer"><X size={18} /></button>
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-ink-700/60 hover:bg-cream-100 mobile:-mr-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Fermer"><X size={18} /></button>
         </div>
 
         <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -157,7 +167,7 @@ export function TableurModal({ onInsert, onClose }: { onInsert: (html: string) =
           <button type="button" onClick={delRow} className={btn}><Minus size={13} /> Ligne</button>
           <button type="button" onClick={addCol} className={btn}><Plus size={13} /> Colonne</button>
           <button type="button" onClick={delCol} className={btn}><Minus size={13} /> Colonne</button>
-          <label className="ml-2 inline-flex items-center gap-1.5 text-xs font-medium text-forest-800">
+          <label className="ml-2 inline-flex items-center gap-1.5 text-xs font-medium text-forest-800 mobile:ml-0 mobile:min-h-11 mobile:text-[0.9375rem]">
             <input type="checkbox" checked={entete} onChange={(e) => setEntete(e.target.checked)} /> 1<sup>re</sup> ligne = en-têtes
           </label>
         </div>
@@ -169,20 +179,20 @@ export function TableurModal({ onInsert, onClose }: { onInsert: (html: string) =
               <tr>
                 <th className="w-8 bg-cream-100" />
                 {Array.from({ length: cols }, (_, c) => (
-                  <th key={c} className="min-w-[6rem] border border-cream-200 bg-cream-100 px-2 py-1 text-xs font-semibold text-forest-800">{colLettre(c)}</th>
+                  <th key={c} className="min-w-[6rem] border border-cream-200 bg-cream-100 px-2 py-1 text-xs font-semibold text-forest-800 mobile:text-[0.9375rem]">{colLettre(c)}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {g.map((row, r) => (
                 <tr key={r}>
-                  <td className="border border-cream-200 bg-cream-100 px-1 text-center text-xs font-semibold text-ink-700/60">{r + 1}</td>
+                  <td className="border border-cream-200 bg-cream-100 px-1 text-center text-xs font-semibold text-ink-700/60 mobile:text-[0.9375rem]">{r + 1}</td>
                   {row.map((cell, c) => (
                     <td key={c} className="border border-cream-200 p-0">
                       <input
                         value={cell}
                         onChange={(e) => setCell(r, c, e.target.value)}
-                        className={cn("w-full min-w-[6rem] bg-transparent px-2 py-1 text-sm outline-none focus:bg-forest-50", entete && r === 0 && "font-semibold")}
+                        className={cn("w-full min-w-[6rem] bg-transparent px-2 py-1 text-sm outline-none focus:bg-forest-50 mobile:py-2.5", entete && r === 0 && "font-semibold")}
                         placeholder={r === 0 && entete ? "En-tête" : ""}
                       />
                     </td>
@@ -193,23 +203,24 @@ export function TableurModal({ onInsert, onClose }: { onInsert: (html: string) =
           </table>
         </div>
 
-        <p className="mt-2 text-xs text-ink-700/55">
+        <p className="mt-2 text-xs text-ink-700/55 mobile:text-[0.9375rem]">
           Formules : <code>=SOMME(A2:A4)</code>, <code>=MOYENNE(B2:B4)</code>, <code>=A2+B2</code>, aussi <code>MIN</code>, <code>MAX</code>, <code>NB</code>. Réf. de cellule : lettre de colonne + numéro de ligne (ex. <code>B3</code>).
         </p>
 
         {/* Aperçu calculé */}
         <div className="mt-3">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-700/50">Aperçu (valeurs calculées)</p>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-700/50 mobile:text-[0.9375rem]">Aperçu (valeurs calculées)</p>
           <div className="overflow-x-auto rounded-xl border border-cream-200 p-2" dangerouslySetInnerHTML={{ __html: apercuStyle(genererTableHtml(g, entete)) }} />
         </div>
 
-        <div className="mt-4 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-full border border-cream-300 px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100">Annuler</button>
-          <button type="button" onClick={() => onInsert(genererTableHtml(g, entete))} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-700"><Check size={15} /> Insérer</button>
+        <div className="mt-4 flex justify-end gap-2 mobile:gap-3">
+          <button type="button" onClick={onClose} className="rounded-full border border-cream-300 px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:min-h-11 mobile:flex-1">Annuler</button>
+          <button type="button" onClick={() => onInsert(genererTableHtml(g, entete))} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white hover:bg-forest-700 mobile:min-h-11 mobile:flex-1 mobile:justify-center"><Check size={15} /> Insérer</button>
         </div>
       </div>
     </div>
   );
+  return ecranMobile ? createPortal(fenetre, document.body) : fenetre;
 }
 
 /** Styles inline pour l'aperçu (le rendu final s'appuie sur CLASSE_HTML_RICHE côté affichage). */

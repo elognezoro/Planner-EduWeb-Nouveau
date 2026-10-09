@@ -52,18 +52,21 @@ export function EnTeteOfficielApfc({
 
   return (
     <div className="apfc-entete-officiel">
-      <div className="grid grid-cols-3 items-start gap-2">
-        <div className="text-[0.7rem] font-semibold uppercase leading-tight text-forest-900">
+      {/* Téléphone (écran seulement — le papier garde ses 3 colonnes) : le titre passe en tête sur
+          toute la largeur, ministère et République se partagent la ligne suivante. Sur ~88 px par
+          colonne, le titre débordait sur ses voisines et les images sortaient de la carte. */}
+      <div className="grid grid-cols-3 items-start gap-2 mobile:grid-cols-2 mobile:gap-x-3 mobile:gap-y-2">
+        <div className="text-[0.7rem] font-semibold uppercase leading-tight text-forest-900 mobile:min-w-0 mobile:text-xs mobile:leading-snug mobile:wrap-break-word">
           <p>{ministere}</p>
           <p className="mt-2 font-bold">{T(apfc.nom)}</p>
           {apfc.regionNom && <p className="mt-0.5 font-normal normal-case text-ink-700/70">{apfc.regionNom}</p>}
         </div>
-        <div className="text-center">
-          <p className="font-display text-lg font-bold uppercase tracking-wide text-forest-900">{titre}</p>
+        <div className="text-center mobile:order-first mobile:col-span-2 mobile:mb-1">
+          <p className="font-display text-lg font-bold uppercase tracking-wide text-forest-900 mobile:text-base mobile:leading-snug mobile:tracking-normal mobile:wrap-break-word">{titre}</p>
           {sousTitre && <p className="text-sm font-semibold text-ink-800">{sousTitre}</p>}
         </div>
-        <div className="flex items-start justify-end gap-3">
-          <div className="text-center text-[0.7rem] leading-tight text-ink-700/80">
+        <div className="flex items-start justify-end gap-3 mobile:min-w-0 mobile:flex-col mobile:items-center mobile:gap-1.5">
+          <div className="text-center text-[0.7rem] leading-tight text-ink-700/80 mobile:min-w-0 mobile:max-w-full mobile:text-xs mobile:leading-snug mobile:wrap-break-word">
             <p className="font-semibold text-forest-900">
               {pays ? (infoPays?.intitule ?? `RÉPUBLIQUE DE ${pays}`).toUpperCase() : ""}
             </p>
@@ -75,7 +78,7 @@ export function EnTeteOfficielApfc({
                 height={48}
                 unoptimized
                 priority
-                className="mx-auto mt-1 h-12 w-[4.5rem] object-contain"
+                className="mx-auto mt-1 h-12 w-[4.5rem] object-contain mobile:h-10 mobile:w-15"
               />
             )}
             {slogan && <p className="mt-1 italic">{slogan}</p>}
@@ -88,7 +91,7 @@ export function EnTeteOfficielApfc({
               height={56}
               unoptimized
               priority
-              className="mt-0.5 h-12 w-12 object-contain"
+              className="mt-0.5 h-12 w-12 object-contain mobile:h-10 mobile:w-10"
             />
           )}
         </div>

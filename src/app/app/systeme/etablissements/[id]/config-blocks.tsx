@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useActionState, useRef } from "react";
+import { useEffect, useId, useState, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { RotateCcw, Loader2, Save, Plus, Trash2, ChevronDown, Sparkles } from "lucide-react";
 import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
@@ -12,6 +12,7 @@ import { trouverPays, sloganOfficiel } from "@/lib/referentiels/pays";
 import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS, CATEGORIES_PEDAGOGIQUES } from "@/lib/referentiels/etablissement";
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { capaciteJournee } from "@/lib/emploi-du-temps/horaires";
+import { EVENEMENT_OUVRIR_BLOC } from "./sections-mobile";
 
 const initial: EtatForm = { ok: false };
 
@@ -135,7 +136,7 @@ function SaveBtn({ label = "Enregistrer" }: { label?: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-xs font-semibold text-cream-50 transition-colors hover:bg-forest-700 disabled:opacity-60"
+      className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-xs font-semibold text-cream-50 transition-colors hover:bg-forest-700 disabled:opacity-60 mobile:h-11 mobile:px-6 mobile:text-sm"
     >
       {pending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
       {label}
@@ -157,24 +158,101 @@ export function Bloc({
   essentiel?: boolean;
   children: React.ReactNode;
 }) {
+  // TÉLÉPHONE SEULEMENT : le bloc se replie sous son titre (la console dépliée faisait plusieurs
+  // dizaines d'écrans). Bascule purement CSS — « mobile:hidden » sur le contenu, levé par
+  // l'attribut data-ouvert : l'ordinateur et l'impression restent TOUJOURS dépliés, et le HTML
+  // serveur est déjà replié sur téléphone (aucun saut à l'hydratation).
+  const [ouvert, setOuvert] = useState(false);
+  const racine = useRef<HTMLElement>(null);
+  const idContenu = useId();
+  const contenu = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // « Tout enregistrer » soumet aussi les blocs repliés (téléphone) : une erreur renvoyée par
+    // l'action serveur (FormAlert role="alert") y resterait invisible — le bloc fautif se déplie.
+    // Sans effet visuel sur ordinateur et à l'impression (« ouvert » ne pilote que des classes mobile:).
+    const c = contenu.current;
+    if (!c) return;
+    const signature = () =>
+      Array.from(c.querySelectorAll('[role="alert"]'), (n) => n.textContent ?? "").join("\n");
+    let precedente = signature();
+    const obs = new MutationObserver(() => {
+      const s = signature();
+      if (s && s !== precedente) setOuvert(true);
+      precedente = s;
+    });
+    obs.observe(c, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["role"] });
+    return () => obs.disconnect();
+  }, []);
+  useEffect(() => {
+    // Bloc visé par l'ancre de l'URL (lien « …#volumes ») ou choisi dans la feuille des
+    // sections : il s'ouvre. Lu après le montage (l'URL d'une navigation client y est à jour).
+    const viseParAncre = () => {
+      if (window.location.hash === `#${id}`) setOuvert(true);
+    };
+    const minuteur = window.setTimeout(viseParAncre, 0);
+    const surOuvrir = (e: Event) => {
+      if ((e as CustomEvent<string>).detail === id) setOuvert(true);
+    };
+    // « Enregistrer toute la configuration » soumet aussi les blocs repliés : un champ requis vide
+    // y bloquerait l'envoi sans rien montrer — le bloc fautif se déplie (l'évènement « invalid »
+    // ne remonte pas : écoute en phase de capture).
+    const surInvalide = () => setOuvert(true);
+    const el = racine.current;
+    window.addEventListener("hashchange", viseParAncre);
+    window.addEventListener(EVENEMENT_OUVRIR_BLOC, surOuvrir);
+    el?.addEventListener("invalid", surInvalide, true);
+    return () => {
+      window.clearTimeout(minuteur);
+      window.removeEventListener("hashchange", viseParAncre);
+      window.removeEventListener(EVENEMENT_OUVRIR_BLOC, surOuvrir);
+      el?.removeEventListener("invalid", surInvalide, true);
+    };
+  }, [id]);
+
   return (
     <section
+      ref={racine}
       id={id}
-      className={`scroll-mt-24 rounded-2xl border bg-white p-6 shadow-soft ${
+      className={`scroll-mt-24 rounded-2xl border bg-white p-6 shadow-soft mobile:scroll-mt-[calc(3.5rem+var(--marge-sure-haut)+0.75rem)] mobile:px-4 mobile:py-3 ${
         essentiel ? "border-gold-300 ring-1 ring-gold-200" : "border-cream-200"
-      }`}
+      } ${ouvert ? "mobile:pb-5" : ""}`}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-display text-lg font-bold text-forest-900">{titre}</h2>
+      {/* Le clic sur l'en-tête n'a d'effet visible que sur téléphone (bascule data-ouvert). */}
+      <div className="flex flex-wrap items-center gap-2 mobile:cursor-pointer mobile:flex-nowrap" onClick={() => setOuvert((o) => !o)}>
+        <h2 className="font-display text-lg font-bold text-forest-900 mobile:min-w-0 mobile:flex-1 mobile:text-base mobile:hyphens-auto mobile:[overflow-wrap:anywhere]">{titre}</h2>
         {essentiel && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-gold-100 px-2.5 py-0.5 text-[0.7rem] font-semibold text-gold-800 ring-1 ring-gold-300">
+          <span className="inline-flex items-center gap-1 rounded-full bg-gold-100 px-2.5 py-0.5 text-[0.7rem] font-semibold text-gold-800 ring-1 ring-gold-300 mobile:hidden">
             <Sparkles size={12} /> Essentiel pour l&apos;emploi du temps
           </span>
         )}
+        {/* Téléphone : badge court (le libellé complet passait sous chaque titre). */}
+        {essentiel && (
+          <span className="hidden shrink-0 items-center gap-1 rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800 ring-1 ring-gold-300 mobile:inline-flex">
+            <Sparkles aria-hidden size={12} /> Essentiel
+          </span>
+        )}
+        <span
+          role="button"
+          tabIndex={0}
+          aria-expanded={ouvert}
+          aria-controls={idContenu}
+          aria-label={`${ouvert ? "Replier" : "Déplier"} : ${titre}`}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setOuvert((o) => !o);
+            }
+          }}
+          className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-700/60 active:bg-cream-100 mobile:flex"
+        >
+          <ChevronDown aria-hidden size={20} className={`transition-transform ${ouvert ? "rotate-180" : ""}`} />
+        </span>
       </div>
-      {sousTitre && <p className="mt-1 mb-4 text-sm text-ink-700/65">{sousTitre}</p>}
-      {!sousTitre && <div className="mb-4" />}
-      {children}
+      <div ref={contenu} id={idContenu} data-ouvert={ouvert ? "" : undefined} className="mobile:hidden mobile:data-[ouvert]:block">
+        {sousTitre && <p className="mt-1 mb-4 text-sm text-ink-700/65">{sousTitre}</p>}
+        {!sousTitre && <div className="mb-4" />}
+        {children}
+      </div>
     </section>
   );
 }
@@ -242,14 +320,15 @@ export function CategoriePedagogiqueBlock({
           {avertissement}
         </p>
       )}
-      <div className="inline-flex flex-wrap gap-1.5 rounded-full border border-cream-300 bg-cream-50 p-1.5">
+      {/* Téléphone : grille 2 × 2 (la pilule passait sur 2 lignes, options de largeurs inégales). */}
+      <div className="inline-flex flex-wrap gap-1.5 rounded-full border border-cream-300 bg-cream-50 p-1.5 mobile:grid mobile:w-full mobile:grid-cols-2 mobile:rounded-2xl">
         {CATEGORIES_PEDAGOGIQUES.map((c) => (
           <button
             key={c.v}
             type="button"
             onClick={() => choisir(c.v)}
             aria-pressed={valeur === c.v}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors mobile:min-h-11 mobile:px-2 ${
               valeur === c.v
                 ? "bg-forest-800 text-cream-50 shadow-soft"
                 : "text-forest-800 hover:bg-forest-50"
@@ -352,14 +431,16 @@ export function PaysBlock({
         <div>
           <Label htmlFor="sloganBulletin">Slogan national officiel</Label>
           <div className="flex gap-2">
-            <Input id="sloganBulletin" name="sloganBulletin" value={vSlogan} onChange={(e) => setSlogan(e.target.value)} />
+            {/* Téléphone : le champ peut rétrécir et le bouton n'y garde que son icône (la rangée
+                débordait du bloc à 360 px). */}
+            <Input id="sloganBulletin" name="sloganBulletin" value={vSlogan} onChange={(e) => setSlogan(e.target.value)} className="mobile:min-w-0" />
             <button
               type="button"
               onClick={() => setSlogan(sloganOfficiel(vPays))}
               title="Réinitialiser sur la devise officielle du pays"
-              className="inline-flex h-11 shrink-0 items-center gap-1 rounded-2xl border border-cream-300 px-3 text-xs font-medium text-forest-700 hover:bg-forest-50"
+              className="inline-flex h-11 shrink-0 items-center gap-1 rounded-2xl border border-cream-300 px-3 text-xs font-medium text-forest-700 hover:bg-forest-50 mobile:w-11 mobile:justify-center mobile:px-0"
             >
-              <RotateCcw size={13} /> Réinitialiser
+              <RotateCcw size={13} /><span className="mobile:sr-only">Réinitialiser</span>
             </button>
           </div>
         </div>
@@ -525,7 +606,7 @@ export function InfosBlock({
               </Select>
             </div>
           )}
-          <p className="mt-1 text-[0.7rem] text-ink-700/55">
+          <p className="mt-1 text-[0.7rem] text-ink-700/55 mobile:text-xs mobile:text-ink-700/70">
             Choix propre à l&apos;établissement (régime de notation des bulletins).
           </p>
         </div>
@@ -1026,7 +1107,7 @@ export function ContraintesBlock({
                         setConditions(conditions.map((x, j) => (j === i ? { ...x, doubleVacation: v } : x)))
                       }
                       aria-pressed={c.doubleVacation === v}
-                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors mobile:min-h-10 mobile:px-4 ${
                         c.doubleVacation === v
                           ? "border-transparent bg-forest-700 text-cream-50"
                           : "border-cream-300 bg-white text-ink-700/65 hover:border-forest-300"
@@ -1041,7 +1122,7 @@ export function ContraintesBlock({
                   onClick={() => setConditions(conditions.filter((_, j) => j !== i))}
                   title={`Retirer « ${c.libelle} »`}
                   aria-label={`Retirer ${c.libelle}`}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600 mobile:h-10 mobile:w-10 mobile:shrink-0"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -1061,13 +1142,13 @@ export function ContraintesBlock({
             }}
             placeholder="Nouvelle condition (ex : Cours d'EPS)…"
             aria-label="Nouvelle condition de double vacation"
-            className="h-9 min-w-[14rem] flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="h-9 min-w-[14rem] flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0 mobile:basis-full mobile:text-base"
           />
           <button
             type="button"
             onClick={() => ajouterCondition(nouvelleCondition)}
             disabled={!nouvelleCondition.trim()}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-11 mobile:text-sm"
           >
             <Plus size={14} /> Ajouter
           </button>
@@ -1082,7 +1163,7 @@ export function ContraintesBlock({
                 key={s}
                 type="button"
                 onClick={() => ajouterCondition(s)}
-                className="rounded-full border border-cream-300 bg-white px-2.5 py-0.5 font-medium text-forest-800 hover:border-forest-300 hover:bg-forest-50"
+                className="rounded-full border border-cream-300 bg-white px-2.5 py-0.5 font-medium text-forest-800 hover:border-forest-300 hover:bg-forest-50 mobile:min-h-10 mobile:px-3"
               >
                 + {s}
               </button>
@@ -1098,7 +1179,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="autoriserHeuresCreuses"
             defaultChecked={autoriserHeuresCreuses}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Autoriser des heures creuses</strong> dans l&apos;emploi du temps des élèves,
@@ -1117,7 +1198,7 @@ export function ContraintesBlock({
             name="doubleVacationMatin"
             defaultValue={doubleVacationMatin === "pairs" ? "pairs" : "impairs"}
             /* Halo orange pour attirer l'attention sur ce réglage de parité. */
-            className="h-9 rounded-lg border border-gold-300 bg-white px-2.5 text-sm outline-none ring-2 ring-gold-300 ring-offset-2 focus:border-gold-400 focus:ring-gold-400"
+            className="h-9 rounded-lg border border-gold-300 bg-white px-2.5 text-sm outline-none ring-2 ring-gold-300 ring-offset-2 focus:border-gold-400 focus:ring-gold-400 mobile:h-11 mobile:text-base"
           >
             <option value="impairs">indices impairs</option>
             <option value="pairs">indices pairs</option>
@@ -1134,7 +1215,7 @@ export function ContraintesBlock({
             id="schemaAlternanceVacation"
             name="schemaAlternanceVacation"
             defaultValue={["hebdomadaire", "fixe", "quotidienne"].includes(schemaAlternanceVacation) ? schemaAlternanceVacation : "quotidienne"}
-            className="h-9 rounded-lg border border-cream-200 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+            className="h-9 rounded-lg border border-cream-200 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:text-base"
           >
             <option value="hebdomadaire">par blocs (lun-mar ⇄ jeu-ven)</option>
             <option value="quotidienne">jour par jour</option>
@@ -1151,7 +1232,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="epsDemiJourneeOpposee"
             defaultChecked={epsDemiJourneeOpposee}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>En double vacation, la séance d&apos;EPS se tient dans l&apos;autre
@@ -1169,7 +1250,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="salleFixeParClasse"
             defaultChecked={salleFixeParClasse}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Réduire au maximum les déplacements des élèves</strong>{" "}
@@ -1189,7 +1270,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="seanceUniqueDemiFermee"
             defaultChecked={seanceUniqueDemiFermee}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Séance unique les jours à demi-journée fermée pour tous</strong>{" "}
@@ -1212,7 +1293,7 @@ export function ContraintesBlock({
             min={4}
             max={6}
             defaultValue={joursOuvres}
-            className="h-9 w-20 rounded-lg border border-cream-200 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+            className="h-9 w-20 rounded-lg border border-cream-200 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:text-base"
           />
           <span className="text-xs text-ink-700/55">5 = lundi-vendredi · 6 = ajoute le samedi</span>
         </div>
@@ -1237,7 +1318,7 @@ export function ContraintesBlock({
                     onClick={() =>
                       setJourComplet((prev) => (actif ? prev.filter((x) => x !== niv.id) : [...prev, niv.id]))
                     }
-                    className={`rounded-full border px-3 py-1 text-xs transition ${
+                    className={`rounded-full border px-3 py-1 text-xs transition mobile:min-h-10 mobile:px-4 ${
                       actif
                         ? "border-forest-500 bg-forest-50 text-forest-800"
                         : "border-cream-200 bg-white text-ink-700 hover:border-forest-300"
@@ -1278,7 +1359,7 @@ export function ContraintesBlock({
                     · {libelleNiveaux(p.niveauIds)}
                   </span>
                   {p.saufEps && (
-                    <span className="ml-1 rounded-full bg-forest-100 px-2 py-0.5 text-[0.7rem] font-semibold text-forest-800">
+                    <span className="ml-1 rounded-full bg-forest-100 px-2 py-0.5 text-[0.7rem] font-semibold text-forest-800 mobile:text-xs">
                       EPS uniquement
                     </span>
                   )}
@@ -1290,7 +1371,7 @@ export function ContraintesBlock({
                   onClick={() => setPlages((prec) => prec.filter((x) => x !== p))}
                   title="Retirer cette plage"
                   aria-label={`Retirer ${JOURS_SEMAINE[p.jour]} ${libelleMoment(p.moment)} (${libelleNiveaux(p.niveauIds)})`}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600 mobile:h-10 mobile:w-10 mobile:shrink-0"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -1308,7 +1389,7 @@ export function ContraintesBlock({
                 type="button"
                 aria-pressed={joursChoisis.has(idx)}
                 onClick={() => setJoursChoisis((prec) => basculerDansEnsemble(prec, idx))}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors mobile:min-h-10 mobile:px-4 ${
                   joursChoisis.has(idx)
                     ? "border-transparent bg-forest-700 text-cream-50"
                     : "border-cream-300 text-ink-700/70 hover:border-forest-300"
@@ -1321,7 +1402,7 @@ export function ContraintesBlock({
               value={nouveauMoment}
               onChange={(e) => setNouveauMoment(e.target.value)}
               aria-label="Moment de la journée"
-              className="ml-1 h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              className="ml-1 h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:text-base"
             >
               {MOMENTS.map((m) => (
                 <option key={m.v} value={m.v}>{m.l}</option>
@@ -1330,12 +1411,12 @@ export function ContraintesBlock({
             {/* « EPS uniquement » : n'a de sens que sur une demi-journée. Ferme aux cours en salle
                 mais laisse l'EPS — les niveaux ciblés y font EPS, leur salle sert à d'autres classes. */}
             {nouveauMoment !== "journee" && (
-              <label className="ml-1 inline-flex items-center gap-1.5 text-xs font-medium text-ink-700/70">
+              <label className="ml-1 inline-flex items-center gap-1.5 text-xs font-medium text-ink-700/70 mobile:min-h-11">
                 <input
                   type="checkbox"
                   checked={saufEpsChoisi}
                   onChange={(e) => setSaufEpsChoisi(e.target.checked)}
-                  className="h-3.5 w-3.5 accent-forest-700"
+                  className="h-3.5 w-3.5 accent-forest-700 mobile:h-5 mobile:w-5"
                 />
                 EPS uniquement
                 <span className="font-normal text-ink-700/45">(salle libérée, EPS maintenue)</span>
@@ -1354,7 +1435,7 @@ export function ContraintesBlock({
                   type="button"
                   aria-pressed={niveauxChoisis.has(n.id)}
                   onClick={() => setNiveauxChoisis((prec) => basculerDansEnsemble(prec, n.id))}
-                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors mobile:min-h-10 mobile:px-4 ${
                     niveauxChoisis.has(n.id)
                       ? "border-transparent bg-gold-600 text-white"
                       : "border-cream-300 text-ink-700/70 hover:border-gold-400"
@@ -1369,7 +1450,7 @@ export function ContraintesBlock({
             type="button"
             onClick={ajouterPlages}
             disabled={joursChoisis.size === 0}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-11 mobile:text-sm"
           >
             <Plus size={14} /> Ajouter {joursChoisis.size > 1 ? `les ${joursChoisis.size} jours` : ""}
           </button>
@@ -1425,7 +1506,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="interdireMemeDisciplineConsecutive"
             defaultChecked={interdireMemeDiscipline}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             Dans la même journée, une même discipline ne doit <strong>jamais avoir deux séances
@@ -1438,7 +1519,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="interdireLitterairesConsecutifs"
             defaultChecked={interdireLitteraires}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             Deux <strong>disciplines littéraires</strong> (français, philosophie,
@@ -1452,7 +1533,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="interdireScientifiquesConsecutifs"
             defaultChecked={interdireScientifiques}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             Deux <strong>disciplines scientifiques</strong> (mathématiques, physique-chimie,
@@ -1466,7 +1547,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="limiterDisciplineParDemiJournee"
             defaultChecked={limiterParDemiJournee}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Limiter une discipline à une séance par demi-journée</strong> dans
@@ -1480,7 +1561,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="eviterMemeDisciplineFinJournee"
             defaultChecked={eviterFinJournee}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Éviter qu&apos;une classe termine deux jours de suite par la même
@@ -1494,7 +1575,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="seanceLongueSeuleParJour"
             defaultChecked={seanceLongueSeuleParJour}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Une séance de 2h d&apos;une discipline est seule dans sa journée</strong> —
@@ -1515,7 +1596,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="reposEnseignant"
             defaultChecked={reposEnseignant}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             Garantir à chaque enseignant <strong>un jour de recherche</strong> (jour sans cours)
@@ -1527,21 +1608,21 @@ export function ContraintesBlock({
         {enseignantsEtab.length > 0 && (
           <details
             key={`deux-jours:${[...deuxJoursRecherche].sort().join(",")}`}
-            className="mb-1 ml-6 rounded-xl border border-cream-200 bg-cream-50/60 px-3 py-2"
+            className="mb-1 ml-6 rounded-xl border border-cream-200 bg-cream-50/60 px-3 py-2 mobile:ml-0"
           >
-            <summary className="cursor-pointer text-sm text-ink-800">
+            <summary className="cursor-pointer text-sm text-ink-800 mobile:py-2">
               Accorder <strong>deux jours de recherche</strong> à certains enseignants
               {deuxJoursRecherche.size > 0 ? ` (${deuxJoursRecherche.size} sélectionné(s))` : ""}
             </summary>
             <div className="mt-2 grid max-h-64 gap-1 overflow-y-auto sm:grid-cols-2">
               {enseignantsEtab.map((t) => (
-                <label key={t.id} className="flex cursor-pointer items-center gap-2 text-sm text-ink-800">
+                <label key={t.id} className="flex cursor-pointer items-center gap-2 text-sm text-ink-800 mobile:min-h-11">
                   <input
                     type="checkbox"
                     name="deuxJoursRecherche"
                     value={t.id}
                     defaultChecked={deuxJoursRecherche.has(t.id)}
-                    className="h-4 w-4 accent-forest-700"
+                    className="h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
                   />
                   {t.nom}
                 </label>
@@ -1558,7 +1639,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="regrouperHeuresCreuses"
             defaultChecked={regrouperHeuresCreuses}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Regrouper les heures creuses</strong> de chaque enseignant (plutôt la matinée
@@ -1572,7 +1653,7 @@ export function ContraintesBlock({
             type="checkbox"
             name="eviterSeanceIsoleeEnseignant"
             defaultChecked={eviterSeanceIsolee}
-            className="mt-0.5 h-4 w-4 accent-forest-700"
+            className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5"
           />
           <span className="text-sm text-ink-800">
             <strong>Empêcher l&apos;isolement d&apos;une séance</strong> dans une demi-journée :

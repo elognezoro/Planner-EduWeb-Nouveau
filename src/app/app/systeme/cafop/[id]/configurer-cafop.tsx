@@ -11,7 +11,7 @@ import { DocumentsCafop, ZoneDocumentCafop } from "./documents-cafop";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 const initial: EtatForm = { ok: false };
-const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 
 export interface CafopConfig {
   id: string;
@@ -95,7 +95,7 @@ function ImportCohorteCSV({ cohorteId, disabled }: { cohorteId: string; disabled
       <input type="hidden" name="cohorteId" value={cohorteId} />
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-forest-900">Importer une cohorte (CSV)</p>
-        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100">
+        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:px-4">
           <FileDown size={13} /> Modèle CSV
         </button>
       </div>
@@ -109,10 +109,14 @@ function ImportCohorteCSV({ cohorteId, disabled }: { cohorteId: string; disabled
         onDragLeave={() => setSurvole(false)}
         onDrop={(e) => { e.preventDefault(); setSurvole(false); if (!disabled) void chargerFichier(e.dataTransfer.files[0]); }}
         onClick={() => !disabled && fichierRef.current?.click()}
-        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"} ${disabled ? "pointer-events-none opacity-50" : ""}`}
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors mobile:py-4 ${survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"} ${disabled ? "pointer-events-none opacity-50" : ""}`}
       >
         <Upload size={20} className="mx-auto mb-1 text-forest-500" />
-        <p className="text-sm font-medium text-forest-900">Glissez-déposez le fichier CSV ici</p>
+        {/* Téléphone : formulation au doigt (pas de glisser-déposer). */}
+        <p className="text-sm font-medium text-forest-900">
+          <span className="mobile:hidden">Glissez-déposez le fichier CSV ici</span>
+          <span className="hidden mobile:inline">Touchez pour choisir un fichier CSV</span>
+        </p>
         <p className="text-xs text-ink-700/55">ou cliquez pour parcourir · déposé dans la promotion sélectionnée</p>
       </div>
       <input ref={fichierRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => void chargerFichier(e.target.files?.[0])} />
@@ -122,10 +126,10 @@ function ImportCohorteCSV({ cohorteId, disabled }: { cohorteId: string; disabled
         name="texte"
         rows={3}
         placeholder={"Ou collez le CSV ici…\nNOM;Prénoms;Année;Classe;Matricule\nKONÉ;Moussa;1;F1;"}
-        className="mt-2 w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="mt-2 w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
       />
       <div className="mt-2 flex justify-end">
-        <SubmitButton className="w-auto px-5"><Upload size={14} /> Importer la cohorte</SubmitButton>
+        <SubmitButton className="w-auto px-5 mobile:w-full"><Upload size={14} /> Importer la cohorte</SubmitButton>
       </div>
     </form>
   );
@@ -189,10 +193,13 @@ function ImportEnseignantsCSV({ cafopId }: { cafopId: string }) {
         onDragLeave={() => setSurvole(false)}
         onDrop={(e) => { e.preventDefault(); setSurvole(false); void chargerFichier(e.dataTransfer.files[0]); }}
         onClick={() => fichierRef.current?.click()}
-        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"}`}
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors mobile:py-4 ${survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"}`}
       >
         <Upload size={20} className="mx-auto mb-1 text-forest-500" />
-        <p className="text-sm font-medium text-forest-900">Glissez-déposez le fichier CSV ici</p>
+        <p className="text-sm font-medium text-forest-900">
+          <span className="mobile:hidden">Glissez-déposez le fichier CSV ici</span>
+          <span className="hidden mobile:inline">Touchez pour choisir un fichier CSV</span>
+        </p>
         <p className="text-xs text-ink-700/55">ou cliquez pour parcourir</p>
       </div>
       <input ref={fichierRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => void chargerFichier(e.target.files?.[0])} />
@@ -202,10 +209,10 @@ function ImportEnseignantsCSV({ cafopId }: { cafopId: string }) {
         name="texte"
         rows={3}
         placeholder={"Ou collez le CSV ici…\nNOM;Prénoms;Discipline\nKOUAMÉ;Jean Marc;Psychopédagogie"}
-        className="mt-2 w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="mt-2 w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
       />
       <div className="mt-2 flex justify-end">
-        <SubmitButton className="w-auto px-5"><Upload size={14} /> Importer les enseignants</SubmitButton>
+        <SubmitButton className="w-auto px-5 mobile:w-full"><Upload size={14} /> Importer les enseignants</SubmitButton>
       </div>
     </form>
   );
@@ -249,14 +256,14 @@ function GroupesClassesEditor({ cohorteId, annee, groupes }: { cohorteId: string
                 value={val}
                 onChange={(e) => setValeurs((v) => ({ ...v, [g]: e.target.value }))}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); renommer(g); } }}
-                className="h-7 w-20 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                className="h-7 w-20 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11"
               />
               <button
                 type="button"
                 disabled={pending || !modifie}
                 onClick={() => renommer(g)}
                 title={`Renommer le groupe-classe ${g}`}
-                className="inline-flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-40"
+                className="inline-flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-40 mobile:h-11"
               >
                 {pending ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />} Renommer
               </button>
@@ -290,7 +297,7 @@ function ProfsPrincipauxEditor({ cafopId, groupes, enseignants, actuels }: { caf
       <div className="grid gap-2 sm:grid-cols-2">
         {groupes.map((g) => (
           <label key={g} className="flex items-center gap-2 text-sm">
-            <span className="w-24 shrink-0 font-semibold text-forest-900">Groupe {g}</span>
+            <span className="w-24 shrink-0 font-semibold text-forest-900 mobile:w-20">Groupe {g}</span>
             <select value={valeurs[g] ?? ""} onChange={(e) => setValeurs((v) => ({ ...v, [g]: e.target.value }))} className={champCls}>
               <option value="">— Aucun —</option>
               {enseignants.map((e) => (
@@ -313,7 +320,7 @@ function ProfsPrincipauxEditor({ cafopId, groupes, enseignants, actuels }: { caf
               if (r.ok) router.refresh();
             });
           }}
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60"
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60 mobile:h-11 mobile:w-full mobile:justify-center"
         >
           {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Enregistrer
         </button>
@@ -379,13 +386,14 @@ function PhotoEleveCell({ eleve }: { eleve: EleveConfig }) {
           <UserRound size={16} />
         </span>
       )}
-      <span className="flex flex-col items-start">
+      {/* Téléphone : boutons Photo / Retirer côte à côte, en cibles de 44 px. */}
+      <span className="flex flex-col items-start mobile:flex-row mobile:flex-wrap mobile:items-center mobile:gap-2">
         <button
           type="button"
           disabled={pending}
           onClick={() => inputRef.current?.click()}
           title={eleve.photoUrl ? "Remplacer la photo d'identité (JPG, PNG ou WebP, 4 Mo max)" : "Téléverser la photo d'identité (JPG, PNG ou WebP, 4 Mo max)"}
-          className="inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-[11px] font-semibold text-forest-700 hover:bg-forest-50 disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-[11px] font-semibold text-forest-700 hover:bg-forest-50 disabled:opacity-40 mobile:min-h-11 mobile:border mobile:border-forest-200 mobile:px-3 mobile:text-sm"
         >
           {pending ? <Loader2 size={11} className="animate-spin" /> : <ImageUp size={11} />} {eleve.photoUrl ? "Remplacer" : "Photo"}
         </button>
@@ -394,14 +402,14 @@ function PhotoEleveCell({ eleve }: { eleve: EleveConfig }) {
             type="button"
             disabled={pending}
             onClick={retirer}
-            className={`inline-flex items-center rounded-lg px-1.5 py-0.5 text-[11px] font-semibold disabled:opacity-40 ${confirme ? "bg-red-600 text-white hover:bg-red-700" : "text-red-600 hover:bg-red-50"}`}
+            className={`inline-flex items-center rounded-lg px-1.5 py-0.5 text-[11px] font-semibold disabled:opacity-40 mobile:min-h-11 mobile:px-3 mobile:text-sm ${confirme ? "bg-red-600 text-white hover:bg-red-700" : "text-red-600 hover:bg-red-50"}`}
           >
             {confirme ? "Confirmer ?" : "Retirer"}
           </button>
         )}
       </span>
       <input ref={inputRef} type="file" accept={FORMATS_PHOTO.join(",")} className="hidden" onChange={(e) => { const f = e.currentTarget.files?.[0]; e.currentTarget.value = ""; if (f) envoyer(f); }} />
-      {erreur && <span className="max-w-[9rem] text-[10px] leading-tight text-red-600">{erreur}</span>}
+      {erreur && <span className="max-w-[9rem] text-[10px] leading-tight text-red-600 mobile:max-w-none mobile:text-xs">{erreur}</span>}
     </div>
   );
 }
@@ -476,7 +484,7 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
             <Champ label="Téléphone"><input name="directeurTel" defaultValue={cafop.directeurTel ?? ""} className={champCls} /></Champ>
             <Champ label="Effectif (élèves-maîtres)"><input name="effectif" type="number" min={0} defaultValue={cafop.effectif} className={champCls} /></Champ>
           </div>
-          <div className="flex justify-end"><SubmitButton className="w-auto px-6"><Save size={15} /> Enregistrer</SubmitButton></div>
+          <div className="flex justify-end"><SubmitButton className="w-auto px-6 mobile:w-full"><Save size={15} /> Enregistrer</SubmitButton></div>
         </form>
       </section>
 
@@ -496,7 +504,7 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
               <Champ label="Téléphone"><input name="telephone" defaultValue={cafop.telephone ?? ""} maxLength={40} placeholder="Ex : +225 07 07 00 00 00" className={champCls} /></Champ>
               <Champ label="E-mail"><input name="email" defaultValue={cafop.email ?? ""} maxLength={160} inputMode="email" placeholder="Ex : cafop.abengourou@exemple.ci" className={champCls} /></Champ>
             </div>
-            <div className="flex justify-end"><SubmitButton className="w-auto px-6"><Save size={15} /> Enregistrer</SubmitButton></div>
+            <div className="flex justify-end"><SubmitButton className="w-auto px-6 mobile:w-full"><Save size={15} /> Enregistrer</SubmitButton></div>
           </form>
           <ZoneDocumentCafop cafopId={cafop.id} type="logo" libelle={T("Logo du CAFOP")} url={cafop.logoUrl} formatsStricts />
         </div>
@@ -533,8 +541,9 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
                     if (!window.confirm(`Retirer « ${[e.nom, e.prenoms].filter(Boolean).join(" ")} » de l'annuaire ?`)) return;
                     start(async () => { const r = await supprimerEnseignantCafop(e.id); if (r?.ok) router.refresh(); });
                   }}
-                  className="shrink-0 rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                  className="shrink-0 rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:p-0"
                   title="Retirer"
+                  aria-label="Retirer l'enseignant"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -544,12 +553,13 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
         )}
 
         {etatEns.message && <div className="mb-3"><FormAlert ton={etatEns.ok ? "succes" : "erreur"}>{etatEns.message}</FormAlert></div>}
-        <form ref={formEnsRef} action={actionEns} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3">
+        {/* Téléphone : grille de 2 colonnes (les largeurs fixes faisaient des rangées en escalier). */}
+        <form ref={formEnsRef} action={actionEns} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3 mobile:grid mobile:grid-cols-2 mobile:gap-3">
           <input type="hidden" name="cafopId" value={cafop.id} />
-          <div className="w-40"><Champ label="NOM"><input name="nom" required onChange={(e) => { e.currentTarget.value = majLive(e.currentTarget.value); }} placeholder="KOUAMÉ" className={champCls} /></Champ></div>
-          <div className="w-44"><Champ label="Prénoms"><input name="prenoms" onChange={(e) => { e.currentTarget.value = titreLive(e.currentTarget.value); }} placeholder="Jean Marc" className={champCls} /></Champ></div>
-          <div className="min-w-[12rem] flex-1"><Champ label="Discipline"><input name="discipline" placeholder="Ex : Psychopédagogie" className={champCls} /></Champ></div>
-          <SubmitButton className="w-auto px-5"><Plus size={15} /> Ajouter</SubmitButton>
+          <div className="w-40 mobile:w-auto"><Champ label="NOM"><input name="nom" required onChange={(e) => { e.currentTarget.value = majLive(e.currentTarget.value); }} placeholder="KOUAMÉ" className={champCls} /></Champ></div>
+          <div className="w-44 mobile:w-auto"><Champ label="Prénoms"><input name="prenoms" onChange={(e) => { e.currentTarget.value = titreLive(e.currentTarget.value); }} placeholder="Jean Marc" className={champCls} /></Champ></div>
+          <div className="min-w-[12rem] flex-1 mobile:col-span-2 mobile:min-w-0"><Champ label="Discipline"><input name="discipline" placeholder="Ex : Psychopédagogie" className={champCls} /></Champ></div>
+          <SubmitButton className="w-auto px-5 mobile:col-span-2 mobile:w-full"><Plus size={15} /> Ajouter</SubmitButton>
         </form>
 
         <ImportEnseignantsCSV cafopId={cafop.id} />
@@ -581,7 +591,8 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
                   disabled={pending}
                   title="Supprimer la promotion"
                   onClick={() => { if (window.confirm(`Supprimer « ${p.libelle} » ?${p.nbEleves > 0 ? ` ${p.nbEleves} élève(s)-maître(s) rattaché(s) seront aussi supprimés.` : ""}`)) start(async () => { const r = await supprimerCohorte(p.id); if (r.ok) router.refresh(); }); }}
-                  className="text-ink-700/40 hover:text-red-600 disabled:opacity-50"
+                  aria-label={`Supprimer ${p.libelle}`}
+                  className="text-ink-700/40 hover:text-red-600 disabled:opacity-50 mobile:-mr-2 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -589,13 +600,13 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
             </div>
           ))}
         </div>
-        <form action={actionPromo} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3">
+        <form action={actionPromo} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3 mobile:grid mobile:grid-cols-2 mobile:gap-3">
           <input type="hidden" name="type" value="cafop_promotion" />
           <input type="hidden" name="cafopId" value={cafop.id} />
-          <div className="min-w-[12rem] flex-1"><Champ label="Nouvelle promotion"><input name="libelle" value={libellePromo} readOnly title="Libellé généré automatiquement à partir des années" className={`${champCls} bg-cream-50 text-ink-700/80`} /></Champ></div>
-          <div className="w-24"><Champ label="Début"><input value={promoDebut} onChange={(e) => setPromoDebut(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" name="anneeDebut" placeholder="2026" className={champCls} /></Champ></div>
-          <div className="w-24"><Champ label="Fin"><input value={promoFin} onChange={(e) => setPromoFin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" name="anneeFin" placeholder="2028" className={champCls} /></Champ></div>
-          <SubmitButton className="w-auto px-5"><Plus size={15} /> Ajouter</SubmitButton>
+          <div className="min-w-[12rem] flex-1 mobile:col-span-2 mobile:min-w-0"><Champ label="Nouvelle promotion"><input name="libelle" value={libellePromo} readOnly title="Libellé généré automatiquement à partir des années" className={`${champCls} bg-cream-50 text-ink-700/80`} /></Champ></div>
+          <div className="w-24 mobile:w-auto"><Champ label="Début"><input value={promoDebut} onChange={(e) => setPromoDebut(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" name="anneeDebut" placeholder="2026" className={champCls} /></Champ></div>
+          <div className="w-24 mobile:w-auto"><Champ label="Fin"><input value={promoFin} onChange={(e) => setPromoFin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" name="anneeFin" placeholder="2028" className={champCls} /></Champ></div>
+          <SubmitButton className="w-auto px-5 mobile:col-span-2 mobile:w-full"><Plus size={15} /> Ajouter</SubmitButton>
         </form>
       </section>
 
@@ -635,8 +646,10 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
         )}
 
         {etatEleve.message && <div className="mb-3"><FormAlert ton={etatEleve.ok ? "succes" : "erreur"}>{etatEleve.message}</FormAlert></div>}
-        <div className="mb-4 max-h-72 overflow-auto rounded-xl border border-cream-100">
-          <table className="w-full border-collapse text-sm">
+        {/* Téléphone : une carte par élève-maître (photo et actions en tête, puis « libellé : valeur »),
+            sans zone à double défilement. */}
+        <div className="mb-4 max-h-72 overflow-auto rounded-xl border border-cream-100 mobile:max-h-none mobile:overflow-visible mobile:border-0">
+          <table className="tableau-cartes-mobile w-full border-collapse text-sm">
             <thead className="sticky top-0 bg-cream-50">
               <tr className="border-b border-cream-200 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
                 <th className="px-3 py-2">Photo</th><th className="px-3 py-2">Nom</th><th className="px-3 py-2">Prénoms</th><th className="px-3 py-2">Année</th><th className="px-3 py-2">Classe</th><th className="px-3 py-2">Matricule</th><th className="w-8" />
@@ -646,14 +659,14 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
               {elevesFiltres.length === 0 ? <tr><td colSpan={7} className="px-3 py-6 text-center text-sm text-ink-700/55">Aucun élève-maître.</td></tr> : elevesFiltres.map((e) => (
                 <tr key={e.id} className="border-b border-cream-100 last:border-0">
                   <td className="px-3 py-1.5"><PhotoEleveCell eleve={e} /></td>
-                  <td className="px-3 py-2 font-medium text-forest-900">{e.nom}</td>
-                  <td className="px-3 py-2 text-ink-700/80">{e.prenoms ?? "—"}</td>
-                  <td className="px-3 py-2 text-ink-700/70">{e.annee ? libelleAnnee(e.annee) : "—"}</td>
-                  <td className="px-3 py-2 text-ink-700/70">{e.groupe ?? "—"}</td>
-                  <td className="px-3 py-2 font-mono text-xs text-ink-700/55">{e.matricule ?? "—"}</td>
+                  <td data-label="Nom" className="px-3 py-2 font-medium text-forest-900">{e.nom}</td>
+                  <td data-label="Prénoms" className="px-3 py-2 text-ink-700/80">{e.prenoms ?? "—"}</td>
+                  <td data-label="Année" className="px-3 py-2 text-ink-700/70">{e.annee ? libelleAnnee(e.annee) : "—"}</td>
+                  <td data-label="Classe" className="px-3 py-2 text-ink-700/70">{e.groupe ?? "—"}</td>
+                  <td data-label="Matricule" className="px-3 py-2 font-mono text-xs text-ink-700/55">{e.matricule ?? "—"}</td>
                   <td className="px-3 py-2 text-center">
-                    <button type="button" disabled={pending} onClick={() => start(async () => { const r = await supprimerApprenant(e.id); if (r.ok) router.refresh(); })} className="text-ink-700/40 hover:text-red-600 disabled:opacity-50" title="Retirer">
-                      <Trash2 size={13} />
+                    <button type="button" disabled={pending} onClick={() => start(async () => { const r = await supprimerApprenant(e.id); if (r.ok) router.refresh(); })} className="text-ink-700/40 hover:text-red-600 disabled:opacity-50 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:gap-2 mobile:rounded-full mobile:px-3 mobile:text-sm mobile:font-semibold mobile:text-red-600" title="Retirer" aria-label={`Retirer ${[e.nom, e.prenoms].filter(Boolean).join(" ")}`}>
+                      <Trash2 size={13} /><span className="hidden mobile:inline">Retirer</span>
                     </button>
                   </td>
                 </tr>
@@ -662,18 +675,19 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
           </table>
         </div>
 
-        <form ref={formEleveRef} action={actionEleve} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3">
+        {/* Téléphone : grille de 2 colonnes, nom et prénoms pleine largeur. */}
+        <form ref={formEleveRef} action={actionEleve} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3 mobile:grid mobile:grid-cols-2 mobile:gap-3">
           <input type="hidden" name="cohorteId" value={promoSel} />
-          <div className="w-32"><Champ label="Nom"><input name="nom" required onChange={(e) => { e.currentTarget.value = majLive(e.currentTarget.value); }} placeholder="KONÉ" className={champCls} /></Champ></div>
-          <div className="w-40"><Champ label="Prénoms"><input name="prenoms" onChange={(e) => { e.currentTarget.value = titreLive(e.currentTarget.value); }} placeholder="Moussa Ibrahim" className={champCls} /></Champ></div>
-          <div className="w-28"><Champ label="Année">
+          <div className="w-32 mobile:col-span-2 mobile:w-auto"><Champ label="Nom"><input name="nom" required onChange={(e) => { e.currentTarget.value = majLive(e.currentTarget.value); }} placeholder="KONÉ" className={champCls} /></Champ></div>
+          <div className="w-40 mobile:col-span-2 mobile:w-auto"><Champ label="Prénoms"><input name="prenoms" onChange={(e) => { e.currentTarget.value = titreLive(e.currentTarget.value); }} placeholder="Moussa Ibrahim" className={champCls} /></Champ></div>
+          <div className="w-28 mobile:w-auto"><Champ label="Année">
             <select key={`an-${anneeEff ?? "auto"}`} name="annee" defaultValue={anneeEff ?? 1} className={champCls}>
               {[1, 2, 3].map((a) => <option key={a} value={a}>{libelleAnnee(a)}</option>)}
             </select>
           </Champ></div>
-          <div className="w-20"><Champ label="Classe"><input key={`cl-${classe || "vide"}`} name="groupe" defaultValue={classe} placeholder="F2" className={champCls} /></Champ></div>
-          <div className="w-36"><Champ label="Matricule"><input name="matricule" placeholder="(auto ou manuel)" className={champCls} /></Champ></div>
-          <SubmitButton className="w-auto px-5"><Plus size={15} /> Ajouter</SubmitButton>
+          <div className="w-20 mobile:w-auto"><Champ label="Classe"><input key={`cl-${classe || "vide"}`} name="groupe" defaultValue={classe} placeholder="F2" className={champCls} /></Champ></div>
+          <div className="w-36 mobile:col-span-2 mobile:w-auto"><Champ label="Matricule"><input name="matricule" placeholder="(auto ou manuel)" className={champCls} /></Champ></div>
+          <SubmitButton className="w-auto px-5 mobile:col-span-2 mobile:w-full"><Plus size={15} /> Ajouter</SubmitButton>
         </form>
 
         <ImportCohorteCSV cohorteId={promoSel} disabled={!promoSel} />
@@ -693,7 +707,7 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
             type="button"
             onClick={enregistrerTout}
             disabled={enregTout}
-            className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-forest-800 px-7 text-sm font-semibold text-cream-50 shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-forest-700 disabled:opacity-60"
+            className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-forest-800 px-7 text-sm font-semibold text-cream-50 shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-forest-700 disabled:opacity-60 mobile:w-full mobile:justify-center"
           >
             {enregTout ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             {enregTout ? "Enregistrement…" : "Enregistrer toute la page"}

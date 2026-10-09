@@ -55,7 +55,7 @@ export default async function RapportsCafopTabPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <EnteteCafop ongletActif="rapports" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={estLectureSeuleCafop(u.roleActif)} />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:last:odd:col-span-2">
         <StatCard libelle="Promotions" valeur={kpis.promotions} icone={<BookMarked size={22} />} />
         <StatCard libelle="Actives" valeur={kpis.actives} icone={<FileText size={22} />} ton="gold" />
         <StatCard libelle="Élèves-maîtres" valeur={kpis.stagiaires} icone={<Users size={22} />} />
@@ -67,7 +67,8 @@ export default async function RapportsCafopTabPage() {
           <p className="text-sm text-ink-700/60">Aucune promotion enregistrée.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+            {/* Téléphone : une carte par promotion (« libellé : valeur »). */}
+            <table className="tableau-cartes-mobile w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs text-ink-700/65">
                   <th className="py-2.5 pr-3 font-semibold">Promotion</th>
@@ -80,11 +81,11 @@ export default async function RapportsCafopTabPage() {
               <tbody>
                 {lignes.map((l) => (
                   <tr key={l.id} className="border-b border-cream-100 last:border-0">
-                    <td className="py-2.5 pr-3 font-medium text-forest-900">{l.libelle}</td>
-                    <td className="px-2 py-2.5 text-ink-700/70">{l.cafop}</td>
-                    <td className="px-2 py-2.5 text-ink-700/70">{l.annees || "—"}</td>
-                    <td className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.stagiaires}</td>
-                    <td className="px-2 py-2.5 text-center">
+                    <td className="py-2.5 pr-3 font-medium text-forest-900 mobile:font-semibold">{l.libelle}</td>
+                    <td data-label={T("CAFOP")} className="px-2 py-2.5 text-ink-700/70">{l.cafop}</td>
+                    <td data-label="Années" className="px-2 py-2.5 text-ink-700/70">{l.annees || "—"}</td>
+                    <td data-label="Élèves-maîtres" className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.stagiaires}</td>
+                    <td data-label="Statut" className="px-2 py-2.5 text-center">
                       <Badge ton={l.statut === "active" ? "succes" : "neutre"}>{l.statut === "active" ? "Active" : "Clôturée"}</Badge>
                     </td>
                   </tr>

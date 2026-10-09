@@ -31,13 +31,13 @@ export function EchangeDemande({ demandeId, echanges }: { demandeId: string; ech
       <button
         type="button"
         onClick={() => setOuvert((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left text-sm font-semibold text-forest-800"
+        className="flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left text-sm font-semibold text-forest-800 mobile:min-h-12"
       >
         <span className="inline-flex items-center gap-2">
           <MessagesSquare size={15} className="text-forest-600" />
           Échanger avec le demandeur
           {echanges.length > 0 && (
-            <span className="rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-bold text-forest-700">{echanges.length}</span>
+            <span className="rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-bold text-forest-700 mobile:text-xs">{echanges.length}</span>
           )}
         </span>
         <ChevronDown size={16} className={`shrink-0 text-ink-700/50 transition-transform ${ouvert ? "rotate-180" : ""}`} />
@@ -50,8 +50,9 @@ export function EchangeDemande({ demandeId, echanges }: { demandeId: string; ech
               {echanges.map((e) => (
                 <li key={e.id} className={e.duDemandeur ? "flex justify-start" : "flex justify-end"}>
                   <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${e.duDemandeur ? "rounded-tl-sm bg-white text-ink-800 ring-1 ring-cream-200" : "rounded-tr-sm bg-forest-700 text-cream-50"}`}>
-                    <p className="whitespace-pre-wrap leading-relaxed">{e.contenu}</p>
-                    <p className={`mt-1 text-[0.6rem] ${e.duDemandeur ? "text-ink-700/45" : "text-cream-200/70"}`}>
+                    {/* Téléphone : une URL ou un e-mail collé (insécable) se coupe au lieu de déborder. */}
+                    <p className="whitespace-pre-wrap leading-relaxed mobile:[overflow-wrap:anywhere]">{e.contenu}</p>
+                    <p className={`mt-1 text-[0.6rem] mobile:text-xs ${e.duDemandeur ? "text-ink-700/45" : "text-cream-200/70"}`}>
                       {e.duDemandeur ? "Demandeur" : e.auteur} · {e.date}
                     </p>
                   </div>
@@ -76,14 +77,14 @@ export function EchangeDemande({ demandeId, echanges }: { demandeId: string; ech
               type="button"
               onClick={envoyer}
               disabled={envoi || !texte.trim()}
-              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-forest-800 px-3.5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-forest-800 px-3.5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-11"
             >
               {envoi ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
               Envoyer
             </button>
           </div>
           {erreur && <p className="text-xs font-medium text-amber-700">{erreur}</p>}
-          <p className="text-[0.65rem] text-ink-700/45">
+          <p className="text-[0.65rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">
             Copie envoyée à l&apos;administration ; le demandeur reçoit aussi cet échange par e-mail et peut répondre.
           </p>
         </div>

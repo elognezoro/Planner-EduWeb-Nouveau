@@ -87,24 +87,27 @@ export default async function DetailUtilisateurConnectePage({
     <div className="mx-auto max-w-5xl space-y-6">
       <Link
         href={`/app/utilisateurs-connectes?fenetre=${fenetre}`}
-        className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900"
+        className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:min-h-11"
       >
         <ArrowLeft size={16} /> Utilisateurs connectés
       </Link>
 
+      {/* Téléphone : la description contient l'e-mail (insécable) — coupure autorisée partout
+          (propriété héritée par le paragraphe de description de l'en-tête). */}
       <PageHeader
+        className="mobile:[overflow-wrap:anywhere]"
         titre={nomComplet}
         description={`${cible.roleActif.libelle} · ${structure} · ${cible.email}${cible.dernierAccesLe ? ` — dernier accès ${tempsRelatif(cible.dernierAccesLe, maintenant)}` : ""}`}
       />
 
-      {/* Fenêtre d'observation (partagée avec la liste). */}
-      <div className="flex flex-wrap gap-2">
+      {/* Fenêtre d'observation (partagée avec la liste). Téléphone : une rangée qui défile. */}
+      <div className="rangee-defilante-mobile flex flex-wrap gap-2 mobile:-mx-4 mobile:px-4">
         {FENETRES.map((f) => (
           <Link
             key={f.cle}
             href={`/app/utilisateurs-connectes/${cible.id}?fenetre=${f.cle}`}
             aria-current={f.cle === fenetre ? "page" : undefined}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors mobile:inline-flex mobile:min-h-11 mobile:items-center ${
               f.cle === fenetre
                 ? "border-forest-700 bg-forest-800 text-white"
                 : "border-cream-300 bg-white text-ink-800 hover:border-forest-300 hover:bg-cream-50"
@@ -115,8 +118,8 @@ export default async function DetailUtilisateurConnectePage({
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 lg:grid-cols-2 mobile:gap-4">
+        <Card className="mobile:p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-forest-900">
             <Compass size={17} className="text-forest-700" /> Pages touchées — {libelleFenetre}
           </p>
@@ -127,7 +130,8 @@ export default async function DetailUtilisateurConnectePage({
             </p>
           ) : (
             <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[380px] text-left text-sm">
+              {/* Téléphone : une carte par page (chemin en titre, visites et dernière visite dessous). */}
+              <table className="tableau-cartes-mobile w-full min-w-[380px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-cream-200 text-xs uppercase tracking-wide text-ink-700/55">
                     <th className="py-2 pr-3 font-semibold">Page</th>
@@ -163,8 +167,8 @@ export default async function DetailUtilisateurConnectePage({
                             </>
                           )}
                         </td>
-                        <td className="py-2 pr-3 tabular-nums text-ink-800">{p._count._all}</td>
-                        <td className="py-2 whitespace-nowrap text-xs text-ink-700/70">
+                        <td data-label="Visites" className="py-2 pr-3 tabular-nums text-ink-800">{p._count._all}</td>
+                        <td data-label="Dernière" className="py-2 whitespace-nowrap text-xs text-ink-700/70">
                           {p._max.date ? tempsRelatif(p._max.date, maintenant) : "—"}
                         </td>
                       </tr>
@@ -176,7 +180,7 @@ export default async function DetailUtilisateurConnectePage({
           )}
         </Card>
 
-        <Card>
+        <Card className="mobile:p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-forest-900">
             <Activity size={17} className="text-forest-700" /> Actions effectuées — {libelleFenetre}
           </p>
@@ -190,7 +194,9 @@ export default async function DetailUtilisateurConnectePage({
               {actions.map((a) => (
                 <li key={a.id} className="rounded-xl border border-cream-200 bg-cream-50/50 px-3 py-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-medium text-ink-900">{a.action}</span>
+                    {/* Téléphone : un identifiant d'action insécable (ex. « securite.mot_de_passe_reinitialise »)
+                        se coupe au lieu d'élargir la carte — et la page. */}
+                    <span className="font-medium text-ink-900 mobile:min-w-0 mobile:text-sm mobile:[overflow-wrap:anywhere]">{a.action}</span>
                     <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs text-ink-700/60">
                       <Clock size={12} className="text-ink-700/40" />
                       {tempsRelatif(a.creeLe, maintenant)}

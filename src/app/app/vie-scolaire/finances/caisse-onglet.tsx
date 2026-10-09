@@ -33,6 +33,7 @@ import type { EnteteEtablissement } from "./finances-vue";
 import { BoutonActionConfirmee } from "./scolarite-plus";
 import { useApresSucces } from "./scolarite-onglets";
 import { fcfa } from "./types";
+import { MontantTuile } from "./montant-mobile";
 
 const INITIAL: EtatForm = { ok: false };
 
@@ -122,20 +123,20 @@ export function OngletCaisses({
 }
 
 function TableauBordCaisses({ tableauBord: t }: { tableauBord: TableauBordCaisseVue }) {
-  const cartes: { libelle: string; valeur: string; Icone: typeof Wallet; ton?: "gold" | "rouge" }[] = [
+  const cartes: { libelle: string; valeur: string; montant?: number; Icone: typeof Wallet; ton?: "gold" | "rouge" }[] = [
     { libelle: "Caisses ouvertes", valeur: `${t.caissesOuvertes} / ${t.caissesTotal}`, Icone: LockOpen },
-    { libelle: "Montant en caisse (théorique)", valeur: fcfa(t.montantEnCaisse), Icone: Banknote },
-    { libelle: "Versements bancaires du jour", valeur: fcfa(t.versementsDuJour), Icone: Landmark },
+    { libelle: "Montant en caisse (théorique)", valeur: fcfa(t.montantEnCaisse), montant: t.montantEnCaisse, Icone: Banknote },
+    { libelle: "Versements bancaires du jour", valeur: fcfa(t.versementsDuJour), montant: t.versementsDuJour, Icone: Landmark },
     { libelle: "Écarts en attente de validation", valeur: String(t.ecartsEnAttente), Icone: AlertTriangle, ton: t.ecartsEnAttente > 0 ? "rouge" : undefined },
   ];
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {cartes.map((c) => (
-        <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
+        <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft mobile:p-3">
           <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${c.ton === "rouge" ? "bg-red-50 text-red-600" : c.ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700"}`}>
             <c.Icone size={15} />
           </span>
-          <p className="mt-1.5 font-display text-base font-bold text-forest-900">{c.valeur}</p>
+          <p className="mt-1.5 font-display text-base font-bold text-forest-900 mobile:tabular-nums mobile:wrap-anywhere">{c.montant !== undefined ? <MontantTuile montant={c.montant} /> : c.valeur}</p>
           <p className="text-xs text-ink-700/60">{c.libelle}</p>
         </div>
       ))}
@@ -480,7 +481,7 @@ function SessionsRecentes({
         <p className="text-sm text-ink-700/60">Aucune session clôturée pour l&apos;instant.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-sm">
+          <table className="w-full min-w-[860px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Caisse</th>
@@ -496,11 +497,11 @@ function SessionsRecentes({
               {sessions.map((s) => (
                 <tr key={s.id}>
                   <td className="py-2 pr-2 font-medium text-forest-900">{s.caisseNom}</td>
-                  <td className="py-2 pr-2">{s.caissierNom}</td>
-                  <td className="py-2 pr-2 whitespace-nowrap">{s.clotureeLe ? dateHeureFr(s.clotureeLe) : "—"}</td>
-                  <td className="py-2 pr-2 text-right">{fcfa(s.soldeTheorique)}</td>
-                  <td className="py-2 pr-2 text-right">{s.soldeReel !== null ? fcfa(s.soldeReel) : "—"}</td>
-                  <td className="py-2 pr-2">
+                  <td data-label="Caissier" className="py-2 pr-2">{s.caissierNom}</td>
+                  <td data-label="Clôturée le" className="py-2 pr-2 whitespace-nowrap">{s.clotureeLe ? dateHeureFr(s.clotureeLe) : "—"}</td>
+                  <td data-label="Théorique" className="py-2 pr-2 text-right">{fcfa(s.soldeTheorique)}</td>
+                  <td data-label="Réel" className="py-2 pr-2 text-right">{s.soldeReel !== null ? fcfa(s.soldeReel) : "—"}</td>
+                  <td data-label="Écart" className="py-2 pr-2">
                     {s.ecart === null || s.ecart === 0 ? (
                       <span className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">Aucun</span>
                     ) : (
@@ -546,7 +547,7 @@ function JournalCaisseImprimable({
   onFermer: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -555,10 +556,10 @@ function JournalCaisseImprimable({
           @page { size: A4 portrait; margin: 12mm; }
         }
       `}</style>
-      <div id="journal-caisse-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="journal-caisse-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Journal de caisse</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
             <X size={18} />
           </button>
         </div>
@@ -569,60 +570,64 @@ function JournalCaisseImprimable({
           sousTitre={`${s.caisseNom} · Caissier : ${s.caissierNom}`}
         />
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 text-sm mobile:grid-cols-1">
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Ouverture</dt><dd>{dateHeureFr(s.ouverteLe)}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Clôture</dt><dd>{s.clotureeLe ? dateHeureFr(s.clotureeLe) : "Session en cours"}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Fonds initial</dt><dd className="font-semibold">{fcfa(s.fondsInitial)}</dd></div>
           {s.observations && <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Observations</dt><dd className="text-right">{s.observations}</dd></div>}
         </dl>
 
-        <table className="mt-4 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
-              <th className="py-1.5 pr-2">Heure</th>
-              <th className="py-1.5 pr-2">Opération</th>
-              <th className="py-1.5 pr-2">Catégorie</th>
-              <th className="py-1.5 text-right">Montant</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-cream-100">
-            {s.journal.length === 0 ? (
-              <tr><td colSpan={4} className="py-3 text-center text-ink-700/55">Aucun mouvement.</td></tr>
-            ) : (
-              s.journal.map((l) => (
-                <tr key={l.id} className={l.annule ? "text-ink-700/40 line-through" : ""}>
-                  <td className="py-1.5 pr-2 whitespace-nowrap">{new Intl.DateTimeFormat("fr-FR", { timeStyle: "short" }).format(new Date(l.heure))}</td>
-                  <td className="py-1.5 pr-2">{l.libelle}</td>
-                  <td className="py-1.5 pr-2 text-xs text-ink-700/70">{LIBELLE_MOUVEMENT_CAISSE[l.categorie] ?? l.categorie}</td>
-                  <td className={`py-1.5 text-right font-medium ${l.sens > 0 ? "text-forest-700" : "text-red-700"}`}>
-                    {l.sens > 0 ? "+" : "−"}{fcfa(l.montant)}
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
+                <th className="py-1.5 pr-2">Heure</th>
+                <th className="py-1.5 pr-2">Opération</th>
+                <th className="py-1.5 pr-2">Catégorie</th>
+                <th className="py-1.5 text-right">Montant</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-cream-100">
+              {s.journal.length === 0 ? (
+                <tr><td colSpan={4} className="py-3 text-center text-ink-700/55">Aucun mouvement.</td></tr>
+              ) : (
+                s.journal.map((l) => (
+                  <tr key={l.id} className={l.annule ? "text-ink-700/40 line-through" : ""}>
+                    <td className="py-1.5 pr-2 whitespace-nowrap">{new Intl.DateTimeFormat("fr-FR", { timeStyle: "short" }).format(new Date(l.heure))}</td>
+                    <td className="py-1.5 pr-2">{l.libelle}</td>
+                    <td className="py-1.5 pr-2 text-xs text-ink-700/70">{LIBELLE_MOUVEMENT_CAISSE[l.categorie] ?? l.categorie}</td>
+                    <td className={`py-1.5 text-right font-medium ${l.sens > 0 ? "text-forest-700" : "text-red-700"}`}>
+                      {l.sens > 0 ? "+" : "−"}{fcfa(l.montant)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-cream-300 font-bold text-forest-900">
+                <td className="py-2 pr-2" colSpan={3}>Encaissements · Décaissements</td>
+                <td className="py-2 text-right">{fcfa(s.totalEncaissements)} · {fcfa(s.totalDecaissements)}</td>
+              </tr>
+              <tr className="font-bold text-forest-900">
+                <td className="py-1.5 pr-2" colSpan={3}>Solde théorique</td>
+                <td className="py-1.5 text-right">{fcfa(s.soldeTheorique)}</td>
+              </tr>
+              {s.soldeReel !== null && (
+                <tr>
+                  <td className="py-1 pr-2" colSpan={3}>Solde réel compté · Écart</td>
+                  <td className="py-1 text-right">
+                    {fcfa(s.soldeReel)} · {s.ecart === 0 || s.ecart === null ? "aucun" : `${s.ecart > 0 ? "+" : ""}${s.ecart.toLocaleString("fr-FR")} F`}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-          <tfoot>
-            <tr className="border-t border-cream-300 font-bold text-forest-900">
-              <td className="py-2 pr-2" colSpan={3}>Encaissements · Décaissements</td>
-              <td className="py-2 text-right">{fcfa(s.totalEncaissements)} · {fcfa(s.totalDecaissements)}</td>
-            </tr>
-            <tr className="font-bold text-forest-900">
-              <td className="py-1.5 pr-2" colSpan={3}>Solde théorique</td>
-              <td className="py-1.5 text-right">{fcfa(s.soldeTheorique)}</td>
-            </tr>
-            {s.soldeReel !== null && (
-              <tr>
-                <td className="py-1 pr-2" colSpan={3}>Solde réel compté · Écart</td>
-                <td className="py-1 text-right">
-                  {fcfa(s.soldeReel)} · {s.ecart === 0 || s.ecart === null ? "aucun" : `${s.ecart > 0 ? "+" : ""}${s.ecart.toLocaleString("fr-FR")} F`}
-                </td>
-              </tr>
-            )}
-            {s.motifEcart && (
-              <tr><td colSpan={4} className="py-1 text-xs italic text-ink-700/70">Justification de l&apos;écart : {s.motifEcart}{s.ecartValide ? " (écart validé)" : " (en attente de validation)"}</td></tr>
-            )}
-          </tfoot>
-        </table>
+              )}
+              {s.motifEcart && (
+                <tr><td colSpan={4} className="py-1 text-xs italic text-ink-700/70">Justification de l&apos;écart : {s.motifEcart}{s.ecartValide ? " (écart validé)" : " (en attente de validation)"}</td></tr>
+              )}
+            </tfoot>
+          </table>
+        </div>
 
         <div className="mt-10 flex justify-between">
           <div className="text-center text-xs text-ink-700/60">

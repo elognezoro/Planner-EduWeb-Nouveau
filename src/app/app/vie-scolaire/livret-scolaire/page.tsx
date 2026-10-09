@@ -71,7 +71,7 @@ function VueLivret({ periodes }: { periodes: Awaited<ReturnType<typeof livret>> 
     <div className="space-y-4">
       {periodes.map((p) => (
         <Card key={p.periode}>
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between mobile:gap-2">
             <h2 className="font-display text-base font-bold text-forest-900">Période {p.periode}</h2>
             {p.moyenne != null && (
               <span className="rounded-full bg-forest-800 px-3 py-0.5 text-sm font-semibold text-gold-300">
@@ -81,9 +81,9 @@ function VueLivret({ periodes }: { periodes: Awaited<ReturnType<typeof livret>> 
           </div>
           <ul className="divide-y divide-cream-100">
             {p.disciplines.map((d) => (
-              <li key={d.nom} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-forest-900">{d.nom}</span>
-                <span className="font-display font-bold text-forest-800">{d.moyenne}/20</span>
+              <li key={d.nom} className="flex items-center justify-between py-2 text-sm mobile:gap-3">
+                <span className="text-forest-900 mobile:min-w-0 mobile:wrap-break-word">{d.nom}</span>
+                <span className="font-display font-bold text-forest-800 mobile:shrink-0 mobile:tabular-nums">{d.moyenne}/20</span>
               </li>
             ))}
           </ul>
@@ -144,12 +144,13 @@ export default async function LivretScolairePage({
         ) : (
           <>
             {enfants.length > 1 && (
-              <div className="flex flex-wrap gap-1.5">
+              // Téléphone : choix de l'enfant sur une ligne qui défile, pastilles de 44 px.
+              <div className="flex flex-wrap gap-1.5 rangee-defilante-mobile">
                 {enfants.map((e) => (
                   <Link
                     key={e.id}
                     href={`${BASE}?eleve=${e.id}`}
-                    className={`rounded-full px-3.5 py-1.5 text-sm font-medium ${sel?.id === e.id ? "bg-forest-800 text-cream-50" : "border border-cream-300 bg-white text-forest-800 hover:bg-forest-50"}`}
+                    className={`rounded-full px-3.5 py-1.5 text-sm font-medium mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:px-4 ${sel?.id === e.id ? "bg-forest-800 text-cream-50" : "border border-cream-300 bg-white text-forest-800 hover:bg-forest-50"}`}
                   >
                     {e.nom}
                   </Link>

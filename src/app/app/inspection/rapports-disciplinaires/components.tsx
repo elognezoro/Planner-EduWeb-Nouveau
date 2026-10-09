@@ -369,7 +369,7 @@ export function RapportCrdForm({
             <button
               type="submit"
               formAction={actionModele}
-              className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+              className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
             >
               <BookmarkPlus size={13} /> Enregistrer comme mon modèle
             </button>
@@ -391,7 +391,8 @@ export function RapportCrdForm({
           onChange={(e) => setTitre(e.target.value)}
           disabled={lectureSeule}
           placeholder="RAPPORT BILAN DES ACTIVITES DU PREMIER TRIMESTRE 2025 - 2026"
-          className="w-full bg-transparent text-center font-display text-lg font-bold uppercase tracking-wide text-black outline-none placeholder:normal-case placeholder:text-black/45"
+          // Téléphone : corps réduit, sans espacement des lettres (titre long tronqué sinon).
+          className="w-full bg-transparent text-center font-display text-lg font-bold uppercase tracking-wide text-black outline-none placeholder:normal-case placeholder:text-black/45 mobile:text-base mobile:tracking-normal"
         />
       </div>
 
@@ -400,13 +401,13 @@ export function RapportCrdForm({
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-2.5 text-xs text-ink-700/70">
           <span className="font-semibold text-forest-900">Sections retirées :</span>
           {masquees.map((id) => (
-            <span key={id} className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-2.5 py-1">
+            <span key={id} className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-2.5 py-1 mobile:max-w-full mobile:py-0">
               <span className="max-w-56 truncate">{titreSectionOfficielle(id)}</span>
               {!lectureSeule && (
                 <button
                   type="button"
                   onClick={() => retablirSection(id)}
-                  className="inline-flex items-center gap-1 font-semibold text-forest-700 hover:underline"
+                  className="inline-flex items-center gap-1 font-semibold text-forest-700 hover:underline mobile:min-h-11 mobile:shrink-0"
                 >
                   <Undo2 size={12} /> Rétablir
                 </button>
@@ -515,7 +516,7 @@ export function RapportCrdForm({
             {...propsTableau("activitesComplement", COLONNES_ACTIVITES_COMPLEMENT)}
           />
           <div className="rounded-2xl border border-cream-200 bg-cream-50/40 p-3.5">
-            <p className="mb-2 text-[13px] font-semibold text-forest-900">Diagramme — Prévue vs Réalisés par activité</p>
+            <p className="mb-2 text-[13px] font-semibold text-forest-900 mobile:text-sm">Diagramme — Prévue vs Réalisés par activité</p>
             {dataPrevuRealise.length > 0 ? (
               <ChartPrevuRealise data={dataPrevuRealise} />
             ) : (
@@ -544,7 +545,7 @@ export function RapportCrdForm({
             {...propsTableau("programmesSecondCycle", COLONNES_PROGRAMMES_SECONDAIRE)}
           />
           <div className="rounded-2xl border border-cream-200 bg-cream-50/40 p-3.5">
-            <p className="mb-2 text-[13px] font-semibold text-forest-900">Diagramme — Taux d&apos;exécution par niveau</p>
+            <p className="mb-2 text-[13px] font-semibold text-forest-900 mobile:text-sm">Diagramme — Taux d&apos;exécution par niveau</p>
             {dataTaux.length > 0 ? (
               <ChartTauxExecution data={dataTaux} />
             ) : (
@@ -664,13 +665,22 @@ export function RapportCrdForm({
         />
       ))}
 
+      {/* Téléphone : « Enregistrer le rapport » colle au bas de l'écran pendant toute la saisie
+          (à gauche du bouton de l'assistant IA) ; le bouton de fin de formulaire est masqué. */}
+      {!lectureSeule && (
+        <div className="lg:hidden print:hidden sticky bottom-[calc(var(--hauteur-barre-onglets,0px)+1.25rem)] z-30 mr-16">
+          <SubmitButton className="mobile:min-h-14 mobile:shadow-lg!">
+            <Save size={15} /> Enregistrer le rapport
+          </SubmitButton>
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {!lectureSeule ? (
           <button
             type="button"
             onClick={ajouterSectionLibre}
             disabled={sectionsLibres.length >= MAX_SECTIONS_LIBRES}
-            className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-4 py-1.5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-4 py-1.5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-50 mobile:min-h-11"
           >
             <Plus size={15} /> Ajouter un titre (section)
           </button>
@@ -678,7 +688,7 @@ export function RapportCrdForm({
           <span />
         )}
         {!lectureSeule && (
-          <SubmitButton className="w-auto px-8">
+          <SubmitButton className="w-auto px-8 mobile:hidden">
             <Save size={15} /> Enregistrer le rapport
           </SubmitButton>
         )}

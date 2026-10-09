@@ -196,7 +196,7 @@ export default async function StagesPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
+      <EnteteCafop compactMobile ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, nbPromos, apprenantsRaw.length)} actif="stages" terme={terme} masquerConfig={masquerConfig} />
       <StagesCafop
         cafopId={cafop.id}

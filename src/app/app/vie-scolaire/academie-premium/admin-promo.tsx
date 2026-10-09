@@ -108,12 +108,12 @@ function LigneDemande({ demande, codes }: { demande: DemandeVue; codes: CodeInst
             {demande.motif}
           </p>
           {demande.tauxDemande != null && (
-            <p className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-gold-100 px-2 py-0.5 text-[0.68rem] font-semibold text-gold-800">
+            <p className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-gold-100 px-2 py-0.5 text-[0.68rem] font-semibold mobile:text-xs text-gold-800">
               <BadgePercent size={11} /> Taux souhaité : {demande.tauxDemande} %
             </p>
           )}
         </div>
-        <span className="text-[0.65rem] text-ink-700/45">{demande.date}</span>
+        <span className="text-[0.65rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">{demande.date}</span>
       </div>
       {msg && <p className="mt-2 text-xs text-ink-700/70">{msg}</p>}
       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -121,7 +121,7 @@ function LigneDemande({ demande, codes }: { demande: DemandeVue; codes: CodeInst
           value={code}
           onChange={(e) => setCode(e.target.value)}
           aria-label="Taux prédéfini (code promo)"
-          className="h-8 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+          className="h-8 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:basis-full mobile:text-base"
         >
           <option value="">Taux personnalisé ↓</option>
           {codes.map((c) => (
@@ -140,9 +140,9 @@ function LigneDemande({ demande, codes }: { demande: DemandeVue; codes: CodeInst
             onChange={(e) => setTaux(e.target.value)}
             placeholder="Taux"
             aria-label="Taux de rabais accordé (%)"
-            className="h-8 w-24 rounded-lg border border-cream-300 bg-white px-2.5 pr-6 text-xs outline-none focus:border-forest-400 disabled:opacity-50"
+            className="h-8 w-24 rounded-lg border border-cream-300 bg-white px-2.5 pr-6 text-xs outline-none focus:border-forest-400 disabled:opacity-50 mobile:h-11 mobile:w-28 mobile:text-base"
           />
-          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[0.65rem] text-ink-700/45">%</span>
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[0.65rem] text-ink-700/45 mobile:text-xs">%</span>
         </span>
         <button
           type="button"
@@ -156,7 +156,7 @@ function LigneDemande({ demande, codes }: { demande: DemandeVue; codes: CodeInst
               setMsg(r.message ?? null);
             })
           }
-          className="inline-flex h-8 items-center gap-1 rounded-full bg-forest-700 px-3 text-xs font-semibold text-cream-50 hover:bg-forest-800 disabled:opacity-50"
+          className="inline-flex h-8 items-center gap-1 rounded-full bg-forest-700 px-3 text-xs font-semibold text-cream-50 hover:bg-forest-800 disabled:opacity-50 mobile:h-11 mobile:flex-1 mobile:justify-center mobile:px-4 mobile:text-sm"
         >
           <Check size={13} /> Approuver
         </button>
@@ -169,7 +169,7 @@ function LigneDemande({ demande, codes }: { demande: DemandeVue; codes: CodeInst
               setMsg(r.message ?? null);
             })
           }
-          className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+          className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:h-11 mobile:flex-1 mobile:justify-center mobile:px-4 mobile:text-sm"
         >
           <X size={13} /> Refuser
         </button>

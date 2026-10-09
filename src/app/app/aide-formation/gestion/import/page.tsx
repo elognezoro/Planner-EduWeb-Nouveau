@@ -14,7 +14,7 @@ export default async function ImportPage() {
   await requireRole(["admin"]);
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Gestion du contenu</Link>
+      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Gestion du contenu</Link>
       <PageHeader titre="Import de contenus" description="Créez plusieurs cours et leçons d'un coup à partir d'un fichier CSV. Un aperçu vous montre ce qui sera importé avant validation." />
       <Card>
         <ImportClient />

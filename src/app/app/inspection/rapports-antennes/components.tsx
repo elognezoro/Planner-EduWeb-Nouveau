@@ -121,7 +121,7 @@ export function FiltresRapportsAntenne({
             type="button"
             onClick={() => naviguer(onglet.v, apfcDefaut?.id ?? null, periode.annee, trimestre)}
             aria-pressed={type === onglet.v}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors mobile:min-h-11 mobile:flex-1 ${
               type === onglet.v
                 ? "bg-forest-700 text-white"
                 : "border border-cream-300 bg-white text-forest-800 hover:bg-forest-50"
@@ -205,7 +205,7 @@ export function FiltresRapportsAntenne({
                 });
               }
             }}
-            className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+            className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:w-full"
           />
         </div>
         <div>
@@ -224,7 +224,7 @@ export function FiltresRapportsAntenne({
                 });
               }
             }}
-            className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+            className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:w-full"
           />
         </div>
       </div>
@@ -273,7 +273,7 @@ function TableauSectionEditable({
         {tableau.source && (
           <span
             title={sourceBlocAuto(tableau.source)}
-            className="rounded-full bg-forest-100 px-2.5 py-0.5 text-[11px] font-semibold text-forest-800"
+            className="rounded-full bg-forest-100 px-2.5 py-0.5 text-[11px] font-semibold text-forest-800 mobile:text-xs"
           >
             auto
           </span>
@@ -283,7 +283,7 @@ function TableauSectionEditable({
         )}
       </div>
       {tableau.source && (
-        <p className="text-[11px] text-ink-700/55">Source : {sourceBlocAuto(tableau.source)} — chiffres modifiables.</p>
+        <p className="text-[11px] text-ink-700/55 mobile:text-xs">Source : {sourceBlocAuto(tableau.source)} — chiffres modifiables.</p>
       )}
       <div className="overflow-x-auto rounded-lg border border-cream-200 bg-white">
         <table className="w-full border-collapse text-xs">
@@ -301,7 +301,7 @@ function TableauSectionEditable({
                       onChange={(e) =>
                         onChange((t) => ({ ...t, colonnes: t.colonnes.map((x, i) => (i === ci ? e.target.value : x)) }))
                       }
-                      className="min-w-20 w-full rounded-md border border-cream-200 bg-white px-1.5 py-1 text-[11px] font-semibold outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent"
+                      className="min-w-20 w-full rounded-md border border-cream-200 bg-white px-1.5 py-1 text-[11px] font-semibold outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent mobile:min-w-28 mobile:py-2 mobile:text-base"
                     />
                     {!lectureSeule && tableau.colonnes.length > 1 && (
                       <BoutonRetrait2Clics
@@ -343,7 +343,7 @@ function TableauSectionEditable({
                           lignes: t.lignes.map((l, i) => (i === li ? l.map((x, j) => (j === ci ? e.target.value : x)) : l)),
                         }))
                       }
-                      className="min-w-16 w-full rounded-md border border-cream-200 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent"
+                      className="min-w-16 w-full rounded-md border border-cream-200 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent mobile:min-w-24 mobile:py-2 mobile:text-base"
                     />
                   </td>
                 ))}
@@ -353,7 +353,7 @@ function TableauSectionEditable({
                       type="button"
                       onClick={() => onChange((t) => ({ ...t, lignes: t.lignes.filter((_, i) => i !== li) }))}
                       aria-label={`Retirer la ligne ${li + 1}`}
-                      className="rounded-full p-1 text-ink-700/40 transition-colors hover:bg-red-50 hover:text-red-600"
+                      className="rounded-full p-1 text-ink-700/40 transition-colors hover:bg-red-50 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                     >
                       <X size={13} />
                     </button>
@@ -373,7 +373,7 @@ function TableauSectionEditable({
                 t.lignes.length >= MAX_LIGNES_TABLEAU ? t : { ...t, lignes: [...t.lignes, t.colonnes.map(() => "")] },
               )
             }
-            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
           >
             <Plus size={13} /> Ajouter une ligne
           </button>
@@ -386,7 +386,7 @@ function TableauSectionEditable({
                   : { ...t, colonnes: [...t.colonnes, `Colonne ${t.colonnes.length + 1}`], lignes: t.lignes.map((l) => [...l, ""]) },
               )
             }
-            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
           >
             <Plus size={13} /> Ajouter une colonne
           </button>
@@ -434,7 +434,7 @@ function GraphiqueSection({
 
   return (
     <div className="rounded-2xl border border-cream-200 bg-cream-50/40 p-3.5">
-      <p className="mb-2 text-[13px] font-semibold text-forest-900">{libelleGraphique(cle)}</p>
+      <p className="mb-2 text-[13px] font-semibold text-forest-900 mobile:text-sm">{libelleGraphique(cle)}</p>
       {data.length > 0 ? (
         <ChartPrevuRealise data={data} nomPrevues="Activités" nomRealisees="Touchés" />
       ) : (
@@ -485,8 +485,13 @@ function SectionEditeur({
   onSupprimer: () => void;
   onAjouterApres: () => void;
 }) {
+  // Téléphone : retrait réduit (la carte n'offre qu'environ 280 px ; les niveaux 2-3 perdaient 40 px).
   const indentation =
-    section.niveau === 2 ? "ml-3 border-l-2 border-cream-200 pl-3" : section.niveau === 3 ? "ml-6 border-l-2 border-cream-200 pl-3" : "";
+    section.niveau === 2
+      ? "ml-3 border-l-2 border-cream-200 pl-3 mobile:ml-0 mobile:pl-2"
+      : section.niveau === 3
+        ? "ml-6 border-l-2 border-cream-200 pl-3 mobile:ml-1.5 mobile:pl-2"
+        : "";
 
   return (
     <div className={`space-y-3 ${indentation}`}>
@@ -500,7 +505,7 @@ function SectionEditeur({
           placeholder={NIVEAUX_OPTIONS.find((n) => n.v === section.niveau)?.l ?? "Titre"}
           aria-label="Titre de la section"
           onChange={(e) => onChange((s) => ({ ...s, titre: e.target.value }))}
-          className={`min-w-0 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 py-1.5 outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-200 disabled:border-transparent disabled:bg-transparent ${STYLES_TITRE[section.niveau]}`}
+          className={`min-w-0 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 py-1.5 outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-200 disabled:border-transparent disabled:bg-transparent ${STYLES_TITRE[section.niveau]} mobile:basis-full mobile:py-2 mobile:text-base`}
         />
         {!lectureSeule && (
           <>
@@ -515,7 +520,7 @@ function SectionEditeur({
                 const v = Number(e.target.value);
                 if (v === 1 || v === 2 || v === 3) onChange((s) => ({ ...s, niveau: v }));
               }}
-              className="h-8 rounded-lg border border-cream-300 bg-white px-1.5 text-xs font-semibold text-forest-800 outline-none focus:border-forest-400"
+              className="h-8 rounded-lg border border-cream-300 bg-white px-1.5 text-xs font-semibold text-forest-800 outline-none focus:border-forest-400 mobile:h-11 mobile:flex-1 mobile:text-base"
             >
               {NIVEAUX_OPTIONS.map((n) => (
                 <option key={n.v} value={n.v}>
@@ -529,7 +534,7 @@ function SectionEditeur({
               disabled={premiere}
               aria-label="Monter la section"
               title="Monter"
-              className="rounded-full p-1.5 text-ink-700/50 transition-colors hover:bg-cream-100 disabled:opacity-30"
+              className="rounded-full p-1.5 text-ink-700/50 transition-colors hover:bg-cream-100 disabled:opacity-30 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
             >
               <ArrowUp size={14} />
             </button>
@@ -539,7 +544,7 @@ function SectionEditeur({
               disabled={derniere}
               aria-label="Descendre la section"
               title="Descendre"
-              className="rounded-full p-1.5 text-ink-700/50 transition-colors hover:bg-cream-100 disabled:opacity-30"
+              className="rounded-full p-1.5 text-ink-700/50 transition-colors hover:bg-cream-100 disabled:opacity-30 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
             >
               <ArrowDown size={14} />
             </button>
@@ -555,7 +560,7 @@ function SectionEditeur({
       {/* Contenu : « PLAN DE PRÉSENTATION » généré, sinon narratif éditable. */}
       {section.planAuto ? (
         <div className="rounded-xl border border-cream-200 bg-cream-50/40 p-3">
-          <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-700/55">
+          <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-700/55 mobile:text-xs">
             <ListOrdered size={12} /> Généré automatiquement (titres de niveau 1 du plan) — présent dans le Word.
           </p>
           <ol className="list-decimal space-y-0.5 pl-5 text-sm text-ink-800">
@@ -612,7 +617,8 @@ function SectionEditeur({
             name={`insertion-bloc-${section.id}`}
             options={BLOCS_AUTO.map((b) => ({ id: b.cle, nom: b.libelle }))}
             placeholder="+ Insérer un tableau automatique…"
-            className="w-72"
+            // Téléphone : pleine largeur (288 px fixes débordaient de la carte et faisaient défiler la page).
+            className="w-72 mobile:w-full"
             onSelect={(o) => {
               if (!o || !estCleBlocAuto(o.id)) return;
               const bloc = blocsAuto[o.id];
@@ -636,7 +642,7 @@ function SectionEditeur({
                 s.tableaux.length >= MAX_TABLEAUX_PAR_SECTION ? s : { ...s, tableaux: [...s.tableaux, tableauManuelVide()] },
               )
             }
-            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
           >
             <Table2 size={13} /> Tableau manuel
           </button>
@@ -645,7 +651,7 @@ function SectionEditeur({
             name={`insertion-graphique-${section.id}`}
             options={GRAPHIQUES_AUTO.map((g) => ({ id: g.cle, nom: g.libelle }))}
             placeholder="+ Insérer un diagramme…"
-            className="w-72"
+            className="w-72 mobile:w-full"
             onSelect={(o) => {
               if (!o) return;
               const cle = o.id;
@@ -665,7 +671,7 @@ function SectionEditeur({
         <button
           type="button"
           onClick={onAjouterApres}
-          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-ink-700/60 transition-colors hover:border-forest-300 hover:text-forest-800"
+          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-ink-700/60 transition-colors hover:border-forest-300 hover:text-forest-800 mobile:min-h-11 mobile:px-4 mobile:text-sm"
         >
           <Plus size={13} /> Ajouter un titre
         </button>
@@ -853,7 +859,7 @@ export function RapportAntenneForm({
             <button
               type="submit"
               formAction={actionModele}
-              className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+              className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm"
             >
               <BookmarkPlus size={13} /> Enregistrer comme mon modèle
             </button>
@@ -879,7 +885,8 @@ export function RapportAntenneForm({
               ? "RAPPORT ANNUEL D'ACTIVITÉS 2025-2026"
               : "BILAN DES ACTIVITÉS PÉDAGOGIQUES MENÉES AU PREMIER TRIMESTRE 2025-2026"
           }
-          className="w-full bg-transparent text-center font-display text-lg font-bold uppercase tracking-wide text-black outline-none placeholder:normal-case placeholder:text-black/45"
+          // Téléphone : corps réduit, sans espacement des lettres (un titre de 70 caractères était tronqué).
+          className="w-full bg-transparent text-center font-display text-lg font-bold uppercase tracking-wide text-black outline-none placeholder:normal-case placeholder:text-black/45 mobile:text-base mobile:tracking-normal"
         />
       </div>
 
@@ -934,7 +941,7 @@ export function RapportAntenneForm({
             type="button"
             onClick={() => ajouterApres(null)}
             disabled={sections.length >= MAX_SECTIONS_PLAN}
-            className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-4 py-1.5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-4 py-1.5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-50 mobile:min-h-11"
           >
             <Plus size={15} /> Ajouter un titre
           </button>
@@ -963,9 +970,11 @@ export function RapportAntenneForm({
         </div>
       </div>
 
+      {/* Téléphone : « Enregistrer le rapport » colle au bas de l'écran pendant toute la saisie
+          (à gauche du bouton de l'assistant IA), au lieu de n'exister qu'en fin de formulaire. */}
       {!lectureSeule && (
-        <div className="flex justify-end">
-          <SubmitButton className="w-auto px-8">
+        <div className="flex justify-end mobile:sticky mobile:bottom-[calc(var(--hauteur-barre-onglets,0px)+1.25rem)] mobile:z-30 mobile:mr-16">
+          <SubmitButton className="w-auto px-8 mobile:h-14 mobile:w-full mobile:shadow-lg!">
             <Save size={15} /> Enregistrer le rapport
           </SubmitButton>
         </div>

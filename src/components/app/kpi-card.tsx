@@ -57,23 +57,24 @@ export function KpiCard({ libelle, valeur, suffixe, icone, ton = "forest", href,
     <>
       <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent opacity-60", t.accent)} />
       <div className="relative flex items-start justify-between">
-        <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", t.fond, t.texte)}>{icone}</span>
+        <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl mobile:h-9 mobile:w-9 mobile:rounded-xl", t.fond, t.texte)}>{icone}</span>
         {href && (
           <ArrowUpRight size={16} className="text-ink-700/25 transition-colors group-hover:text-gold-600" />
         )}
       </div>
-      <div className="relative mt-4">
-        <p className="font-display text-3xl font-bold tracking-tight text-forest-900">
+      {/* Téléphone : carte compacte (deux par rangée), chiffre plus petit, libellé sur 2 lignes max. */}
+      <div className="relative mt-4 mobile:mt-3">
+        <p className="font-display text-3xl font-bold tracking-tight text-forest-900 mobile:text-2xl">
           <CompteurAnime valeur={valeur} suffixe={suffixe} />
         </p>
-        <p className="mt-0.5 text-sm font-medium text-ink-700/70">{libelle}</p>
-        {sousTitre && <p className="mt-0.5 text-xs text-ink-700/45">{sousTitre}</p>}
+        <p className="mt-0.5 text-sm font-medium text-ink-700/70 mobile:line-clamp-2 mobile:leading-snug mobile:wrap-anywhere mobile:hyphens-auto">{libelle}</p>
+        {sousTitre && <p className="mt-0.5 text-xs text-ink-700/45 mobile:text-ink-700/70">{sousTitre}</p>}
       </div>
     </>
   );
 
   const classeBase =
-    "group relative overflow-hidden rounded-3xl border border-cream-200 bg-white p-5 shadow-soft";
+    "group relative overflow-hidden rounded-3xl border border-cream-200 bg-white p-5 shadow-soft mobile:h-full mobile:rounded-2xl mobile:p-4";
 
   return (
     <motion.div

@@ -46,7 +46,7 @@ export function SalleForm({ etablissementId }: { etablissementId: string }) {
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-6">Ajouter la salle</SubmitButton>
+      <SubmitButton className="w-auto px-6 mobile:w-full">Ajouter la salle</SubmitButton>
     </form>
   );
 }
@@ -141,8 +141,8 @@ export function SalleChip({
 
   if (edition) {
     return (
-      <span className="inline-flex flex-col">
-        <span className="inline-flex items-center gap-1.5 rounded-xl border border-forest-300 bg-white py-1.5 pl-2 pr-1.5 text-sm">
+      <span className="inline-flex flex-col mobile:flex mobile:w-full">
+        <span className="inline-flex items-center gap-1.5 rounded-xl border border-forest-300 bg-white py-1.5 pl-2 pr-1.5 text-sm mobile:flex mobile:w-full">
           <input
             value={nouveauNom}
             onChange={(e) => setNouveauNom(e.target.value)}
@@ -153,7 +153,7 @@ export function SalleChip({
             autoFocus
             maxLength={80}
             aria-label={`Nouveau nom pour ${nom}`}
-            className="h-7 w-28 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300"
+            className="h-7 w-28 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300 mobile:h-10 mobile:min-w-0 mobile:flex-1"
           />
           <input
             value={nouvelleCapacite}
@@ -169,7 +169,7 @@ export function SalleChip({
             inputMode="numeric"
             maxLength={4}
             aria-label={`Nouvelle capacité pour ${nom}`}
-            className="h-7 w-16 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300"
+            className="h-7 w-16 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300 mobile:h-10 mobile:w-14 mobile:shrink-0"
           />
           <span className="text-xs text-ink-700/50">pl.</span>
           {pending ? (
@@ -181,7 +181,7 @@ export function SalleChip({
                 onClick={enregistrer}
                 aria-label="Valider les modifications"
                 title="Valider"
-                className="rounded-full p-1 text-forest-700 hover:bg-forest-100"
+                className="rounded-full p-1 text-forest-700 hover:bg-forest-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
               >
                 <Check size={14} />
               </button>
@@ -190,23 +190,23 @@ export function SalleChip({
                 onClick={annulerEdition}
                 aria-label="Annuler la modification"
                 title="Annuler"
-                className="rounded-full p-1 text-ink-700/45 hover:bg-cream-100"
+                className="rounded-full p-1 text-ink-700/45 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
               >
                 <X size={14} />
               </button>
             </>
           )}
         </span>
-        {message && <span role="alert" className="mt-1 max-w-56 text-[0.65rem] leading-tight text-red-600">{message}</span>}
+        {message && <span role="alert" className="mt-1 max-w-56 text-[0.65rem] leading-tight text-red-600 mobile:max-w-none mobile:text-xs">{message}</span>}
       </span>
     );
   }
 
   return (
-    <span className="inline-flex flex-col">
-      <span className="inline-flex items-center gap-2 rounded-xl border border-cream-200 bg-cream-50 py-1.5 pl-3 pr-1.5 text-sm">
-        <span className="font-medium text-forest-900">{nom}</span>
-        <span className="text-xs text-ink-700/60">
+    <span className="inline-flex flex-col mobile:flex mobile:w-full">
+      <span className="inline-flex items-center gap-2 rounded-xl border border-cream-200 bg-cream-50 py-1.5 pl-3 pr-1.5 text-sm mobile:flex mobile:w-full mobile:flex-wrap mobile:gap-x-2 mobile:gap-y-0 mobile:py-1">
+        <span className="font-medium text-forest-900 mobile:min-w-0 mobile:flex-1 mobile:wrap-break-word">{nom}</span>
+        <span className="text-xs text-ink-700/60 mobile:order-last mobile:basis-full mobile:pb-1">
           {typeLibelle} · {capacite} pl.
         </span>
         {!pending && !confirme && (
@@ -224,7 +224,7 @@ export function SalleChip({
             }}
             aria-label={`Modifier ${nom}`}
             title={`Modifier ${nom} (nom, capacité)`}
-            className="rounded-full p-1 text-ink-700/45 hover:bg-forest-50 hover:text-forest-700"
+            className="rounded-full p-1 text-ink-700/45 hover:bg-forest-50 hover:text-forest-700 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
           >
             <Pencil size={13} />
           </button>
@@ -237,14 +237,14 @@ export function SalleChip({
               type="button"
               onClick={supprimer}
               autoFocus
-              className="rounded-full bg-red-600 px-2 py-0.5 text-[0.65rem] font-semibold text-white hover:bg-red-500"
+              className="rounded-full bg-red-600 px-2 py-0.5 text-[0.65rem] font-semibold text-white hover:bg-red-500 mobile:min-h-10 mobile:px-3 mobile:text-sm"
             >
               Confirmer
             </button>
             <button
               type="button"
               onClick={() => setConfirme(false)}
-              className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-medium text-ink-700/60 hover:bg-cream-100"
+              className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-medium text-ink-700/60 hover:bg-cream-100 mobile:min-h-10 mobile:px-3 mobile:text-sm"
             >
               Annuler
             </button>
@@ -258,13 +258,13 @@ export function SalleChip({
             }}
             aria-label={`Supprimer ${nom}`}
             title={`Supprimer ${nom}`}
-            className="rounded-full p-1 text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+            className="rounded-full p-1 text-ink-700/45 hover:bg-red-50 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
           >
             <X size={14} />
           </button>
         )}
       </span>
-      {message && <span className="mt-1 max-w-56 text-[0.65rem] leading-tight text-red-600">{message}</span>}
+      {message && <span className="mt-1 max-w-56 text-[0.65rem] leading-tight text-red-600 mobile:max-w-none mobile:text-xs">{message}</span>}
     </span>
   );
 }
@@ -316,7 +316,7 @@ export function ClasseForm({
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-6">Ajouter la classe</SubmitButton>
+      <SubmitButton className="w-auto px-6 mobile:w-full">Ajouter la classe</SubmitButton>
     </form>
   );
 }

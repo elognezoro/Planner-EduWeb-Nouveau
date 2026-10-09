@@ -114,7 +114,7 @@ export default async function FicheAbsencePage({ params }: { params: Promise<{ i
               <p className="text-sm text-ink-700/60">Aucune séance de l&apos;emploi du temps ne tombe sur la période demandée.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[420px] border-collapse text-sm">
+                <table className="w-full min-w-[420px] border-collapse text-sm mobile:min-w-0">
                   <thead>
                     <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
                       <th className="py-1.5 pr-2">Classe</th><th className="py-1.5 pr-2">Discipline</th>
@@ -126,7 +126,7 @@ export default async function FicheAbsencePage({ params }: { params: Promise<{ i
                       <tr key={i}>
                         <td className="py-1.5 pr-2 font-medium text-forest-900">{c.classeNom}</td>
                         <td className="py-1.5 pr-2">{c.disciplineNom}</td>
-                        <td className="py-1.5 pr-2 text-ink-700/70">{c.jours.map((j) => LIBELLE_JOUR[j]).join(", ")}</td>
+                        <td className="py-1.5 pr-2 text-ink-700/70 mobile:text-xs">{c.jours.map((j) => LIBELLE_JOUR[j]).join(", ")}</td>
                         <td className="py-1.5 text-right">{c.nbSeances}</td>
                       </tr>
                     ))}

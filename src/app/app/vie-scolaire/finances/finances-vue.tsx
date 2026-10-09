@@ -4,8 +4,11 @@ import { useState } from "react";
 import {
   LayoutDashboard, GraduationCap, Landmark, Store, Printer, AlertTriangle, Wallet, Receipt,
   ArrowDownCircle, ArrowUpCircle, Banknote, BookOpen, Building2, FileBarChart, FileText,
-  GitCompare, History, PiggyBank, ShieldCheck, ShoppingCart,
+  GitCompare, History, PiggyBank, ShieldCheck, ShoppingCart, ChevronDown,
 } from "lucide-react";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
+import { useEcranMobile } from "@/lib/mobile/appareil";
+import { MontantTuile } from "./montant-mobile";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
 import { OngletScolarite, OngletPaiements } from "./scolarite-onglets";
@@ -105,6 +108,15 @@ type Onglet =
   | "rapport"
   | "rapports"
   | "droits";
+
+/** Téléphone : les 13 à 18 onglets, rangés par famille dans la feuille de choix. */
+const GROUPES_ONGLETS: { titre: string; cles: Onglet[] }[] = [
+  { titre: "Pilotage", cles: ["tableau", "budget", "rapport", "rapports"] },
+  { titre: "Élèves", cles: ["scolarite", "facturation", "encaissements"] },
+  { titre: "Trésorerie", cles: ["caisses", "banques", "tresorerie", "rapprochement"] },
+  { titre: "Achats & stocks", cles: ["achats", "depenses", "economat", "immobilisations"] },
+  { titre: "Comptabilité & gouvernance", cles: ["comptabilite", "droits"] },
+];
 
 /**
  * Coquille des Finances de l'établissement : 9 onglets internes (état local, pas de navigation).
@@ -240,6 +252,14 @@ export function FinancesVue({
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
+  // Téléphone : choix de l'onglet dans une feuille ; un changement d'onglet ramène en haut de
+  // page (sinon on restait au bas de l'onglet précédent). Sans effet sur ordinateur.
+  const [choixOngletOuvert, setChoixOngletOuvert] = useState(false);
+  const ecranMobile = useEcranMobile();
+  const allerA = (cle: Onglet) => {
+    setOnglet(cle);
+    if (ecranMobile) window.scrollTo({ top: 0 });
+  };
 
   const onglets: { cle: Onglet; libelle: string; Icone: typeof LayoutDashboard }[] = [
     { cle: "tableau", libelle: "Tableau de bord", Icone: LayoutDashboard },
@@ -274,7 +294,7 @@ export function FinancesVue({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft print:hidden">
+      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft print:hidden mobile:hidden">
         {onglets.map((o) => (
           <button
             key={o.cle}
@@ -287,6 +307,67 @@ export function FinancesVue({
             <o.Icone size={15} /> {o.libelle}
           </button>
         ))}
+      </div>
+      {/* Téléphone : la barre de 13 à 18 onglets faisait 8 à 9 rangées de boutons. Elle devient
+          un sélecteur pleine largeur (onglet courant) qui ouvre les onglets rangés par famille. */}
+      <div className="lg:hidden print:hidden">
+        {(() => {
+          const actif = onglets.find((o) => o.cle === onglet) ?? onglets[0];
+          return (
+            <button
+              type="button"
+              onClick={() => setChoixOngletOuvert(true)}
+              aria-haspopup="dialog"
+              aria-expanded={choixOngletOuvert}
+              className="flex min-h-12 w-full items-center gap-3 rounded-2xl border border-cream-200 bg-white px-4 text-left shadow-soft active:bg-cream-100"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-800 text-cream-50">
+                <actif.Icone size={17} aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs text-ink-700/70">Rubrique</span>
+                <span className="block truncate font-semibold text-forest-900">{actif.libelle}</span>
+              </span>
+              <ChevronDown size={18} aria-hidden className="shrink-0 text-ink-700/60" />
+            </button>
+          );
+        })()}
+        <FeuilleBas ouvert={choixOngletOuvert} onFermer={() => setChoixOngletOuvert(false)} titre="Rubriques des finances" hauteurMax="90dvh">
+          <div className="space-y-4 px-2 pb-3">
+            {[
+              ...GROUPES_ONGLETS,
+              // Filet : un onglet futur absent des familles reste accessible.
+              { titre: "Autres", cles: onglets.map((o) => o.cle).filter((c) => !GROUPES_ONGLETS.some((g) => g.cles.includes(c))) },
+            ].map((g) => {
+              const items = g.cles.map((c) => onglets.find((o) => o.cle === c)).filter((o): o is (typeof onglets)[number] => !!o);
+              if (items.length === 0) return null;
+              return (
+                <section key={g.titre}>
+                  <h3 className="mb-1.5 px-2 text-xs font-bold uppercase tracking-wide text-ink-700/70">{g.titre}</h3>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {items.map((o) => (
+                      <button
+                        key={o.cle}
+                        type="button"
+                        aria-current={onglet === o.cle ? "page" : undefined}
+                        onClick={() => {
+                          setChoixOngletOuvert(false);
+                          allerA(o.cle);
+                        }}
+                        className={`flex min-h-12 min-w-0 items-center gap-2 rounded-xl px-3 text-left text-sm font-semibold ${
+                          onglet === o.cle ? "bg-forest-800 text-cream-50" : "bg-white text-forest-900 ring-1 ring-inset ring-cream-200 active:bg-cream-100"
+                        }`}
+                      >
+                        <o.Icone size={16} aria-hidden className="shrink-0" />
+                        <span className="min-w-0 leading-tight wrap-break-word">{o.libelle}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </FeuilleBas>
       </div>
 
       {onglet === "tableau" && (
@@ -303,7 +384,7 @@ export function FinancesVue({
             donneesAchats={donneesAchats}
             donneesDepenses={donneesDepenses}
             registreCompta={registreCompta}
-            onNaviguer={(o) => setOnglet(o as Onglet)}
+            onNaviguer={(o) => allerA(o as Onglet)}
           />
           <TableauDeBord kpi={kpi} paiements={paiements} articles={articles} impayes={impayes} />
         </div>
@@ -561,15 +642,17 @@ function TableauDeBord({
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {cartes.map((c) => (
-          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
+          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft mobile:p-3">
             <span
-              className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+              className={`flex h-9 w-9 items-center justify-center rounded-xl mobile:h-8 mobile:w-8 ${
                 c.ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700"
               }`}
             >
               <c.Icone size={16} />
             </span>
-            <p className="mt-2 font-display text-lg font-bold text-forest-900">{fcfa(c.valeur)}</p>
+            <p className="mt-2 font-display text-lg font-bold text-forest-900 mobile:text-base mobile:tabular-nums">
+              <MontantTuile montant={c.valeur} />
+            </p>
             <p className="text-xs text-ink-700/60">{c.libelle}</p>
           </div>
         ))}
@@ -749,7 +832,7 @@ function RapportFinancier({
             Soldes par mode de paiement (cumul)
           </h3>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[420px] border-collapse text-sm">
+            <table className="w-full min-w-[420px] border-collapse text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
                   <th className="py-1.5 pr-2">Mode</th>
@@ -761,8 +844,8 @@ function RapportFinancier({
                 {kpi.soldes.map((s) => (
                   <tr key={s.mode}>
                     <td className="py-1.5 pr-2 font-medium text-forest-900">{LIBELLE_MODE[s.mode] ?? s.mode}</td>
-                    <td className="py-1.5 pr-2 text-right text-forest-700">{fcfa(s.recettes)}</td>
-                    <td className="py-1.5 text-right text-red-600">{fcfa(s.depenses)}</td>
+                    <td data-label="Recettes" className="py-1.5 pr-2 text-right text-forest-700">{fcfa(s.recettes)}</td>
+                    <td data-label="Dépenses" className="py-1.5 text-right text-red-600">{fcfa(s.depenses)}</td>
                   </tr>
                 ))}
               </tbody>

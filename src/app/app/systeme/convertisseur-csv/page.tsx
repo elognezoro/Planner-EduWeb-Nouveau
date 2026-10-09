@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/session";
 import { PageHeader, Card } from "@/components/app/ui";
 import { Convertisseur } from "./converter";
 import { GenerateurComptes } from "./generateur";
+import { TexteRepliableMobile } from "./texte-repliable-mobile";
 
 export const metadata: Metadata = { title: "Convertisseur CSV" };
 export const dynamic = "force-dynamic";
@@ -17,12 +18,14 @@ export default async function ConvertisseurCsvPage() {
         titre="Convertisseur CSV"
         description="Déposez une liste (Word ou Excel) et obtenez un fichier CSV prêt à l'emploi : format d'import Moodle, ou comptes EduWeb avec mots de passe générés et champs de sortie configurables."
       />
-      <Card>
+      <Card className="mobile:p-4">
         <div className="mb-4 flex items-start justify-between gap-3">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold text-forest-900">
             <FileSpreadsheet size={20} /> Liste (Word / Excel) → CSV Moodle
           </h2>
         </div>
+        {/* Téléphone : explications limitées à 4 lignes (« Lire la suite »). */}
+        <TexteRepliableMobile>
         <p className="mb-5 text-base leading-relaxed text-ink-700/70">
           Le fichier peut contenir les <strong>NOM et Prénoms dans une seule colonne</strong> ou dans
           <strong> deux colonnes séparées</strong>. En sortie : les <strong>NOM en MAJUSCULES</strong>, les
@@ -32,15 +35,17 @@ export default async function ConvertisseurCsvPage() {
           <strong> nom de l&apos;établissement</strong>, la <strong>classe pédagogique</strong>{" "}
           et l&apos;<strong>année scolaire</strong>.
         </p>
+        </TexteRepliableMobile>
         <Convertisseur />
       </Card>
 
-      <Card>
+      <Card className="mobile:p-4">
         <div className="mb-4 flex items-start justify-between gap-3">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold text-forest-900">
             <KeyRound size={20} /> Liste (Word / Excel) → CSV comptes EduWeb
           </h2>
         </div>
+        <TexteRepliableMobile>
         <p className="mb-5 text-base leading-relaxed text-ink-700/70">
           Génère un fichier CSV avec des <strong>champs de sortie configurables</strong> :
           <code className="text-sm"> prénoms, nom, email, mot de passe, rôle, disciplines, niveaux</code> —
@@ -53,6 +58,8 @@ export default async function ConvertisseurCsvPage() {
           enseigner dans les deux cycles). Le fichier obtenu est directement importable dans la
           console «&nbsp;Enseignants&nbsp;» d&apos;un établissement.
         </p>
+        </TexteRepliableMobile>
+        {/* Avertissement de fonctionnement (comptes actifs dès l'import) : jamais replié. */}
         <p className="mb-5 rounded-2xl border border-forest-200 bg-forest-50/60 px-4 py-3 text-sm leading-relaxed text-forest-900">
           <strong>Comptes immédiatement connectables.</strong> À l&apos;import, chaque ligne crée un
           compte <strong>actif</strong> : l&apos;<strong>identifiant</strong> est l&apos;adresse

@@ -14,7 +14,7 @@ export default async function StatsRegionalesPage() {
   let erreur = false;
   let titreContexte = "";
   let kpis = { regions: 0, etablissements: 0, eleves: 0 };
-  let graph: { label: string; valeur: number }[] = [];
+  let graph: { label: string; valeur: number; detail?: string }[] = [];
   let lignes: { nom: string; etablissements: number; eleves: number }[] = [];
   let nomSerie = "Élèves";
 
@@ -72,7 +72,8 @@ export default async function StatsRegionalesPage() {
       lignes = [...parRegion.entries()]
         .map(([nom, v]) => ({ nom, ...v }))
         .sort((a, b) => b.eleves - a.eleves);
-      graph = lignes.map((l) => ({ label: l.nom, valeur: l.eleves }));
+      // `detail` : affiché sous le nom sur téléphone seulement (le classement y remplace le tableau).
+      graph = lignes.map((l) => ({ label: l.nom, valeur: l.eleves, detail: `${l.etablissements} établissement(s)` }));
       kpis = {
         regions: parRegion.size,
         etablissements: etablissements.length,
@@ -97,7 +98,8 @@ export default async function StatsRegionalesPage() {
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          {/* Téléphone : KPI en 2 colonnes compactes, le dernier en pleine largeur. */}
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
             <StatCard libelle={u.roleReel === "drena" ? "Région" : "Régions"} valeur={kpis.regions} icone={<MapPin size={22} />} />
             <StatCard libelle="Établissements" valeur={kpis.etablissements} icone={<School size={22} />} ton="gold" />
             <StatCard libelle="Élèves inscrits" valeur={kpis.eleves} icone={<Users size={22} />} />
@@ -107,10 +109,12 @@ export default async function StatsRegionalesPage() {
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">
               {u.roleReel === "drena" ? "Élèves par établissement" : "Élèves par région"}
             </h2>
-            <ChartBarVertical data={graph} nomSerie={nomSerie} vide="Aucun effectif inscrit pour le moment." />
+            <ChartBarVertical data={graph} nomSerie={nomSerie} vide="Aucun effectif inscrit pour le moment." unite="élèves" />
           </Card>
 
-          <Card>
+          {/* Téléphone : masqué — le classement ci-dessus (dépliable) porte déjà chaque ligne, avec le
+              nombre d'établissements. Conservé sur ordinateur et à l'impression. */}
+          <Card className="mobile:hidden">
             <h2 className="mb-3 font-display text-base font-bold text-forest-900">Détail</h2>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-sm">

@@ -68,11 +68,13 @@ export default async function RapportEtablissementPage({
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
         titre={`Rapport — ${etab?.nom ?? "Établissement"}`}
+        titreMobile="Rapport d'établissement"
+        titreVisibleMobile
         description={[etab?.ville, etab?.region?.nom].filter(Boolean).join(" · ") || "Synthèse de l'établissement."}
       />
       {peutChoisir && <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={etabId} />}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mobile:grid-cols-2 mobile:gap-3">
         <StatCard libelle="Classes" valeur={classes} icone={<School size={22} />} />
         <StatCard libelle="Élèves inscrits" valeur={eleves} icone={<Users size={22} />} ton="gold" />
         <StatCard libelle="Enseignants" valeur={enseignants} icone={<GraduationCap size={22} />} />

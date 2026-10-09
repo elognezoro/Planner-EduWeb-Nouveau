@@ -9,6 +9,7 @@ import { ROLES_PAGES_VISITES } from "@/lib/inspection/droits-visite";
 import { lireReponsesGrille, compterReponses } from "@/lib/inspection/grille-supervision";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
 import { NouvelleVisiteForm, VisiteCard, type VisiteVue, type EtabPlanification } from "./components";
+import { ReplieMobile } from "../replie-mobile";
 
 export const metadata: Metadata = { title: "Inspection — Visites" };
 export const dynamic = "force-dynamic";
@@ -169,14 +170,17 @@ export default async function VisitesPage() {
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
             <StatCard libelle="Visites" valeur={kpis.total} icone={<Stamp size={22} />} />
             <StatCard libelle="Planifiées" valeur={kpis.planifiees} icone={<CalendarClock size={22} />} ton="gold" />
             <StatCard libelle="Réalisées" valeur={kpis.realisees} icone={<CheckCircle2 size={22} />} />
             <StatCard libelle="Recommandations à suivre" valeur={kpis.recosOuvertes} icone={<ListChecks size={22} />} ton="gold" />
           </div>
 
+          {/* Téléphone : formulaire replié derrière « Planifier une visite » — « Mes visites »,
+              consultées sur le terrain, viennent tout de suite après. */}
           {gerable && (
+            <ReplieMobile libelle="Planifier une visite">
             <Card>
               <h2 className="mb-4 font-display text-base font-bold text-forest-900">Planifier une visite</h2>
               {etablissements.length === 0 ? (
@@ -193,6 +197,7 @@ export default async function VisitesPage() {
                 />
               )}
             </Card>
+            </ReplieMobile>
           )}
 
           <div className="space-y-4">

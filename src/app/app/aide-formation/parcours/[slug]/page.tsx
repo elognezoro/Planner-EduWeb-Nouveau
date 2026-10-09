@@ -49,7 +49,7 @@ export default async function ParcoursPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/parcours`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Tous les parcours</Link>
+      <Link href={`${BASE}/parcours`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Tous les parcours</Link>
       <PageHeader titre={parcours.titre} description={parcours.description ?? undefined} action={<BoutonInscriptionParcours parcoursId={parcours.id} slug={slug} inscrit={inscrit} />} />
       {parcours.statut !== "publie" && <Badge ton="attente">Brouillon — aperçu administrateur</Badge>}
 
@@ -88,10 +88,12 @@ export default async function ParcoursPage({ params }: { params: Promise<{ slug:
                   {fait ? <CheckCircle2 size={18} /> : <Circle size={16} />}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-forest-900"><span className="text-ink-700/40">{i + 1}.</span> {e.cours.titre}</p>
+                  <p className="truncate font-medium text-forest-900 mobile:line-clamp-2 mobile:whitespace-normal"><span className="text-ink-700/40">{i + 1}.</span> {e.cours.titre}</p>
                   <p className="flex items-center gap-1 text-xs text-ink-700/55"><BookOpen size={11} /> {e.cours._count.modules} leçon(s){fait ? " · terminé" : ""}</p>
                 </div>
-                {estProchain && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-forest-600 px-3 py-1 text-xs font-semibold text-white">Continuer <ArrowRight size={13} /></span>}
+                {/* Téléphone : pastille réduite à sa flèche (le titre du cours garde la place) ; le libellé
+                    reste lu par les lecteurs d'écran. */}
+                {estProchain && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-forest-600 px-3 py-1 text-xs font-semibold text-white mobile:h-9 mobile:w-9 mobile:justify-center mobile:px-0"><span className="mobile:sr-only">Continuer</span> <ArrowRight size={13} className="mobile:size-4" /></span>}
               </Link>
             );
           })}

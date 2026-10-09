@@ -98,7 +98,7 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
+      <EnteteCafop compactMobile ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, nbPromos, apprenants.length)} actif="cahier" terme={terme} masquerConfig={masquerConfig} />
       <CahierTexteCafop cafopId={cafop.id} modules={modules} groupes={groupes} seances={seances} disciplines={disciplines} lectureSeule={lectureSeule} />
     </div>

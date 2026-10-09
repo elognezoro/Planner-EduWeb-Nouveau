@@ -544,7 +544,7 @@ export default async function ConfigurationEtablissementPage({
                 </span>
                 <form action={supprimerChamp}>
                   <input type="hidden" name="champId" value={c.id} />
-                  <button type="submit" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-red-50 hover:text-red-600" aria-label="Supprimer">
+                  <button type="submit" className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11" aria-label="Supprimer">
                     <Trash2 size={15} />
                   </button>
                 </form>
@@ -769,7 +769,7 @@ export default async function ConfigurationEtablissementPage({
                 <p className="text-sm font-semibold text-forest-900">Absences des enseignants</p>
                 <p className="text-xs text-ink-700/60">Saisie des autorisations d&apos;absence (journée / demi-journée) — alimente la heatmap du réseau catholique.</p>
               </div>
-              <Link href={`/app/systeme/etablissements/${id}/absences`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-4 py-2 text-sm font-medium text-forest-800 hover:bg-forest-50">
+              <Link href={`/app/systeme/etablissements/${id}/absences`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-4 py-2 text-sm font-medium text-forest-800 hover:bg-forest-50 mobile:min-h-11">
                 <CalendarX2 size={15} /> Gérer les absences
               </Link>
             </div>
@@ -844,17 +844,26 @@ export default async function ConfigurationEtablissementPage({
         />
       </Bloc>
 
-      {/* Enregistrement global : sauvegarde tous les blocs de paramétrage d'un coup. */}
-      <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+      {/* Enregistrement global : sauvegarde tous les blocs de paramétrage d'un coup.
+          Téléphone : barre COLLANTE compacte au-dessus de la barre d'onglets (le bouton n'était
+          qu'au bout de plusieurs dizaines d'écrans), qui laisse la place du bouton flottant de
+          l'assistant (mr-16) ; sans objet quand la configuration est verrouillée. */}
+      <div
+        className={`rounded-2xl border border-cream-200 bg-white p-5 shadow-soft ${
+          configVerrouillee
+            ? ""
+            : "mobile:sticky mobile:bottom-[calc(var(--hauteur-barre-onglets,0px)+0.5rem)] mobile:z-20 mobile:mr-16 mobile:p-2 mobile:shadow-lg"
+        }`}
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className={configVerrouillee ? "" : "mobile:hidden"}>
             <p className="font-display text-base font-bold text-forest-900">Enregistrer toute la configuration</p>
             <p className="mt-0.5 text-sm text-ink-700/60">
               Sauvegarde en une fois tous les blocs de paramétrage qui n&apos;auraient pas encore été enregistrés
               individuellement (les onglets Volumes horaires et Compétences se sauvegardent séparément).
             </p>
           </div>
-          <EnregistrerTouteLaConfig />
+          <EnregistrerTouteLaConfig className="mobile:w-full mobile:justify-center mobile:px-4" />
         </div>
       </div>
 
@@ -864,7 +873,7 @@ export default async function ConfigurationEtablissementPage({
       <div className="flex justify-end pt-2">
         <Link
           href={`/app/systeme/etablissements/${id}/emploi-du-temps`}
-          className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-8 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5"
+          className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-8 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5 mobile:w-full mobile:justify-center"
         >
           <CalendarCog size={18} /> Générer l&apos;emploi du temps
         </Link>

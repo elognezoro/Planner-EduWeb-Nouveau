@@ -17,6 +17,7 @@ import type { StatistiquesEncaissementsVue } from "@/lib/finances/encaissements/
 import type { FactureVue } from "@/lib/finances/facturation/types";
 import { ChampsModeEtDate, SelecteurEleve, useApresSucces } from "./scolarite-onglets";
 import { LIBELLE_MODE, fcfa, type EleveVue } from "./types";
+import { MontantTuile } from "./montant-mobile";
 
 const INITIAL: EtatForm = { ok: false };
 
@@ -25,22 +26,22 @@ const dateFr = (iso: string | null) =>
 
 /** Bandeau KPI des encaissements (08) — données agrégées côté serveur. */
 export function BandeauEncaissements({ stats }: { stats: StatistiquesEncaissementsVue }) {
-  const cartes: { libelle: string; valeur: string; Icone: typeof Wallet; ton?: "gold" }[] = [
-    { libelle: `Encaissé aujourd'hui (${stats.nombreJour} reçu${stats.nombreJour > 1 ? "s" : ""})`, valeur: fcfa(stats.jour), Icone: CalendarDays },
-    { libelle: "Encaissé ce mois", valeur: fcfa(stats.mois), Icone: CalendarClock },
-    { libelle: "Encaissé cette année", valeur: fcfa(stats.annee), Icone: Wallet },
-    { libelle: "Avances disponibles", valeur: fcfa(stats.avancesDisponibles), Icone: PiggyBank, ton: "gold" },
-    { libelle: "Remboursements payés (année)", valeur: fcfa(stats.remboursementsPayes), Icone: Undo2, ton: "gold" },
+  const cartes: { libelle: string; valeur: string; montant?: number; Icone: typeof Wallet; ton?: "gold" }[] = [
+    { libelle: `Encaissé aujourd'hui (${stats.nombreJour} reçu${stats.nombreJour > 1 ? "s" : ""})`, valeur: fcfa(stats.jour), montant: stats.jour, Icone: CalendarDays },
+    { libelle: "Encaissé ce mois", valeur: fcfa(stats.mois), montant: stats.mois, Icone: CalendarClock },
+    { libelle: "Encaissé cette année", valeur: fcfa(stats.annee), montant: stats.annee, Icone: Wallet },
+    { libelle: "Avances disponibles", valeur: fcfa(stats.avancesDisponibles), montant: stats.avancesDisponibles, Icone: PiggyBank, ton: "gold" },
+    { libelle: "Remboursements payés (année)", valeur: fcfa(stats.remboursementsPayes), montant: stats.remboursementsPayes, Icone: Undo2, ton: "gold" },
   ];
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {cartes.map((c) => (
-          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
+          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft mobile:p-3">
             <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${c.ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700"}`}>
               <c.Icone size={15} />
             </span>
-            <p className="mt-1.5 font-display text-base font-bold text-forest-900">{c.valeur}</p>
+            <p className="mt-1.5 font-display text-base font-bold text-forest-900 mobile:tabular-nums mobile:wrap-anywhere">{c.montant !== undefined ? <MontantTuile montant={c.montant} /> : c.valeur}</p>
             <p className="text-xs text-ink-700/60">{c.libelle}</p>
           </div>
         ))}

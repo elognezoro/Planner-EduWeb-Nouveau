@@ -6,6 +6,7 @@ import { Search, Check, Copy, UserPlus, Link2, Power, Trash2, Loader2, X, Chevro
 import { inscrireParticipants, genererLiensRole, majDateDuree, type ResultatInscriptions, type ResultatLiens } from "./actions";
 import { basculerInvitationCours, supprimerInvitationCours } from "../../invitation-cours-actions";
 import { CalendarClock, Clock, CalendarX, Lock } from "lucide-react";
+import { BoutonPartagerMobile, useConfirmationMobile } from "../../outils-mobiles";
 
 export type Formation = { id: string; titre: string; estSeminaire: boolean; publie: boolean; dateFormation: string | null; dureeMinutes: number | null; dateLimiteInscription: string | null };
 export type Lien = { id: string; coursId: string; coursTitre: string; token: string; actif: boolean; expiration: string | null; placesMax: number | null; roleCible: string | null; coursDate: string | null; coursDuree: number | null; coursLimite: string | null; clos: boolean };
@@ -36,17 +37,23 @@ function LigneLienRole({ lien }: { lien: Lien }) {
   const copier = async () => {
     try { await navigator.clipboard.writeText(url); setCopie(true); setTimeout(() => setCopie(false), 1600); } catch { /* presse-papiers indisponible */ }
   };
+  // Téléphone : confirmation dans une feuille montante (window.confirm conservé sur ordinateur).
+  const { confirmer: demanderConfirmation, feuille } = useConfirmationMobile();
   const agir = (fn: () => Promise<unknown>, confirmer?: string) => {
-    if (confirmer && !window.confirm(confirmer)) return;
-    start(async () => { await fn(); router.refresh(); });
+    const lancer = () => start(async () => { await fn(); router.refresh(); });
+    if (confirmer) demanderConfirmation(confirmer, lancer);
+    else lancer();
   };
   return (
     <div className={`rounded-xl border p-3 ${lien.actif ? "border-cream-200 bg-white" : "border-cream-200 bg-cream-50/60 opacity-70"}`}>
-      <div className="flex flex-wrap items-center gap-2">
-        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={`${champ} min-w-[220px] flex-1 font-mono text-xs`} />
-        <button type="button" onClick={copier} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-3 py-2 text-xs font-semibold text-white hover:bg-forest-700">
+      {/* Téléphone : champ en 16 px (pas de zoom iOS au toucher), « Copier » et « Partager »
+          côte à côte sous le lien. */}
+      <div className="flex flex-wrap items-center gap-2 mobile:grid mobile:grid-cols-2">
+        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className={`${champ} min-w-[220px] flex-1 font-mono text-xs mobile:col-span-2 mobile:h-11 mobile:min-w-0 mobile:text-base`} />
+        <button type="button" onClick={copier} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-3 py-2 text-xs font-semibold text-white hover:bg-forest-700 mobile:min-h-11 mobile:justify-center mobile:text-sm">
           {copie ? <Check size={14} /> : <Copy size={14} />} {copie ? "Copié" : "Copier"}
         </button>
+        <BoutonPartagerMobile url={url} titre={lien.coursTitre} />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-700/60">
         {fmtDate(lien.coursDate) && <span className="inline-flex items-center gap-1 font-medium text-ink-800"><CalendarClock size={12} /> {fmtDate(lien.coursDate)}</span>}
@@ -58,10 +65,11 @@ function LigneLienRole({ lien }: { lien: Lien }) {
         {lien.placesMax != null && <span>plafond : {lien.placesMax}</span>}
         {lien.expiration && <span>expire le {new Date(lien.expiration).toLocaleDateString("fr-FR")}</span>}
       </div>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap gap-2 mobile:grid mobile:grid-cols-2 mobile:[&>button]:min-h-11 mobile:[&>button]:justify-center mobile:[&>button]:text-sm">
         <button type="button" disabled={pending} onClick={() => agir(() => basculerInvitationCours(lien.id))} className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-ink-800 hover:bg-cream-100 disabled:opacity-50"><Power size={12} /> {lien.actif ? "Désactiver" : "Réactiver"}</button>
         <button type="button" disabled={pending} onClick={() => agir(() => supprimerInvitationCours(lien.id), "Supprimer ce lien ?")} className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50">{pending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} Supprimer</button>
       </div>
+      {feuille}
     </div>
   );
 }
@@ -88,28 +96,29 @@ function EditeurDateDuree({ formation }: { formation: Formation }) {
     start(async () => { const r = await majDateDuree(formation.id, date, duree, fin); if (r.ok) { setOk(true); setTimeout(() => setOk(false), 1800); router.refresh(); } });
   };
   return (
+    // Téléphone : champs empilés pleine largeur (44 px), bouton pleine largeur.
     <div className="flex flex-wrap items-end justify-between gap-2 rounded-xl border border-cream-200 bg-white p-3">
-      <div className="min-w-0">
+      <div className="min-w-0 mobile:w-full">
         <p className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-forest-900">
           <span className="min-w-0 truncate">{formation.titre}</span>
-          {!formation.publie && <span className="shrink-0 rounded-full bg-cream-200 px-2 py-0.5 text-[0.7rem] font-medium text-ink-700/70">brouillon</span>}
+          {!formation.publie && <span className="shrink-0 rounded-full bg-cream-200 px-2 py-0.5 text-[0.7rem] font-medium text-ink-700/70 mobile:text-xs">brouillon</span>}
         </p>
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-end gap-2 mobile:flex-col mobile:items-stretch">
           <label className="text-xs">
             <span className="mb-0.5 block font-medium text-ink-700/70">Date &amp; heure</span>
-            <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} className={`${champ} w-56`} />
+            <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} className={`${champ} w-56 mobile:h-11 mobile:w-full`} />
           </label>
           <label className="text-xs">
             <span className="mb-0.5 block font-medium text-ink-700/70">Durée (min)</span>
-            <input type="number" min={0} value={duree} onChange={(e) => setDuree(e.target.value)} placeholder="—" className={`${champ} w-28`} />
+            <input type="number" min={0} value={duree} onChange={(e) => setDuree(e.target.value)} placeholder="—" className={`${champ} w-28 mobile:h-11 mobile:w-full`} />
           </label>
           <label className="text-xs">
             <span className="mb-0.5 block font-medium text-ink-700/70">Fin des inscriptions</span>
-            <input type="datetime-local" value={fin} onChange={(e) => setFin(e.target.value)} className={`${champ} w-56`} />
+            <input type="datetime-local" value={fin} onChange={(e) => setFin(e.target.value)} className={`${champ} w-56 mobile:h-11 mobile:w-full`} />
           </label>
         </div>
       </div>
-      <button type="button" onClick={enregistrer} disabled={pending} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-xs font-semibold text-white hover:bg-forest-700 disabled:opacity-50">
+      <button type="button" onClick={enregistrer} disabled={pending} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-xs font-semibold text-white hover:bg-forest-700 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:justify-center mobile:text-sm">
         {pending ? <Loader2 size={14} className="animate-spin" /> : ok ? <Check size={14} /> : null} {ok ? "Enregistré" : "Enregistrer"}
       </button>
     </div>
@@ -158,11 +167,11 @@ export function FormulaireInscriptions({ formations, liens }: { formations: Form
               {filtrees.length === 0 ? (
                 <p className="px-2 py-3 text-sm text-ink-700/55">Aucune formation ne correspond.</p>
               ) : filtrees.map((f) => (
-                <label key={f.id} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-forest-50">
-                  <input type="checkbox" checked={selection.has(f.id)} onChange={() => toggle(f.id)} className="h-4 w-4 accent-forest-700" />
+                <label key={f.id} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-forest-50 mobile:min-h-11">
+                  <input type="checkbox" checked={selection.has(f.id)} onChange={() => toggle(f.id)} className="h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5 mobile:shrink-0" />
                   <span className="min-w-0 flex-1 text-sm text-ink-800">{f.titre}</span>
-                  {f.estSeminaire && <span className="rounded-full bg-forest-100 px-2 py-0.5 text-[0.7rem] font-semibold text-forest-800">Séminaire</span>}
-                  {!f.publie && <span className="rounded-full bg-cream-200 px-2 py-0.5 text-[0.7rem] font-medium text-ink-700/70">brouillon</span>}
+                  {f.estSeminaire && <span className="rounded-full bg-forest-100 px-2 py-0.5 text-[0.7rem] font-semibold text-forest-800 mobile:text-xs">Séminaire</span>}
+                  {!f.publie && <span className="rounded-full bg-cream-200 px-2 py-0.5 text-[0.7rem] font-medium text-ink-700/70 mobile:text-xs">brouillon</span>}
                 </label>
               ))}
             </div>
@@ -171,9 +180,9 @@ export function FormulaireInscriptions({ formations, liens }: { formations: Form
         {choisies.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {choisies.map((f) => (
-              <span key={f.id} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-forest-50 py-1 pl-3 pr-1 text-xs font-medium text-forest-800">
-                {f.titre}
-                <button type="button" onClick={() => toggle(f.id)} aria-label={`Retirer ${f.titre}`} className="rounded-full p-0.5 text-forest-700/60 hover:bg-forest-100 hover:text-forest-900"><X size={13} /></button>
+              <span key={f.id} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-forest-50 py-1 pl-3 pr-1 text-xs font-medium text-forest-800 mobile:max-w-full mobile:py-0">
+                <span className="contents mobile:block mobile:min-w-0 mobile:truncate">{f.titre}</span>
+                <button type="button" onClick={() => toggle(f.id)} aria-label={`Retirer ${f.titre}`} className="rounded-full p-0.5 text-forest-700/60 hover:bg-forest-100 hover:text-forest-900 mobile:flex mobile:h-11 mobile:w-11 mobile:shrink-0 mobile:items-center mobile:justify-center"><X size={13} /></button>
               </span>
             ))}
           </div>
@@ -217,7 +226,7 @@ export function FormulaireInscriptions({ formations, liens }: { formations: Form
           type="button"
           onClick={inscrire}
           disabled={pendingIns || selection.size === 0 || !saisie.trim()}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-600 px-6 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 disabled:opacity-50"
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-600 px-6 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 disabled:opacity-50 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:justify-center mobile:px-4 mobile:py-2.5 mobile:text-center"
         >
           {pendingIns ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />} Inscrire les participants comme {libStatut(statut)}
         </button>
@@ -226,13 +235,13 @@ export function FormulaireInscriptions({ formations, liens }: { formations: Form
 
       {/* Liens d'inscription directe (scoppés au statut) */}
       <section className="space-y-3 border-t border-cream-100 pt-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 mobile:flex-col mobile:items-stretch">
           <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900"><Link2 size={17} className="text-forest-600" /> Liens d&apos;inscription directe</h3>
           <button
             type="button"
             onClick={genererLiens}
             disabled={pendingLien || selection.size === 0}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:justify-center mobile:py-2.5 mobile:text-center"
           >
             {pendingLien ? <Loader2 size={15} className="animate-spin" /> : <GraduationCap size={15} />} Générer un lien « {libStatut(statut)} » par formation
           </button>

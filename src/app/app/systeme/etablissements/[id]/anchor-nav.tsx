@@ -1,4 +1,5 @@
 import { List, Sparkles } from "lucide-react";
+import { SectionsMobile } from "./sections-mobile";
 
 const SECTIONS = [
   { id: "categorie", label: "Catégorie pédagogique", essentiel: true },
@@ -18,7 +19,12 @@ const SECTIONS = [
 /** Barre « ALLER À » : ancres de saut vers chaque bloc de la configuration. */
 export function AnchorNav() {
   return (
-    <div className="sticky top-16 z-20 rounded-2xl border border-cream-200 bg-cream-50/95 p-3 shadow-soft backdrop-blur">
+    <>
+    {/* Téléphone : bouton « Aller à une section » + feuille montante (la barre collante de
+        12 pastilles y masquait plus de la moitié de l'écran) — placé AVANT la barre, masquée
+        sur téléphone, pour ne rien changer aux marges de l'ordinateur. */}
+    <SectionsMobile />
+    <div className="sticky top-16 z-20 rounded-2xl border border-cream-200 bg-cream-50/95 p-3 shadow-soft backdrop-blur mobile:hidden">
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="mr-1 inline-flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-ink-700/50">
           <List size={13} /> Aller à
@@ -42,5 +48,6 @@ export function AnchorNav() {
         <Sparkles size={11} className="text-gold-600" /> Blocs dorés : paramètres essentiels à la génération des emplois du temps — à ne pas omettre.
       </p>
     </div>
+    </>
   );
 }

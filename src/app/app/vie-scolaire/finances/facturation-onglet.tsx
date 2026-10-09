@@ -29,6 +29,7 @@ import type { EnteteEtablissement } from "./finances-vue";
 import { BoutonActionConfirmee } from "./scolarite-plus";
 import { SelecteurEleve, nombreEnLettres, useApresSucces } from "./scolarite-onglets";
 import { fcfa, type EleveVue } from "./types";
+import { MontantTuile } from "./montant-mobile";
 
 const INITIAL: EtatForm = { ok: false };
 
@@ -123,15 +124,15 @@ export function OngletFacturation({
 }
 
 function StatsFacturation({ stats, exercice }: { stats: StatistiquesFacturationVue; exercice: string }) {
-  const cartes: { libelle: string; valeur: string; Icone: typeof FileText; ton?: "gold" | "rouge" }[] = [
+  const cartes: { libelle: string; valeur: string; montant?: number; Icone: typeof FileText; ton?: "gold" | "rouge" }[] = [
     { libelle: "Factures émises", valeur: String(stats.nombre), Icone: FileText },
-    { libelle: "Montant facturé (net)", valeur: fcfa(stats.montantFacture), Icone: Scale },
-    { libelle: "Encaissé sur factures", valeur: fcfa(stats.montantEncaisse), Icone: Wallet },
-    { libelle: "Reste à encaisser", valeur: fcfa(stats.resteAEncaisser), Icone: Receipt, ton: "gold" },
+    { libelle: "Montant facturé (net)", valeur: fcfa(stats.montantFacture), montant: stats.montantFacture, Icone: Scale },
+    { libelle: "Encaissé sur factures", valeur: fcfa(stats.montantEncaisse), montant: stats.montantEncaisse, Icone: Wallet },
+    { libelle: "Reste à encaisser", valeur: fcfa(stats.resteAEncaisser), montant: stats.resteAEncaisser, Icone: Receipt, ton: "gold" },
     { libelle: "Taux de paiement", valeur: `${stats.tauxPaiement} %`, Icone: Gauge },
     { libelle: "En retard", valeur: `${stats.enRetardNombre} · ${fcfa(stats.enRetardMontant)}`, Icone: CalendarClock, ton: "rouge" },
-    { libelle: "Montants annulés", valeur: fcfa(stats.montantsAnnules), Icone: Ban, ton: "gold" },
-    { libelle: "Avoirs émis", valeur: fcfa(stats.totalAvoirs), Icone: Stamp },
+    { libelle: "Montants annulés", valeur: fcfa(stats.montantsAnnules), montant: stats.montantsAnnules, Icone: Ban, ton: "gold" },
+    { libelle: "Avoirs émis", valeur: fcfa(stats.totalAvoirs), montant: stats.totalAvoirs, Icone: Stamp },
   ];
   return (
     <div>
@@ -141,11 +142,11 @@ function StatsFacturation({ stats, exercice }: { stats: StatistiquesFacturationV
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {cartes.map((c) => (
-          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
+          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft mobile:p-3">
             <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${c.ton === "rouge" ? "bg-red-50 text-red-600" : c.ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700"}`}>
               <c.Icone size={15} />
             </span>
-            <p className="mt-1.5 font-display text-base font-bold text-forest-900">{c.valeur}</p>
+            <p className="mt-1.5 font-display text-base font-bold text-forest-900 mobile:tabular-nums mobile:wrap-anywhere">{c.montant !== undefined ? <MontantTuile montant={c.montant} /> : c.valeur}</p>
             <p className="text-xs text-ink-700/60">{c.libelle}</p>
           </div>
         ))}
@@ -163,7 +164,7 @@ function BlocFacturerCreances({ etablissementId, eleves }: { etablissementId: st
         Facturer les créances ouvertes d&apos;un élève (06 → 07)
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="min-w-[260px] flex-1">
+        <div className="min-w-[260px] flex-1 mobile:min-w-0 mobile:basis-full">
           <SelecteurEleve eleves={eleves} valeur={eleveId} onChange={setEleveId} name="eleveFacturation" />
         </div>
         <BoutonActionConfirmee
@@ -328,8 +329,8 @@ function ListeFactures({
           <FileText size={18} className="text-forest-600" /> Factures
           <span className="text-xs font-normal text-ink-700/55">({filtrees.length})</span>
         </h2>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)} className="w-auto">
+        <div className="flex flex-wrap items-center gap-2 mobile:grid mobile:w-full mobile:grid-cols-1">
+          <Select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)} className="w-auto mobile:w-full mobile:text-base">
             <option value="tous">Tous les états</option>
             {Object.entries(LIBELLE_STATUT_FACTURE).map(([v, l]) => (
               <option key={v} value={v}>{l}</option>
@@ -338,7 +339,7 @@ function ListeFactures({
           <input
             value={recherche} onChange={(e) => setRecherche(e.target.value)}
             placeholder="Rechercher (élève, n°, objet, classe, matricule)…"
-            className="h-9 min-w-[220px] rounded-xl border border-cream-300 bg-white px-3 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="h-9 min-w-[220px] rounded-xl border border-cream-300 bg-white px-3 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:min-w-0 mobile:w-full mobile:text-base"
           />
         </div>
       </div>
@@ -347,7 +348,7 @@ function ListeFactures({
         <p className="text-sm text-ink-700/60">Aucune facture ne correspond.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-sm">
+          <table className="w-full min-w-[860px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">N°</th>
@@ -394,7 +395,7 @@ function LigneFactureTableau({
   return (
     <>
       <tr className={f.statut === "annulee" ? "opacity-60" : ""}>
-        <td className="py-2 pr-2 font-mono text-xs text-ink-700/70">
+        <td data-label="N°" className="py-2 pr-2 font-mono text-xs text-ink-700/70">
           {f.numero ?? "—"}
           {f.type === "proforma" && <span className="ml-1 rounded-full bg-cream-200 px-1.5 text-[10px] font-semibold">PRO</span>}
         </td>
@@ -402,14 +403,14 @@ function LigneFactureTableau({
           <p className="font-medium text-forest-900">{f.eleveNom}</p>
           <p className="text-xs text-ink-700/55">{[f.classe, f.matricule].filter(Boolean).join(" · ") || "—"}</p>
         </td>
-        <td className="py-2 pr-2">{f.objet}</td>
-        <td className="py-2 pr-2 text-right font-medium">{fcfa(f.netDu)}</td>
-        <td className="py-2 pr-2 text-right text-forest-700">{f.type === "proforma" ? "—" : fcfa(f.paye)}</td>
-        <td className="py-2 pr-2 whitespace-nowrap">
+        <td data-label="Objet" className="py-2 pr-2">{f.objet}</td>
+        <td data-label="Net dû" className="py-2 pr-2 text-right font-medium">{fcfa(f.netDu)}</td>
+        <td data-label="Payé" className="py-2 pr-2 text-right text-forest-700">{f.type === "proforma" ? "—" : fcfa(f.paye)}</td>
+        <td data-label="Échéance" className="py-2 pr-2 whitespace-nowrap">
           {dateFr(f.dateEcheance)}
           {f.joursRetard > 0 && <span className="ml-1 text-xs font-semibold text-red-600">(+{f.joursRetard} j)</span>}
         </td>
-        <td className="py-2 pr-2"><BadgeFacture statut={f.statutAffiche} /></td>
+        <td data-label="État" className="py-2 pr-2"><BadgeFacture statut={f.statutAffiche} /></td>
         <td className="py-2 text-right whitespace-nowrap">
           <button type="button" onClick={onImprimer} title="Imprimer" className="mr-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-forest-700 hover:bg-forest-50">
             <Printer size={13} />
@@ -440,7 +441,7 @@ function DetailFacture({ facture: f, onModifier, peutEcrire }: { facture: Factur
   return (
     <div className="space-y-3">
       <div className="overflow-x-auto rounded-2xl border border-cream-200 bg-white p-3">
-        <table className="w-full min-w-[560px] text-sm">
+        <table className="w-full min-w-[560px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead>
             <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
               <th className="py-1 pr-2">Ligne</th>
@@ -455,11 +456,11 @@ function DetailFacture({ facture: f, onModifier, peutEcrire }: { facture: Factur
             {f.lignes.map((l) => (
               <tr key={l.id}>
                 <td className="py-1.5 pr-2">{l.libelle}{l.creanceId && <span className="ml-1 text-[10px] text-forest-600">(créance)</span>}</td>
-                <td className="py-1.5 pr-2 text-right">{l.quantite}</td>
-                <td className="py-1.5 pr-2 text-right">{fcfa(l.prixUnitaire)}</td>
-                <td className="py-1.5 pr-2 text-right">{l.remise ? fcfa(l.remise) : "—"}</td>
-                <td className="py-1.5 pr-2 text-right">{l.taxe ? fcfa(l.taxe) : "—"}</td>
-                <td className="py-1.5 text-right font-medium">{fcfa(l.montant)}</td>
+                <td data-label="Qté" className="py-1.5 pr-2 text-right">{l.quantite}</td>
+                <td data-label="P.U." className="py-1.5 pr-2 text-right">{fcfa(l.prixUnitaire)}</td>
+                <td data-label="Remise" className="py-1.5 pr-2 text-right">{l.remise ? fcfa(l.remise) : "—"}</td>
+                <td data-label="Taxe" className="py-1.5 pr-2 text-right">{l.taxe ? fcfa(l.taxe) : "—"}</td>
+                <td data-label="Montant" className="py-1.5 text-right font-medium">{fcfa(l.montant)}</td>
               </tr>
             ))}
           </tbody>
@@ -535,11 +536,11 @@ function DetailFacture({ facture: f, onModifier, peutEcrire }: { facture: Factur
             <BoutonActionConfirmee libelle="Reprendre" icone={CheckCircle2} action={reprendreFacture} champs={base} />
           )}
           {annulable && (
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 mobile:w-full mobile:flex-wrap">
               <input
                 value={motifAnnulation} onChange={(e) => setMotifAnnulation(e.target.value)} maxLength={300}
                 placeholder="Motif d'annulation…"
-                className="h-8 w-48 rounded-xl border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                className="h-8 w-48 rounded-xl border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base"
               />
               <BoutonActionConfirmee
                 libelle="Annuler la facture" icone={Ban} ton="danger"
@@ -587,7 +588,7 @@ function FormAjustement({ facture, genre, onFermer }: { facture: FactureVue; gen
 
 function ApercuFacture({ facture: f, entete, onFermer }: { facture: FactureVue; entete: EnteteEtablissement; onFermer: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -596,10 +597,10 @@ function ApercuFacture({ facture: f, entete, onFermer }: { facture: FactureVue; 
           @page { size: A4 portrait; margin: 14mm; }
         }
       `}</style>
-      <div id="apercu-facture-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="apercu-facture-impression" className="mx-auto my-8 w-full max-w-2xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Aperçu de la facture</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
             <X size={18} />
           </button>
         </div>
@@ -610,7 +611,7 @@ function ApercuFacture({ facture: f, entete, onFermer }: { facture: FactureVue; 
           sousTitre={`${f.numero ?? "Brouillon — sans valeur comptable"} · Exercice ${f.exercice}`}
         />
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-1 text-sm mobile:grid-cols-1">
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Client (élève)</dt><dd className="font-semibold text-forest-900">{f.eleveNom}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Classe</dt><dd>{f.classe ?? "—"}</dd></div>
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Matricule</dt><dd>{f.matricule ?? "—"}</dd></div>
@@ -619,50 +620,54 @@ function ApercuFacture({ facture: f, entete, onFermer }: { facture: FactureVue; 
           <div className="flex justify-between gap-2"><dt className="text-ink-700/60">Objet</dt><dd className="text-right">{f.objet}</dd></div>
         </dl>
 
-        <table className="mt-4 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
-              <th className="py-1.5 pr-2">Désignation</th>
-              <th className="py-1.5 pr-2 text-right">Qté</th>
-              <th className="py-1.5 pr-2 text-right">P.U.</th>
-              <th className="py-1.5 pr-2 text-right">Remise</th>
-              <th className="py-1.5 text-right">Montant</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-cream-100">
-            {f.lignes.map((l) => (
-              <tr key={l.id}>
-                <td className="py-1.5 pr-2">{l.libelle}</td>
-                <td className="py-1.5 pr-2 text-right">{l.quantite}</td>
-                <td className="py-1.5 pr-2 text-right">{fcfa(l.prixUnitaire)}</td>
-                <td className="py-1.5 pr-2 text-right">{l.remise ? fcfa(l.remise) : "—"}</td>
-                <td className="py-1.5 text-right font-medium">{fcfa(l.montant)}</td>
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-cream-300 text-left text-xs uppercase tracking-wide text-ink-700/55">
+                <th className="py-1.5 pr-2">Désignation</th>
+                <th className="py-1.5 pr-2 text-right">Qté</th>
+                <th className="py-1.5 pr-2 text-right">P.U.</th>
+                <th className="py-1.5 pr-2 text-right">Remise</th>
+                <th className="py-1.5 text-right">Montant</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="border-t border-cream-300 font-bold text-forest-900">
-              <td className="py-2 pr-2" colSpan={4}>Total TTC</td>
-              <td className="py-2 text-right">{fcfa(f.montantTotal)}</td>
-            </tr>
-            {f.totalNotesDebit > 0 && (
-              <tr><td className="py-1 pr-2" colSpan={4}>Notes de débit</td><td className="py-1 text-right">+{fcfa(f.totalNotesDebit)}</td></tr>
-            )}
-            {f.totalAvoirs > 0 && (
-              <tr><td className="py-1 pr-2" colSpan={4}>Avoirs</td><td className="py-1 text-right">−{fcfa(f.totalAvoirs)}</td></tr>
-            )}
-            <tr className="font-bold text-forest-900">
-              <td className="py-1.5 pr-2" colSpan={4}>Net dû</td>
-              <td className="py-1.5 text-right">{fcfa(f.netDu)}</td>
-            </tr>
-            {f.type === "facture" && (
-              <tr>
-                <td className="py-1 pr-2" colSpan={4}>Payé à ce jour · Reste</td>
-                <td className="py-1 text-right">{fcfa(f.paye)} · {fcfa(Math.max(0, f.netDu - f.paye))}</td>
+            </thead>
+            <tbody className="divide-y divide-cream-100">
+              {f.lignes.map((l) => (
+                <tr key={l.id}>
+                  <td className="py-1.5 pr-2">{l.libelle}</td>
+                  <td className="py-1.5 pr-2 text-right">{l.quantite}</td>
+                  <td className="py-1.5 pr-2 text-right">{fcfa(l.prixUnitaire)}</td>
+                  <td className="py-1.5 pr-2 text-right">{l.remise ? fcfa(l.remise) : "—"}</td>
+                  <td className="py-1.5 text-right font-medium">{fcfa(l.montant)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-cream-300 font-bold text-forest-900">
+                <td className="py-2 pr-2" colSpan={4}>Total TTC</td>
+                <td className="py-2 text-right">{fcfa(f.montantTotal)}</td>
               </tr>
-            )}
-          </tfoot>
-        </table>
+              {f.totalNotesDebit > 0 && (
+                <tr><td className="py-1 pr-2" colSpan={4}>Notes de débit</td><td className="py-1 text-right">+{fcfa(f.totalNotesDebit)}</td></tr>
+              )}
+              {f.totalAvoirs > 0 && (
+                <tr><td className="py-1 pr-2" colSpan={4}>Avoirs</td><td className="py-1 text-right">−{fcfa(f.totalAvoirs)}</td></tr>
+              )}
+              <tr className="font-bold text-forest-900">
+                <td className="py-1.5 pr-2" colSpan={4}>Net dû</td>
+                <td className="py-1.5 text-right">{fcfa(f.netDu)}</td>
+              </tr>
+              {f.type === "facture" && (
+                <tr>
+                  <td className="py-1 pr-2" colSpan={4}>Payé à ce jour · Reste</td>
+                  <td className="py-1 text-right">{fcfa(f.paye)} · {fcfa(Math.max(0, f.netDu - f.paye))}</td>
+                </tr>
+              )}
+            </tfoot>
+          </table>
+        </div>
 
         <p className="mt-3 rounded-xl bg-cream-50 px-3 py-2 text-xs italic text-ink-700/70">
           Arrêtée la présente facture à la somme de : {capitaliser(nombreEnLettres(f.netDu))} francs CFA.

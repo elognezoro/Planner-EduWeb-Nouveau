@@ -85,7 +85,7 @@ export function OngletRapports({
                     <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-900">
                       <FileText size={14} className="text-forest-600" /> {def.nom}
                     </p>
-                    <p className="mt-1 text-[11px] text-ink-700/60">{def.description}</p>
+                    <p className="mt-1 text-[11px] text-ink-700/60 mobile:text-xs">{def.description}</p>
                   </button>
                 ))}
               </div>
@@ -106,13 +106,13 @@ export function OngletRapports({
                   <p className="text-xs text-ink-700/60">{rapport.sousTitre} · généré le {new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(rapport.genereLe))}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setImpression(true)} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+                  <button type="button" onClick={() => setImpression(true)} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11">
                     <Printer size={13} /> Imprimer (A4/A3)
                   </button>
-                  <a href={`/api/finances/rapport?code=${rapport.code}&format=csv`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+                  <a href={`/api/finances/rapport?code=${rapport.code}&format=csv`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11">
                     <Download size={13} /> CSV
                   </a>
-                  <a href={`/api/finances/rapport?code=${rapport.code}&format=json`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-ink-700/70 hover:bg-cream-100">
+                  <a href={`/api/finances/rapport?code=${rapport.code}&format=json`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-ink-700/70 hover:bg-cream-100 mobile:min-h-11">
                     <Download size={13} /> JSON
                   </a>
                 </div>
@@ -131,7 +131,7 @@ export function OngletRapports({
 function TableRapport({ rapport }: { rapport: RapportGenere }) {
   return (
     <div className="mt-3 overflow-x-auto">
-      <table className="w-full min-w-[560px] text-sm">
+      <table className="w-full min-w-[560px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
         <thead>
           <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
             {rapport.colonnes.map((c) => (
@@ -146,7 +146,7 @@ function TableRapport({ rapport }: { rapport: RapportGenere }) {
             rapport.lignes.map((row, i) => (
               <tr key={i} className="border-b border-cream-100">
                 {rapport.colonnes.map((c) => (
-                  <td key={c.cle} className={`px-2 py-1.5 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(row[c.cle], c.format)}</td>
+                  <td data-label={c.libelle} key={c.cle} className={`px-2 py-1.5 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(row[c.cle], c.format)}</td>
                 ))}
               </tr>
             ))
@@ -154,7 +154,7 @@ function TableRapport({ rapport }: { rapport: RapportGenere }) {
           {rapport.totaux && (
             <tr className="border-t-2 border-forest-200 font-bold">
               {rapport.colonnes.map((c) => (
-                <td key={c.cle} className={`px-2 py-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(rapport.totaux![c.cle], c.format)}</td>
+                <td data-label={c.libelle} key={c.cle} className={`px-2 py-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(rapport.totaux![c.cle], c.format)}</td>
               ))}
             </tr>
           )}
@@ -167,40 +167,44 @@ function TableRapport({ rapport }: { rapport: RapportGenere }) {
 function RapportImprimable({ rapport, entete, onFermer }: { rapport: RapportGenere; entete: EnteteEtablissement; onFermer: () => void }) {
   const taille = rapport.orientation === "paysage" ? "A4 landscape" : "A4 portrait";
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`@media print { body * { visibility: hidden; } #rapport-impression, #rapport-impression * { visibility: visible; } #rapport-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; overflow: visible; } @page { size: ${taille}; margin: 12mm; } }`}</style>
-      <div id="rapport-impression" className="mx-auto my-8 w-full max-w-5xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="rapport-impression" className="mx-auto my-8 w-full max-w-5xl rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Aperçu avant impression</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer"><X size={16} /></button>
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer"><X size={16} /></button>
         </div>
         <EnTeteOfficielDoc etab={entete} titre={rapport.titre.toUpperCase()} sousTitre={rapport.sousTitre} />
-        <table className="mt-4 w-full border-collapse text-xs">
-          <thead>
-            <tr className="border-y-2 border-forest-800 text-left uppercase tracking-wide">
-              {rapport.colonnes.map((c) => (
-                <th key={c.cle} className={`py-1.5 pr-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{c.libelle}</th>
+        {/* Téléphone : le tableau défile dans la feuille au lieu d'en déborder
+            (div sans style hors mobile : bureau et impression inchangés). */}
+        <div className="mobile:overflow-x-auto">
+          <table className="mt-4 w-full border-collapse text-xs">
+            <thead>
+              <tr className="border-y-2 border-forest-800 text-left uppercase tracking-wide">
+                {rapport.colonnes.map((c) => (
+                  <th key={c.cle} className={`py-1.5 pr-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{c.libelle}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rapport.lignes.map((row, i) => (
+                <tr key={i} className="border-b border-cream-200">
+                  {rapport.colonnes.map((c) => (
+                    <td key={c.cle} className={`py-1 pr-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(row[c.cle], c.format)}</td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rapport.lignes.map((row, i) => (
-              <tr key={i} className="border-b border-cream-200">
-                {rapport.colonnes.map((c) => (
-                  <td key={c.cle} className={`py-1 pr-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(row[c.cle], c.format)}</td>
-                ))}
-              </tr>
-            ))}
-            {rapport.totaux && (
-              <tr className="border-t-2 border-forest-800 font-bold">
-                {rapport.colonnes.map((c) => (
-                  <td key={c.cle} className={`py-2 pr-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(rapport.totaux![c.cle], c.format)}</td>
-                ))}
-              </tr>
-            )}
-          </tbody>
-        </table>
-        <p className="mt-4 text-[10px] text-ink-700/50">
+              {rapport.totaux && (
+                <tr className="border-t-2 border-forest-800 font-bold">
+                  {rapport.colonnes.map((c) => (
+                    <td key={c.cle} className={`py-2 pr-2 ${aligneDroite(c.format) ? "text-right" : ""}`}>{formater(rapport.totaux![c.cle], c.format)}</td>
+                  ))}
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-4 text-[10px] text-ink-700/50 mobile:text-xs">
           Généré le {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(new Date(rapport.genereLe))} — EduWeb Planner.
         </p>
         <div className="mt-6 flex justify-center gap-2 print:hidden">

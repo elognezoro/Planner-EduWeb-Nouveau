@@ -55,12 +55,14 @@ export default async function SujetForumPage({ params }: { params: Promise<{ slu
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/cours/${slug}/forum`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+      <Link href={`${BASE}/cours/${slug}/forum`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden">
         <ArrowLeft size={15} /> Retour au forum
       </Link>
 
       <PageHeader
         titre={sujet.titre}
+        titreMobile="Discussion"
+        titreVisibleMobile
         description={`Forum du cours « ${sujet.cours.titre} »${sujet.description ? ` — ${sujet.description}` : ""}`}
       />
 

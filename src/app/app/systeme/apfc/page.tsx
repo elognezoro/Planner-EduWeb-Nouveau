@@ -12,6 +12,7 @@ import { StructureLien } from "@/components/app/formation/components";
 import { FormulaireApfc } from "./formulaire-apfc";
 import { ImportApfcCSV } from "./import-apfc-csv";
 import { ReglageTermeApfc } from "./reglage-terme-apfc";
+import { ReplieMobile } from "@/app/app/inspection/replie-mobile";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: appliquerTermeApfc("APFC", await termeApfcCourant()) };
@@ -115,8 +116,12 @@ export default async function ApfcPage() {
         </Card>
       ) : (
         <>
+          {/* Téléphone : réglage et formulaires repliés — la liste des antennes vient d'abord. */}
+          <ReplieMobile libelle="Nom local des antennes" variante="secondaire">
           <ReglageTermeApfc pays={pays} terme={terme} />
+          </ReplieMobile>
 
+          <ReplieMobile libelle={`${T("Nouvelle APFC")} ou import CSV`}>
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">{T("Nouvelle APFC")}</h2>
             <FormulaireApfc
@@ -130,6 +135,7 @@ export default async function ApfcPage() {
               <ImportApfcCSV regions={regions} pays={pays} terme={terme} />
             </div>
           </Card>
+          </ReplieMobile>
 
           <div className="space-y-3">
             <h2 className="font-display text-base font-bold text-forest-900">

@@ -113,7 +113,7 @@ export default async function AbsencesPage({ params }: { params: Promise<{ id: s
         </Card>
       ) : (
         <>
-          <Card>
+          <Card className="mobile:p-4">
             <h2 className="mb-3 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
               <CalendarX2 size={18} className="text-forest-600" /> Nouvelle absence
             </h2>
@@ -130,16 +130,19 @@ export default async function AbsencesPage({ params }: { params: Promise<{ id: s
             </Card>
           )}
 
-          <Card>
+          <Card className="mobile:p-4">
             <h2 className="mb-3 font-display text-base font-bold text-forest-900">
               Absences enregistrées <span className="text-xs font-normal text-ink-700/55">({absences.length})</span>
             </h2>
             {absences.length === 0 ? (
               <p className="text-sm text-ink-700/60">Aucune absence enregistrée pour l&apos;instant.</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[620px] text-sm">
-                  <thead>
+              <div className="overflow-x-auto mobile:overflow-visible">
+                {/* Téléphone : une carte par absence (ligne 1 : enseignant et statut ; ligne 2 :
+                    date et durée ; puis motif et « Retirer ») — statut, motif et bouton étaient
+                    hors écran. */}
+                <table className="w-full min-w-[620px] text-sm mobile:block mobile:min-w-0">
+                  <thead className="mobile:hidden">
                     <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                       <th className="py-1.5 pr-2">Date</th>
                       <th className="py-1.5 pr-2">Enseignant</th>
@@ -149,23 +152,23 @@ export default async function AbsencesPage({ params }: { params: Promise<{ id: s
                       <th className="py-1.5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-cream-100">
+                  <tbody className="divide-y divide-cream-100 mobile:block mobile:space-y-2">
                     {absences.map((a) => (
-                      <tr key={a.id}>
-                        <td className="py-1.5 pr-2 whitespace-nowrap">{dateCourte(a.date)}</td>
-                        <td className="py-1.5 pr-2 font-medium text-forest-900">{nomComplet(a.enseignant)}</td>
-                        <td className="py-1.5 pr-2">{LIBELLE_DEMI[a.demiJournee] ?? a.demiJournee}</td>
-                        <td className="py-1.5 pr-2">
-                          <span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${TON_STATUT[a.statut] ?? "bg-cream-100 text-ink-700/70"}`}>
+                      <tr key={a.id} className="mobile:flex mobile:flex-wrap mobile:items-center mobile:gap-x-3 mobile:gap-y-1 mobile:rounded-2xl mobile:border-0 mobile:bg-white mobile:p-3 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200">
+                        <td className="py-1.5 pr-2 whitespace-nowrap mobile:order-3 mobile:p-0 mobile:text-ink-700/75">{dateCourte(a.date)}</td>
+                        <td className="py-1.5 pr-2 font-medium text-forest-900 mobile:order-1 mobile:min-w-0 mobile:grow mobile:basis-[calc(100%-8.5rem)] mobile:p-0 mobile:font-semibold">{nomComplet(a.enseignant)}</td>
+                        <td className="py-1.5 pr-2 mobile:order-4 mobile:p-0 mobile:text-ink-700/75">{LIBELLE_DEMI[a.demiJournee] ?? a.demiJournee}</td>
+                        <td className="py-1.5 pr-2 mobile:order-2 mobile:p-0">
+                          <span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${TON_STATUT[a.statut] ?? "bg-cream-100 text-ink-700/70"} mobile:text-xs`}>
                             {LIBELLE_STATUT[a.statut] ?? a.statut}
                           </span>
                         </td>
-                        <td className="py-1.5 pr-2 text-ink-700/70">{a.motif || "—"}</td>
-                        <td className="py-1.5 text-right">
+                        <td className="py-1.5 pr-2 text-ink-700/70 mobile:order-5 mobile:basis-full mobile:p-0 mobile:text-xs">{a.motif || "—"}</td>
+                        <td className="py-1.5 text-right mobile:order-6 mobile:basis-full mobile:p-0 mobile:pt-1">
                           <form action={supprimerAbsence}>
                             <input type="hidden" name="id" value={a.id} />
                             <input type="hidden" name="etablissementId" value={id} />
-                            <button type="submit" className="inline-flex items-center gap-1 rounded-full border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50">
+                            <button type="submit" className="inline-flex items-center gap-1 rounded-full border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 mobile:min-h-10 mobile:px-4 mobile:text-sm">
                               <Trash2 size={13} /> Retirer
                             </button>
                           </form>

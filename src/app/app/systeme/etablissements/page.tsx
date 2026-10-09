@@ -253,18 +253,18 @@ export default async function EtablissementsPage({
 
               {/* Pagination */}
               {pages > 1 && (
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-ink-700/60">
+                <div className="flex items-center justify-between mobile:flex-col mobile:items-stretch mobile:gap-2">
+                  <p className="text-xs text-ink-700/60 mobile:text-center">
                     Page {page} / {pages.toLocaleString("fr-FR")} — {total.toLocaleString("fr-FR")} établissement(s)
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mobile:w-full">
                     {page > 1 && (
-                      <Link href={lienPage(sp, page - 1)} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50">
+                      <Link href={lienPage(sp, page - 1)} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:flex-1 mobile:justify-center">
                         <ChevronLeft size={15} /> Précédent
                       </Link>
                     )}
                     {page < pages && (
-                      <Link href={lienPage(sp, page + 1)} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50">
+                      <Link href={lienPage(sp, page + 1)} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:flex-1 mobile:justify-center">
                         Suivant <ChevronRight size={15} />
                       </Link>
                     )}

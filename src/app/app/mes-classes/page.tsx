@@ -112,22 +112,24 @@ export default async function MesClassesPage() {
                 ))}
               </div>
 
-              <div className="mt-auto flex flex-wrap gap-2 border-t border-cream-100 pt-3">
+              {/* Téléphone : les 3 accès sur une ligne, en boutons de 44 px (« Cahier » abrégé). */}
+              <div className="mt-auto flex flex-wrap gap-2 border-t border-cream-100 pt-3 mobile:grid mobile:grid-cols-3">
                 <Link
                   href={`/app/vie-scolaire/registre-appel?classe=${c.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:justify-center mobile:px-2 mobile:text-sm"
                 >
                   <ClipboardList size={13} /> Appel
                 </Link>
                 <Link
                   href={`/app/vie-scolaire/cahier-texte?classe=${c.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:justify-center mobile:px-2 mobile:text-sm"
                 >
-                  <NotebookPen size={13} /> Cahier de texte
+                  <NotebookPen size={13} /> <span className="mobile:hidden">Cahier de texte</span>
+                  <span className="hidden mobile:inline">Cahier</span>
                 </Link>
                 <Link
                   href={`/app/vie-scolaire/notes-bulletins?classe=${c.id}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:justify-center mobile:px-2 mobile:text-sm"
                 >
                   <BookOpen size={13} /> Notes
                 </Link>

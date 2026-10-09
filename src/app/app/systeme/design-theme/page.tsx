@@ -53,7 +53,7 @@ function Nuancier({
         {teintes.map((t) => (
           <div key={t.c} className="text-center">
             <div className={`h-12 w-14 rounded-lg border border-cream-200 ${t.c}`} />
-            <span className="mt-1 block text-[0.6rem] text-ink-700/60">{t.l}</span>
+            <span className="mt-1 block text-[0.6rem] text-ink-700/60 mobile:text-xs">{t.l}</span>
           </div>
         ))}
       </div>

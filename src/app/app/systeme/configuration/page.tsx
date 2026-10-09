@@ -62,7 +62,7 @@ export default async function ConfigurationPage({
   for (const g of grilles) heures.set(`${g.niveauId}:${g.disciplineId}`, g.heuresHebdo);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8 mobile:space-y-5">
       <PageHeader
         titre="Configuration générale"
         description="Paramètres nationaux par défaut : année scolaire, régime de notation, régions et grille horaire — base du futur module Emplois du temps."
@@ -71,7 +71,7 @@ export default async function ConfigurationPage({
       {/* Filtre pays : les conditions nationales ci-dessous sont définies pays par pays. */}
       <FiltrePaysConfiguration pays={pays} />
 
-      <Card>
+      <Card className="mobile:p-4">
         <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
           <Settings size={18} /> Paramètres généraux
         </h2>
@@ -82,7 +82,7 @@ export default async function ConfigurationPage({
         />
       </Card>
 
-      <Card>
+      <Card className="mobile:p-4">
         <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
           <Hourglass size={18} /> Période d&apos;essai par défaut
         </h2>
@@ -93,7 +93,7 @@ export default async function ConfigurationPage({
         />
       </Card>
 
-      <Card>
+      <Card className="mobile:p-4">
         <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
           <AlarmClock size={18} /> Déconnexion automatique (inactivité)
         </h2>
@@ -104,8 +104,8 @@ export default async function ConfigurationPage({
         />
       </Card>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-8 lg:grid-cols-2 mobile:gap-5">
+        <Card className="mobile:p-4">
           <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
             <CalendarRange size={18} /> Années scolaires
           </h2>
@@ -130,7 +130,7 @@ export default async function ConfigurationPage({
           <AnneeForm />
         </Card>
 
-        <Card>
+        <Card className="mobile:p-4">
           <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
             <MapPin size={18} /> Régions — {pays}
           </h2>
@@ -153,7 +153,7 @@ export default async function ConfigurationPage({
       </div>
 
       {/* Disciplines : référentiel national — ajout et suppression protégée. */}
-      <Card>
+      <Card className="mobile:p-4">
         <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
           <BookOpen size={18} /> Disciplines
         </h2>
@@ -172,7 +172,7 @@ export default async function ConfigurationPage({
         <DisciplineForm />
       </Card>
 
-      <Card>
+      <Card className="mobile:p-4">
         <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
           <Table2 size={18} /> Grille horaire nationale — {pays} (heures / semaine)
         </h2>

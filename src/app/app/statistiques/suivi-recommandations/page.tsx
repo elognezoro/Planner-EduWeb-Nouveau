@@ -41,15 +41,17 @@ export default async function SuiviRecommandationsPage() {
   const traitees = parStatut.traitee;
   const tauxTraitement = total > 0 ? Math.round((traitees / total) * 100) : 0;
 
+  // `couleur` : téléphone seulement (l'ordinateur garde une couleur par graphique) — statut lisible
+  // d'un coup d'œil, priorité « Haute » en rouge.
   const graphStatut = [
-    { label: "Ouvertes", valeur: parStatut.ouverte },
-    { label: "En cours", valeur: parStatut.en_cours },
-    { label: "Traitées", valeur: parStatut.traitee },
+    { label: "Ouvertes", valeur: parStatut.ouverte, couleur: "#c9a227" },
+    { label: "En cours", valeur: parStatut.en_cours, couleur: "#57a47b" },
+    { label: "Traitées", valeur: parStatut.traitee, couleur: "#246a48" },
   ];
   const graphPriorite = [
-    { label: "Basse", valeur: parPriorite.basse },
-    { label: "Moyenne", valeur: parPriorite.moyenne },
-    { label: "Haute", valeur: parPriorite.haute },
+    { label: "Basse", valeur: parPriorite.basse, couleur: "#8cc4a4" },
+    { label: "Moyenne", valeur: parPriorite.moyenne, couleur: "#c9a227" },
+    { label: "Haute", valeur: parPriorite.haute, couleur: "#dc2626" },
   ];
 
   return (
@@ -65,7 +67,8 @@ export default async function SuiviRecommandationsPage() {
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          {/* Téléphone : KPI en 2 colonnes compactes, le dernier en pleine largeur. */}
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
             <StatCard libelle="Recommandations" valeur={total} icone={<ListChecks size={22} />} />
             <StatCard libelle="Traitées" valeur={traitees} icone={<CheckCircle2 size={22} />} ton="gold" />
             <StatCard libelle="Taux de traitement" valeur={`${tauxTraitement}%`} icone={<Clock size={22} />} />
@@ -74,11 +77,12 @@ export default async function SuiviRecommandationsPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <h2 className="mb-4 font-display text-base font-bold text-forest-900">Par statut</h2>
-              <ChartBarVertical data={graphStatut} nomSerie="Recommandations" couleur="#246a48" vide="Aucune recommandation." />
+              {/* Téléphone : 3 lignes compactes, ordre conservé, échelle = total des recommandations. */}
+              <ChartBarVertical data={graphStatut} nomSerie="Recommandations" couleur="#246a48" vide="Aucune recommandation." ordonne max={total} />
             </Card>
             <Card>
               <h2 className="mb-4 font-display text-base font-bold text-forest-900">Par priorité</h2>
-              <ChartBarVertical data={graphPriorite} nomSerie="Recommandations" couleur="#c9a227" vide="Aucune recommandation." />
+              <ChartBarVertical data={graphPriorite} nomSerie="Recommandations" couleur="#c9a227" vide="Aucune recommandation." ordonne max={total} />
             </Card>
           </div>
         </>

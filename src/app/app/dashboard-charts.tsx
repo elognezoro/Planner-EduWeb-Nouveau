@@ -2,12 +2,19 @@
 
 import { motion } from "motion/react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useEcranMobile, useImpressionDepuisEcranMobile } from "@/lib/mobile/appareil";
+import { ClassementBarres, RepartitionAnneau } from "@/components/app/mobile/graphiques-mobiles";
 
 const COULEURS = ["#246a48", "#c9a227", "#57a47b", "#e3b536", "#8cc4a4", "#ad821f", "#34855c", "#f4df8d"];
 const tooltipStyle = { borderRadius: 12, border: "1px solid #e9dcbe", fontSize: 13, boxShadow: "0 8px 24px rgba(15,53,39,0.08)" };
 const axisStyle = { fontSize: 12, fill: "#2b3a33" };
 
 export function DonutRoles({ data }: { data: { role: string; total: number }[] }) {
+  // Téléphone : anneau compact + total + légende chiffrée (top 5 + « Autres »).
+  const mobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
+  if (mobile) return <RepartitionAnneau donnees={data.map((d) => ({ libelle: d.role, valeur: d.total }))} libelleTotal="comptes" />;
   if (data.length === 0) {
     return <div className="flex h-[240px] items-center justify-center text-sm text-ink-700/50">Aucune donnée.</div>;
   }
@@ -18,7 +25,7 @@ export function DonutRoles({ data }: { data: { role: string; total: number }[] }
           largeur du conteneur (aucun rognage haut/bas possible). */}
       <ResponsiveContainer width="100%" height={224}>
         <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
-          <Pie data={data} dataKey="total" nameKey="role" cx="50%" cy="50%" innerRadius={48} outerRadius={80} paddingAngle={2}>
+          <Pie isAnimationActive={impression ? false : undefined} data={data} dataKey="total" nameKey="role" cx="50%" cy="50%" innerRadius={48} outerRadius={80} paddingAngle={2}>
             {data.map((_, i) => (
               <Cell key={i} fill={COULEURS[i % COULEURS.length]} />
             ))}
@@ -39,7 +46,12 @@ export function DonutRoles({ data }: { data: { role: string; total: number }[] }
   );
 }
 
-export function BarEtablissements({ data }: { data: { label: string; valeur: number }[] }) {
+export function BarEtablissements({ data }: { data: { label: string; valeur: number; nomComplet?: string }[] }) {
+  // Téléphone : classement en barres horizontales, nom COMPLET de l'établissement lisible.
+  const mobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
+  if (mobile) return <ClassementBarres donnees={data.map((d) => ({ libelle: d.nomComplet ?? d.label, valeur: d.valeur }))} unite="élèves" vide="Aucun effectif inscrit." />;
   if (data.length === 0) {
     return <div className="flex h-[240px] items-center justify-center text-sm text-ink-700/50">Aucun effectif inscrit.</div>;
   }
@@ -51,7 +63,7 @@ export function BarEtablissements({ data }: { data: { label: string; valeur: num
           <XAxis dataKey="label" tick={axisStyle} tickLine={false} axisLine={{ stroke: "#e9dcbe" }} interval={0} angle={data.length > 5 ? -20 : 0} textAnchor={data.length > 5 ? "end" : "middle"} height={data.length > 5 ? 50 : 30} />
           <YAxis tick={axisStyle} tickLine={false} axisLine={false} allowDecimals={false} />
           <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#f0f8f3" }} />
-          <Bar dataKey="valeur" name="Élèves" fill="#246a48" radius={[6, 6, 0, 0]} maxBarSize={44} />
+          <Bar isAnimationActive={impression ? false : undefined} dataKey="valeur" name="Élèves" fill="#246a48" radius={[6, 6, 0, 0]} maxBarSize={44} />
         </BarChart>
       </ResponsiveContainer>
     </motion.div>

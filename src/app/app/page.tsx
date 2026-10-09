@@ -86,7 +86,7 @@ async function donneesAdmin() {
     if (e) elevesParEtab.set(e, (elevesParEtab.get(e) ?? 0) + g._count._all);
   }
   const barEtab = etabList
-    .map((e) => ({ label: e.nom.length > 18 ? e.nom.slice(0, 17) + "…" : e.nom, valeur: elevesParEtab.get(e.id) ?? 0 }))
+    .map((e) => ({ label: e.nom.length > 18 ? e.nom.slice(0, 17) + "…" : e.nom, nomComplet: e.nom, valeur: elevesParEtab.get(e.id) ?? 0 }))
     .sort((a, b) => b.valeur - a.valeur)
     .slice(0, 8);
 
@@ -217,7 +217,7 @@ export default async function TableauDeBordPage() {
           </Reveal>
 
           {/* KPI cliquables */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mobile:grid-cols-2 mobile:gap-3">
             <KpiCard index={0} libelle="Comptes" valeur={data.kpi.utilisateurs} icone={<Icons.Users size={22} />} href="/app/systeme/comptes" />
             <KpiCard index={1} libelle="Établissements" valeur={data.kpi.etablissements} ton="gold" icone={<Icons.School size={22} />} href="/app/systeme/etablissements" />
             <KpiCard index={2} libelle="Classes" valeur={data.kpi.classes} icone={<Icons.GraduationCap size={22} />} href="/app/statistiques/etablissement" />
@@ -262,7 +262,7 @@ export default async function TableauDeBordPage() {
                   <h3 className="flex items-center gap-2 font-display text-base font-bold text-forest-900">
                     <Icons.Activity size={18} /> Activité récente
                   </h3>
-                  <Link href="/app/systeme/journal-activite" className="text-xs font-semibold text-forest-700 hover:text-forest-900">
+                  <Link href="/app/systeme/journal-activite" className="text-xs font-semibold text-forest-700 hover:text-forest-900 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:px-2 mobile:text-sm">
                     Journal
                   </Link>
                 </div>
@@ -274,8 +274,10 @@ export default async function TableauDeBordPage() {
                       <li key={j.id} className="flex items-start gap-2.5 text-sm">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400" />
                         <span className="min-w-0">
-                          <span className="block text-forest-900">{LIBELLE_ACTION[j.action] ?? j.action}</span>
-                          <span className="block text-xs text-ink-700/50">
+                          {/* Téléphone : un code d'action brut (« modele.operation », insécable) se coupe au lieu d'élargir la page. */}
+                          <span className="block text-forest-900 mobile:wrap-anywhere">{LIBELLE_ACTION[j.action] ?? j.action}</span>
+                          {/* Téléphone : une adresse e-mail longue (sans espace) se coupe au lieu de déborder de la carte. */}
+                          <span className="block text-xs text-ink-700/50 mobile:wrap-anywhere mobile:text-ink-700/70">
                             {j.acteurEmail ?? "—"} · {new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(j.creeLe)}
                           </span>
                         </span>

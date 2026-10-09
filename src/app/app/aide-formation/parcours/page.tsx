@@ -34,7 +34,7 @@ export default async function ParcoursListePage() {
       <PageHeader
         titre="Parcours de formation"
         description="Suivez des parcours structurés de plusieurs cours et décrochez des badges à la clé."
-        action={estAdmin ? <Link href={`${BASE}/gestion/parcours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Settings2 size={15} /> Gérer</Link> : undefined}
+        action={estAdmin ? <Link href={`${BASE}/gestion/parcours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11"><Settings2 size={15} /> Gérer</Link> : undefined}
       />
 
       {/* Mes badges */}
@@ -63,7 +63,8 @@ export default async function ParcoursListePage() {
               <Link key={p.id} href={`${BASE}/parcours/${p.slug}`} className="group flex flex-col rounded-3xl border border-cream-200 bg-white p-5 shadow-soft transition-colors hover:border-forest-200">
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-forest-50 text-forest-700"><Route size={20} /></span>
-                  {p.badge && <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${classeBadge(p.badge.couleur)}`}><Award size={11} /> {p.badge.nom}</span>}
+                  {/* Téléphone : pastille au plancher de 15 px des formations. */}
+                  {p.badge && <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 mobile:text-[0.9375rem] ${classeBadge(p.badge.couleur)}`}><Award size={11} /> {p.badge.nom}</span>}
                 </div>
                 <h3 className="font-display text-base font-bold text-forest-900 group-hover:text-forest-700">{p.titre}</h3>
                 {p.description && <p className="mt-1 line-clamp-2 text-sm text-ink-700/70">{p.description}</p>}

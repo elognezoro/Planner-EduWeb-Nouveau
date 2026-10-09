@@ -65,11 +65,11 @@ export function ImportClient() {
       {/* Source */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700">
+          <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 mobile:h-11">
             <FileUp size={15} /> Choisir un fichier CSV
             <input type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; lireFichier(f); }} />
           </label>
-          <button type="button" onClick={telechargerModele} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-2 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+          <button type="button" onClick={telechargerModele} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-2 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-4">
             <Download size={14} /> Modèle CSV
           </button>
           {nomFichier && <span className="text-xs text-ink-700/60">{nomFichier}</span>}
@@ -82,7 +82,7 @@ export function ImportClient() {
             onChange={(e) => { setTexte(e.target.value); setNomFichier(""); }}
             rows={5}
             placeholder="cours;categorie;niveau;description;lecon;type;contenu;duree"
-            className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
           />
         </div>
 

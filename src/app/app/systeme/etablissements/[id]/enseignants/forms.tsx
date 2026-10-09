@@ -47,7 +47,7 @@ export function AjoutEnseignantForm({ etablissementId }: { etablissementId: stri
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-6">Ajouter l&apos;utilisateur</SubmitButton>
+      <SubmitButton className="w-auto px-6 mobile:w-full">Ajouter l&apos;utilisateur</SubmitButton>
     </form>
   );
 }
@@ -64,7 +64,7 @@ export function GenererComptesEnseignantsForm({ etablissementId }: { etablisseme
         sur l&apos;emploi du temps et pourront ensuite modifier leurs coordonnées. Opération sans
         risque : elle ne crée que les comptes manquants.
       </p>
-      <SubmitButton className="inline-flex w-auto items-center gap-2 px-6">
+      <SubmitButton className="inline-flex w-auto items-center gap-2 px-6 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:py-2">
         <UsersRound size={16} /> Générer les comptes depuis les effectifs
       </SubmitButton>
     </form>
@@ -86,7 +86,7 @@ export function ImportCSVForm({ etablissementId }: { etablissementId: string }) 
         required
         className="block w-full text-sm text-ink-700 file:mr-3 file:rounded-full file:border-0 file:bg-forest-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-forest-800"
       />
-      <SubmitButton className="w-auto px-6">Importer la cohorte</SubmitButton>
+      <SubmitButton className="w-auto px-6 mobile:w-full">Importer la cohorte</SubmitButton>
     </form>
   );
 }

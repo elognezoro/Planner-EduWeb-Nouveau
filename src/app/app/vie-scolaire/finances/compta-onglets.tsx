@@ -190,13 +190,14 @@ export function OngletComptabilite({
         }}
       />
       <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
-        <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft">
+        {/* Téléphone : sous-onglets sur une ligne qui défile au doigt (au lieu de murs de pastilles). */}
+        <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft rangee-defilante-mobile mobile:w-full">
           {onglets.map((o) => (
             <button
               key={o.cle}
               type="button"
               onClick={() => setSousOnglet(o.cle)}
-              className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors ${
+              className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors mobile:h-11 ${
                 sousOnglet === o.cle ? "bg-forest-800 text-cream-50" : "text-ink-700/70 hover:bg-cream-100"
               }`}
             >
@@ -204,10 +205,11 @@ export function OngletComptabilite({
             </button>
           ))}
         </div>
+        {/* Téléphone : pas d'impression d'états comptables depuis le téléphone (bouton masqué). */}
         <button
           type="button"
           onClick={() => window.print()}
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:hidden"
         >
           <Printer size={15} /> Imprimer
         </button>
@@ -306,7 +308,7 @@ function GrandLivre({ ecritures }: { ecritures: Ecriture[] }) {
         <p className="text-sm text-ink-700/60">Aucune écriture sur ce compte.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[640px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Date</th>
@@ -319,20 +321,20 @@ function GrandLivre({ ecritures }: { ecritures: Ecriture[] }) {
             <tbody className="divide-y divide-cream-100">
               {lignes.map((l) => (
                 <tr key={l.id}>
-                  <td className="whitespace-nowrap py-2 pr-2">{formatDate(l.date)}</td>
-                  <td className="py-2 pr-2">{l.libelle}</td>
-                  <td className="py-2 pr-2 text-right">{l.d ? fcfa(l.d) : "—"}</td>
-                  <td className="py-2 pr-2 text-right">{l.c ? fcfa(l.c) : "—"}</td>
-                  <td className={`py-2 text-right font-semibold ${l.solde >= 0 ? "text-forest-800" : "text-red-700"}`}>{fcfa(l.solde)}</td>
+                  <td data-label="Date" className="whitespace-nowrap py-2 pr-2">{formatDate(l.date)}</td>
+                  <td data-label="Libellé" className="py-2 pr-2">{l.libelle}</td>
+                  <td data-label="Débit" className="py-2 pr-2 text-right">{l.d ? fcfa(l.d) : "—"}</td>
+                  <td data-label="Crédit" className="py-2 pr-2 text-right">{l.c ? fcfa(l.c) : "—"}</td>
+                  <td data-label="Solde cumulé" className={`py-2 text-right font-semibold ${l.solde >= 0 ? "text-forest-800" : "text-red-700"}`}>{fcfa(l.solde)}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
+            <tfoot className="mobile:block">
               <tr className="border-t border-cream-200 font-bold text-forest-900">
                 <td className="py-2 pr-2" colSpan={2}>Totaux</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totalDebit)}</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totalCredit)}</td>
-                <td className="py-2 text-right">{fcfa(totalDebit - totalCredit)}</td>
+                <td data-label="Débit" className="py-2 pr-2 text-right">{fcfa(totalDebit)}</td>
+                <td data-label="Crédit" className="py-2 pr-2 text-right">{fcfa(totalCredit)}</td>
+                <td data-label="Solde" className="py-2 text-right">{fcfa(totalDebit - totalCredit)}</td>
               </tr>
             </tfoot>
           </table>
@@ -384,7 +386,7 @@ function Balance({ ecritures }: { ecritures: Ecriture[] }) {
         <p className="text-sm text-ink-700/60">Aucune écriture enregistrée.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[720px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">N°</th>
@@ -398,22 +400,22 @@ function Balance({ ecritures }: { ecritures: Ecriture[] }) {
             <tbody className="divide-y divide-cream-100">
               {lignes.map((l) => (
                 <tr key={l.code}>
-                  <td className="py-2 pr-2 font-mono text-xs text-ink-700/70">{l.code}</td>
-                  <td className="py-2 pr-2 font-medium text-forest-900">{l.libelle}</td>
-                  <td className="py-2 pr-2 text-right">{fcfa(l.debit)}</td>
-                  <td className="py-2 pr-2 text-right">{fcfa(l.credit)}</td>
-                  <td className="py-2 pr-2 text-right text-forest-700">{l.soldeDebiteur ? fcfa(l.soldeDebiteur) : "—"}</td>
-                  <td className="py-2 text-right text-red-700">{l.soldeCrediteur ? fcfa(l.soldeCrediteur) : "—"}</td>
+                  <td data-label="N°" className="py-2 pr-2 font-mono text-xs text-ink-700/70">{l.code}</td>
+                  <td data-label="Intitulé" className="py-2 pr-2 font-medium text-forest-900">{l.libelle}</td>
+                  <td data-label="Total débits" className="py-2 pr-2 text-right">{fcfa(l.debit)}</td>
+                  <td data-label="Total crédits" className="py-2 pr-2 text-right">{fcfa(l.credit)}</td>
+                  <td data-label="Solde débiteur" className="py-2 pr-2 text-right text-forest-700">{l.soldeDebiteur ? fcfa(l.soldeDebiteur) : "—"}</td>
+                  <td data-label="Solde créditeur" className="py-2 text-right text-red-700">{l.soldeCrediteur ? fcfa(l.soldeCrediteur) : "—"}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
+            <tfoot className="mobile:block">
               <tr className="border-t border-cream-200 font-bold text-forest-900">
                 <td className="py-2 pr-2" colSpan={2}>TOTAUX</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totaux.debit)}</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totaux.credit)}</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totaux.soldeDebiteur)}</td>
-                <td className="py-2 text-right">{fcfa(totaux.soldeCrediteur)}</td>
+                <td data-label="Total débits" className="py-2 pr-2 text-right">{fcfa(totaux.debit)}</td>
+                <td data-label="Total crédits" className="py-2 pr-2 text-right">{fcfa(totaux.credit)}</td>
+                <td data-label="Solde débiteur" className="py-2 pr-2 text-right">{fcfa(totaux.soldeDebiteur)}</td>
+                <td data-label="Solde créditeur" className="py-2 text-right">{fcfa(totaux.soldeCrediteur)}</td>
               </tr>
             </tfoot>
           </table>
@@ -955,7 +957,7 @@ export function OngletRapprochement({
           <p className="text-sm text-ink-700/60">Aucun relevé enregistré.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[320px] text-sm">
+            <table className="w-full min-w-[320px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Mois</th>
@@ -966,7 +968,7 @@ export function OngletRapprochement({
                 {releves.map((r) => (
                   <tr key={r.mois}>
                     <td className="py-2 pr-2 font-medium text-forest-900">{r.mois}</td>
-                    <td className="py-2 text-right">{fcfa(r.solde)}</td>
+                    <td data-label="Solde du relevé" className="py-2 text-right">{fcfa(r.solde)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -984,7 +986,7 @@ export function OngletRapprochement({
           <p className="text-sm text-ink-700/60">Aucune écriture bancaire.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-sm">
+            <table className="w-full min-w-[680px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Date</th>
@@ -1021,13 +1023,13 @@ function LigneEcritureBancaire({ ecriture, peutEcrire }: { ecriture: EcritureBan
 
   return (
     <tr>
-      <td className="whitespace-nowrap py-2 pr-2">{formatDate(ecriture.date)}</td>
-      <td className="py-2 pr-2">{ecriture.libelle}</td>
-      <td className="py-2 pr-2 text-xs text-ink-700/70">{LIBELLE_MODE[ecriture.mode] ?? ecriture.mode}</td>
-      <td className={`py-2 pr-2 text-right font-medium ${ecriture.sens === "recette" ? "text-forest-700" : "text-red-700"}`}>
+      <td data-label="Date" className="whitespace-nowrap py-2 pr-2">{formatDate(ecriture.date)}</td>
+      <td data-label="Libellé" className="py-2 pr-2">{ecriture.libelle}</td>
+      <td data-label="Mode" className="py-2 pr-2 text-xs text-ink-700/70">{LIBELLE_MODE[ecriture.mode] ?? ecriture.mode}</td>
+      <td data-label="Montant" className={`py-2 pr-2 text-right font-medium ${ecriture.sens === "recette" ? "text-forest-700" : "text-red-700"}`}>
         {ecriture.sens === "recette" ? "+" : "−"}{fcfa(ecriture.montant)}
       </td>
-      <td className="py-2 text-right">
+      <td data-label="Pointé" className="py-2 text-right">
         <button
           type="button"
           onClick={basculer}
@@ -1199,7 +1201,7 @@ function BlocLignesBudget({
     <div>
       <h3 className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-forest-900">{titre}</h3>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[680px] text-sm">
+        <table className="w-full min-w-[680px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead>
             <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
               <th className="py-1.5 pr-2">Catégorie</th>
@@ -1225,7 +1227,7 @@ function BlocLignesBudget({
                       </span>
                     )}
                   </td>
-                  <td className="py-2 pr-2 text-right">
+                  <td data-label="Prévu" className="py-2 pr-2 text-right">
                     {l.automatique ? (
                       <span className="text-xs italic text-ink-700/50">Automatique</span>
                     ) : (
@@ -1240,9 +1242,9 @@ function BlocLignesBudget({
                       />
                     )}
                   </td>
-                  <td className="py-2 pr-2 text-right">{fcfa(r)}</td>
-                  <td className="py-2 pr-2 text-right text-xs text-ink-700/60">{taux === null ? "—" : `${taux}%`}</td>
-                  <td className="py-2">
+                  <td data-label="Réalisé" className="py-2 pr-2 text-right">{fcfa(r)}</td>
+                  <td data-label="Taux" className="py-2 pr-2 text-right text-xs text-ink-700/60">{taux === null ? "—" : `${taux}%`}</td>
+                  <td data-label="Exécution" className="py-2">
                     <div className="h-2 w-full overflow-hidden rounded-full bg-cream-100">
                       <div
                         className={`h-full ${depasse ? "bg-red-500" : "bg-forest-500"}`}

@@ -66,14 +66,14 @@ export default async function AttestationPage({ params }: { params: Promise<{ sl
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
-      <div className="flex items-center justify-between print:hidden">
-        <Link href={`${BASE}/cours/${slug}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour au cours</Link>
+      <div className="flex items-center justify-between print:hidden mobile:[&>button]:w-full mobile:[&>button]:justify-center">
+        <Link href={`${BASE}/cours/${slug}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Retour au cours</Link>
         <BoutonImprimerAttestation />
       </div>
 
       {/* Attestation */}
-      <div className="relative overflow-hidden rounded-3xl border-2 border-gold-300 bg-white p-8 shadow-soft print:rounded-none print:border print:shadow-none sm:p-12">
-        <div className="pointer-events-none absolute inset-0 rounded-3xl border-[6px] border-forest-100 [margin:14px] print:hidden" />
+      <div className="relative overflow-hidden rounded-3xl border-2 border-gold-300 bg-white p-8 shadow-soft print:rounded-none print:border print:shadow-none sm:p-12 mobile:p-5">
+        <div className="pointer-events-none absolute inset-0 rounded-3xl border-[6px] border-forest-100 [margin:14px] print:hidden mobile:[margin:8px] mobile:border-4" />
         <div className="relative space-y-6 text-center">
           <div className="flex flex-col items-center gap-2">
             {/* Logo officiel EduWeb Planner (public/logo.png). */}

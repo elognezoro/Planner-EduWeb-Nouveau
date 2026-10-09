@@ -20,10 +20,12 @@ export function WidgetAssociation({ lefts, droites, valeur, onChange }: {
   return (
     <div className="space-y-2">
       {lefts.map((l) => (
-        <div key={l.id} className="flex items-center gap-2">
-          <span className="min-w-0 flex-1 rounded-lg bg-cream-100 px-3 py-2 text-sm text-ink-800">{l.texte}</span>
-          <span className="text-ink-700/40">→</span>
-          <select value={rep.get(l.id) ?? ""} onChange={(e) => set(l.id, e.target.value)} className={selBase}>
+        // Téléphone : l'élément au-dessus, la liste déroulante pleine largeur dessous (deux moitiés
+        // de ~100 px n'affichaient que « — Relier… » et cassaient l'élément mot par mot).
+        <div key={l.id} className="flex items-center gap-2 mobile:flex-col mobile:items-stretch mobile:gap-1">
+          <span className="min-w-0 flex-1 rounded-lg bg-cream-100 px-3 py-2 text-sm text-ink-800 mobile:flex-none">{l.texte}</span>
+          <span className="text-ink-700/40 mobile:hidden">→</span>
+          <select value={rep.get(l.id) ?? ""} onChange={(e) => set(l.id, e.target.value)} className={`${selBase} mobile:h-11 mobile:w-full mobile:flex-none`}>
             <option value="">— Relier à —</option>
             {droites.map((d, i) => <option key={i} value={d}>{d}</option>)}
           </select>
@@ -46,7 +48,7 @@ export function WidgetTexteTrous({ nbTrous, valeur, onChange }: { nbTrous: numbe
       {Array.from({ length: nbTrous }, (_, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="w-16 shrink-0 text-xs font-semibold text-ink-700/60">Trou {i + 1}</span>
-          <input value={valeur[i] ?? ""} onChange={(e) => set(i, e.target.value)} placeholder={`Réponse ${i + 1}`} className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400" />
+          <input value={valeur[i] ?? ""} onChange={(e) => set(i, e.target.value)} placeholder={`Réponse ${i + 1}`} className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0" />
         </div>
       ))}
     </div>
@@ -67,12 +69,13 @@ export function WidgetRemiseOrdre({ items, onChange }: { items: { id: string; te
   return (
     <div className="space-y-1.5">
       {ordre.map((id, idx) => (
-        <div key={id} className="flex items-center gap-2 rounded-lg border border-cream-200 bg-white px-3 py-2">
+        <div key={id} className="flex items-center gap-2 rounded-lg border border-cream-200 bg-white px-3 py-2 mobile:py-1.5 mobile:pr-1.5">
           <span className="w-5 text-center text-xs font-bold text-ink-700/40">{idx + 1}</span>
           <span className="min-w-0 flex-1 text-sm text-ink-800">{texteDe(id)}</span>
-          <div className="flex flex-col">
-            <button type="button" onClick={() => bouger(idx, -1)} disabled={idx === 0} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-30"><ChevronUp size={14} /></button>
-            <button type="button" onClick={() => bouger(idx, 1)} disabled={idx === ordre.length - 1} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-30"><ChevronDown size={14} /></button>
+          {/* Téléphone : flèches côte à côte de 44 px (cibles de ~18 px empilées, quasi intouchables). */}
+          <div className="flex flex-col mobile:shrink-0 mobile:flex-row mobile:gap-1">
+            <button type="button" onClick={() => bouger(idx, -1)} disabled={idx === 0} aria-label="Monter" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-30 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200 mobile:text-ink-700/60"><ChevronUp size={14} className="mobile:size-[18px]" /></button>
+            <button type="button" onClick={() => bouger(idx, 1)} disabled={idx === ordre.length - 1} aria-label="Descendre" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-30 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200 mobile:text-ink-700/60"><ChevronDown size={14} className="mobile:size-[18px]" /></button>
           </div>
         </div>
       ))}

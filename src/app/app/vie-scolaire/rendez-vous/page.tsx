@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { DemandeRdvForm, ActionsRdv } from "./components";
+import { FormulaireReplieMobile } from "../_mobile/formulaire-replie";
 
 export const metadata: Metadata = { title: "Rendez-vous" };
 export const dynamic = "force-dynamic";
@@ -53,12 +54,15 @@ export default async function RendezVousPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader titre="Rendez-vous" description="Prenez et gérez vos rendez-vous avec le personnel et les familles." />
 
-      <Card>
-        <h2 className="mb-4 flex items-center gap-2 font-display text-base font-bold text-forest-900">
-          <CalendarClock size={18} /> Nouvelle demande
-        </h2>
-        <DemandeRdvForm />
-      </Card>
+      {/* Téléphone : formulaire replié, les demandes reçues passent au premier écran. */}
+      <FormulaireReplieMobile libelle="Demander un rendez-vous">
+        <Card>
+          <h2 className="mb-4 flex items-center gap-2 font-display text-base font-bold text-forest-900">
+            <CalendarClock size={18} /> Nouvelle demande
+          </h2>
+          <DemandeRdvForm />
+        </Card>
+      </FormulaireReplieMobile>
 
       <Card>
         <h2 className="mb-3 font-display text-base font-bold text-forest-900">Demandes reçues</h2>
@@ -75,7 +79,7 @@ export default async function RendezVousPage() {
                     <p className="text-xs text-ink-700/65">{r.motif}</p>
                     <p className="mt-0.5 text-xs text-ink-700/50">{dateHeure(r.date)}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mobile:w-full mobile:flex-wrap">
                     <Badge ton={st.ton}>{st.texte}</Badge>
                     {r.statut === "demande" && <ActionsRdv id={r.id} role="destinataire" />}
                   </div>
@@ -101,7 +105,7 @@ export default async function RendezVousPage() {
                     <p className="text-xs text-ink-700/65">{r.motif}</p>
                     <p className="mt-0.5 text-xs text-ink-700/50">{dateHeure(r.date)}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mobile:w-full mobile:flex-wrap">
                     <Badge ton={st.ton}>{st.texte}</Badge>
                     {(r.statut === "demande" || r.statut === "confirme") && <ActionsRdv id={r.id} role="demandeur" />}
                   </div>

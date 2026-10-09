@@ -399,7 +399,7 @@ export function GenerateurComptes() {
         }}
         onDragLeave={() => setSurvol(false)}
         onDrop={onDrop}
-        className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
+        className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors mobile:px-4 mobile:py-6 ${
           survol ? "border-forest-400 bg-forest-50/60" : "border-cream-300 bg-cream-50/40"
         }`}
       >
@@ -419,13 +419,18 @@ export function GenerateurComptes() {
         ) : (
           <UploadCloud className="mb-2 text-forest-500" size={30} />
         )}
-        <p className="text-base font-semibold text-forest-900">
+        <p className="text-base font-semibold text-forest-900 mobile:hidden">
           Glissez un fichier ici, ou <span className="underline">parcourez</span>
         </p>
+        {/* Téléphone : pas de glisser-déposer au doigt — un appui ouvre le choix du fichier. */}
+        <p className="text-base font-semibold text-forest-900 lg:hidden print:hidden">
+          Touchez pour choisir un fichier
+        </p>
         <p className="mt-1 text-sm text-ink-700/60">Excel (.xlsx, .xls), Word (.docx), CSV ou texte</p>
+        {/* Téléphone : un nom de fichier insécable (tirets bas) se coupe au lieu de déborder. */}
         {fichierNom && (
-          <span className="pointer-events-none mt-3 inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-3 py-1 text-sm font-medium text-forest-800">
-            <FileSpreadsheet size={13} /> {fichierNom} · {lignes.length} ligne(s)
+          <span className="pointer-events-none mt-3 inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-3 py-1 text-sm font-medium text-forest-800 mobile:max-w-full mobile:rounded-2xl mobile:[overflow-wrap:anywhere]">
+            <FileSpreadsheet size={13} className="mobile:shrink-0" /> {fichierNom} · {lignes.length} ligne(s)
           </span>
         )}
       </div>
@@ -441,9 +446,9 @@ export function GenerateurComptes() {
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Correspondance des colonnes sources */}
             <section className="space-y-3 rounded-2xl border border-cream-200 bg-white p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mobile:flex-wrap mobile:gap-x-3">
                 <h3 className="text-base font-bold text-forest-900">Colonnes du fichier</h3>
-                <label className="flex items-center gap-1.5 text-sm text-ink-700/70">
+                <label className="flex items-center gap-1.5 text-sm text-ink-700/70 mobile:min-h-11">
                   <input type="checkbox" checked={avecEntete} onChange={(e) => setAvecEntete(e.target.checked)} />
                   1re ligne = en-tête
                 </label>
@@ -456,7 +461,7 @@ export function GenerateurComptes() {
                     type="button"
                     aria-pressed={modeNom === m}
                     onClick={() => setModeNom(m)}
-                    className={`rounded-full border px-3 py-1.5 font-medium transition-colors ${
+                    className={`rounded-full border px-3 py-1.5 font-medium transition-colors mobile:min-h-11 mobile:px-4 ${
                       modeNom === m ? "border-transparent bg-forest-700 text-cream-50" : "border-cream-300 text-ink-700/70 hover:border-forest-300"
                     }`}
                   >
@@ -511,7 +516,7 @@ export function GenerateurComptes() {
 
               <div className="flex flex-wrap gap-x-4 gap-y-2">
                 {CLES_SORTIE.map((c) => (
-                  <label key={c} className="flex items-center gap-1.5 text-sm text-ink-700/80">
+                  <label key={c} className="flex items-center gap-1.5 text-sm text-ink-700/80 mobile:min-h-11">
                     <input
                       type="checkbox"
                       checked={inclure[c]}
@@ -615,7 +620,7 @@ export function GenerateurComptes() {
                   <button
                     type="button"
                     onClick={() => setColonnesPerso((c) => [...c, { entete: "", valeur: "" }])}
-                    className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-sm font-medium text-forest-700 hover:bg-forest-50"
+                    className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-sm font-medium text-forest-700 hover:bg-forest-50 mobile:min-h-11 mobile:px-4"
                   >
                     <Plus size={13} /> Ajouter
                   </button>
@@ -631,19 +636,19 @@ export function GenerateurComptes() {
                         onChange={(e) => setColonnesPerso((arr) => arr.map((x, j) => (j === i ? { ...x, entete: e.target.value } : x)))}
                         placeholder="En-tête (ex : établissement)"
                         aria-label={`En-tête de la colonne personnalisée ${i + 1}`}
-                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0"
                       />
                       <input
                         value={c.valeur}
                         onChange={(e) => setColonnesPerso((arr) => arr.map((x, j) => (j === i ? { ...x, valeur: e.target.value } : x)))}
                         placeholder="Valeur"
                         aria-label={`Valeur de la colonne personnalisée ${i + 1}`}
-                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0"
                       />
                       <button
                         type="button"
                         onClick={() => setColonnesPerso((arr) => arr.filter((_, j) => j !== i))}
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
                         aria-label="Retirer"
                       >
                         <Trash2 size={14} />
@@ -686,13 +691,13 @@ export function GenerateurComptes() {
             </p>
           )}
 
-          {/* Actions */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Actions — téléphone : empilées pleine largeur, hauteur libre (libellés longs en 18 px). */}
+          <div className="flex flex-wrap items-center gap-2 mobile:flex-col mobile:items-stretch">
             <button
               type="button"
               onClick={telecharger}
               disabled={!telechargeable}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-base font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-base font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-auto mobile:min-h-12 mobile:justify-center mobile:py-2.5 mobile:leading-tight"
             >
               <Download size={16} /> Télécharger le CSV ({sortie?.rows.length ?? 0})
             </button>
@@ -700,7 +705,7 @@ export function GenerateurComptes() {
               <button
                 type="button"
                 onClick={() => setNonceMdp((x) => x + 1)}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-base font-semibold text-forest-800 hover:bg-forest-50"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-base font-semibold text-forest-800 hover:bg-forest-50 mobile:h-auto mobile:min-h-12 mobile:justify-center mobile:py-2.5 mobile:leading-tight"
               >
                 <RefreshCw size={15} /> Régénérer les mots de passe
               </button>
@@ -708,7 +713,7 @@ export function GenerateurComptes() {
             <button
               type="button"
               onClick={demanderReinit}
-              className={`inline-flex h-11 items-center gap-1.5 rounded-full border px-5 text-base font-medium ${
+              className={`inline-flex h-11 items-center gap-1.5 rounded-full border px-5 text-base font-medium mobile:h-auto mobile:min-h-12 mobile:justify-center mobile:py-2.5 mobile:leading-tight ${
                 confirmerReinit
                   ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
                   : "border-cream-300 text-ink-700/70 hover:bg-cream-100"

@@ -67,7 +67,7 @@ export function VerrouConfig({
           <input type="hidden" name="etablissementId" value={etablissementId} />
           <input type="hidden" name="verrouiller" value={verrouillee ? "0" : "1"} />
           <SubmitButton
-            className={`w-auto px-5 ${verrouillee ? "" : "!bg-gradient-to-br !from-gold-300 !to-gold-500 !text-forest-950"}`}
+            className={`w-auto px-5 mobile:w-full ${verrouillee ? "" : "!bg-gradient-to-br !from-gold-300 !to-gold-500 !text-forest-950"}`}
           >
             {verrouillee ? (
               <>

@@ -3,6 +3,7 @@
 import { Fragment, useState, useTransition } from "react";
 import { Move, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { deplacerCreneau } from "./actions";
+import { EdtJourMobile } from "@/components/app/mobile/edt-jour-mobile";
 
 export interface CreneauPlain {
   id: string;
@@ -26,6 +27,7 @@ export function GrilleInteractive({
   couleurs,
   horaires,
   bandes,
+  peutDeplacer = false,
 }: {
   classeId: string;
   creneaux: CreneauPlain[];
@@ -35,6 +37,9 @@ export function GrilleInteractive({
   horaires?: { debut: string; fin: string }[];
   /** Bandes de pause (RÉCRÉATION / PAUSE DÉJEUNER) insérées après certaines périodes. */
   bandes?: { apresPeriode: number; libelle: string }[];
+  /** Profil autorisé à déplacer un cours (gestionnaire, hors aperçu) : seul à voir, sur
+   *  téléphone, l'invitation à le faire depuis un ordinateur. */
+  peutDeplacer?: boolean;
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [survol, setSurvol] = useState<string | null>(null);
@@ -90,7 +95,26 @@ export function GrilleInteractive({
 
   return (
     <div className="space-y-3 edt-grille-wrap">
-      <p className="flex items-center gap-2 text-xs text-ink-700/60 print:hidden">
+      {/* Téléphone : la journée en cartes (la grille de la semaine reste celle de l'ordinateur
+          et de l'impression). Le glisser-déposer, lui, se fait sur un grand écran. */}
+      <div className="lg:hidden print:hidden">
+        <EdtJourMobile
+          seances={dansClasse}
+          jours={jours}
+          horaires={horaires}
+          bandes={bandes}
+          couleurs={couleurs}
+          creneauxParJour={N}
+          vue="classe"
+        />
+        {peutDeplacer && (
+          <p className="mt-4 flex items-start gap-2 text-xs text-ink-700/70">
+            <Move aria-hidden size={14} className="mt-0.5 shrink-0" /> Pour déplacer un cours, ouvrez cette page sur un ordinateur.
+          </p>
+        )}
+      </div>
+
+      <p className="flex items-center gap-2 text-xs text-ink-700/60 print:hidden mobile:hidden">
         <Move size={14} /> Glissez un cours vers une case libre pour l&apos;ajuster — les conflits sont
         re-vérifiés en temps réel.
       </p>
@@ -102,7 +126,7 @@ export function GrilleInteractive({
         </div>
       )}
 
-      <div className="relative overflow-x-auto">
+      <div className="relative overflow-x-auto mobile:hidden">
         {pending && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/40">
             <Loader2 className="animate-spin text-forest-600" />

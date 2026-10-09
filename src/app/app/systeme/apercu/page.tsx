@@ -40,15 +40,15 @@ export default async function ApercuPage() {
       />
 
       {u.apercuActif && (
-        <Card className="mb-6 flex flex-col gap-3 border-gold-300/70 bg-gold-50 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="mb-6 flex flex-col gap-3 border-gold-300/70 bg-gold-50 sm:flex-row sm:items-center sm:justify-between mobile:flex-col mobile:items-stretch mobile:p-4">
           <p className="flex items-center gap-2 text-sm text-gold-900">
             <Eye size={18} className="text-gold-600" />
             Aperçu actif en tant que <strong>{T(u.libelleRoleActif)}</strong>.
           </p>
-          <form action={quitterApercu}>
+          <form action={quitterApercu} className="mobile:w-full">
             <button
               type="submit"
-              className="inline-flex h-9 items-center rounded-full bg-forest-800 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-700"
+              className="inline-flex h-9 items-center rounded-full bg-forest-800 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-700 mobile:h-11 mobile:w-full mobile:justify-center mobile:text-sm"
             >
               Quitter l&apos;aperçu
             </button>
@@ -56,7 +56,8 @@ export default async function ApercuPage() {
         </Card>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      {/* Téléphone : liste compacte ci-dessous (≈ 34 cartes de 190 px faisaient ~6 500 px). */}
+      <div className="grid gap-4 sm:grid-cols-2 mobile:hidden">
         {roles.map((id) => {
           const role = ROLES[id];
           const actif = u.apercuActif && u.roleActif === id;
@@ -98,6 +99,48 @@ export default async function ApercuPage() {
           );
         })}
       </div>
+
+      {/* Téléphone : une rangée par rôle (libellé, portée, description complète) ; un appui
+          envoie le même formulaire activerApercu que le bouton « Prévisualiser » des cartes. */}
+      <Card className="overflow-hidden p-0 lg:hidden print:hidden">
+        <ul className="divide-y divide-cream-100">
+          {roles.map((id) => {
+            const role = ROLES[id];
+            const actif = u.apercuActif && u.roleActif === id;
+            return (
+              <li key={id}>
+                <form action={activerApercu}>
+                  <input type="hidden" name="role" value={id} />
+                  <button
+                    type="submit"
+                    disabled={actif}
+                    className={`flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left active:bg-cream-50 ${actif ? "bg-gold-50" : ""}`}
+                  >
+                    {/* Nom accessible = texte visible (libellé, portée, description), préfixé de l'action. */}
+                    {!actif && <span className="sr-only">Prévisualiser : </span>}
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="font-semibold text-forest-900">{T(role.libelle)}</span>
+                        <span className="rounded-full bg-cream-100 px-2 py-0.5 text-xs font-medium text-forest-700">
+                          {T(libellePortee[role.portee])}
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block text-sm text-ink-700/70">{T(role.description)}</span>
+                    </span>
+                    {actif ? (
+                      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-forest-700">
+                        <Check size={14} /> En cours
+                      </span>
+                    ) : (
+                      <Eye size={18} className="shrink-0 text-forest-600" aria-hidden />
+                    )}
+                  </button>
+                </form>
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
     </div>
   );
 }

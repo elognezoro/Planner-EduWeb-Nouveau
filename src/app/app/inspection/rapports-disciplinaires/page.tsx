@@ -185,7 +185,7 @@ export default async function RapportsDisciplinairesPage({
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:*:last:odd:col-span-2">
             <StatCard libelle="Disciplines couvertes" valeur={kpis.disciplines} icone={<BookOpenCheck size={22} />} />
             <StatCard libelle="Visites concernées" valeur={kpis.visites} icone={<Stamp size={22} />} ton="gold" />
             <StatCard libelle="Recommandations à suivre" valeur={kpis.recosOuvertes} icone={<ListChecks size={22} />} />
@@ -199,7 +199,8 @@ export default async function RapportsDisciplinairesPage({
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-sm">
+                {/* Téléphone : une carte par discipline (« libellé : valeur »). */}
+                <table className="tableau-cartes-mobile w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-cream-200 text-left text-xs text-ink-700/65">
                       <th className="py-2.5 pr-3 font-semibold">Discipline</th>
@@ -211,10 +212,10 @@ export default async function RapportsDisciplinairesPage({
                   <tbody>
                     {lignes.map((l) => (
                       <tr key={l.discipline} className="border-b border-cream-100 last:border-0">
-                        <td className="py-2.5 pr-3 font-medium text-forest-900">{l.discipline}</td>
-                        <td className="px-2 py-2.5 text-right text-ink-700/80">{l.visites}</td>
-                        <td className="px-2 py-2.5 text-right text-gold-700">{l.recosOuvertes}</td>
-                        <td className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.moyenne ?? "—"}</td>
+                        <td className="py-2.5 pr-3 font-medium text-forest-900 mobile:font-semibold">{l.discipline}</td>
+                        <td data-label="Visites" className="px-2 py-2.5 text-right text-ink-700/80">{l.visites}</td>
+                        <td data-label="Reco. à suivre" className="px-2 py-2.5 text-right text-gold-700">{l.recosOuvertes}</td>
+                        <td data-label="Moy. /20" className="px-2 py-2.5 text-right font-semibold text-forest-800">{l.moyenne ?? "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -277,7 +278,7 @@ export default async function RapportsDisciplinairesPage({
                   href={`/app/inspection/rapports-disciplinaires/rapport-word?apfc=${encodeURIComponent(
                     apfcChoisie.id,
                   )}&discipline=${encodeURIComponent(discipline)}`}
-                  className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:h-11"
                 >
                   <Download size={15} /> Télécharger (Word)
                 </a>
@@ -285,10 +286,11 @@ export default async function RapportsDisciplinairesPage({
 
               {/* En-tête officiel du modèle (2 colonnes, mentions séparées par des pointillés) —
                   mentions CONFIGURABLES (panneau « En-tête du document » du formulaire) : les
-                  valeurs enregistrées priment, une mention vide retombe sur le défaut calculé. */}
+                  valeurs enregistrées priment, une mention vide retombe sur le défaut calculé.
+                  Téléphone : mentions en 14 px, coupées si un mot (« L'ALPHABÉTISATION ») dépasse la colonne. */}
               <Card>
                 <div className="grid grid-cols-2 items-start gap-4">
-                  <div className="text-[0.7rem] font-semibold uppercase leading-snug text-forest-900">
+                  <div className="text-[0.7rem] font-semibold uppercase leading-snug text-forest-900 mobile:min-w-0 mobile:text-xs mobile:wrap-break-word">
                     <p>{enteteEffectif.ministere}</p>
                     <Pointille />
                     {enteteEffectif.directionRegionale && (
@@ -301,7 +303,7 @@ export default async function RapportsDisciplinairesPage({
                     <Pointille />
                     <p>{enteteEffectif.coordination}</p>
                   </div>
-                  <div className="text-center text-[0.7rem] leading-tight text-ink-700/80">
+                  <div className="text-center text-[0.7rem] leading-tight text-ink-700/80 mobile:min-w-0 mobile:text-xs mobile:leading-snug mobile:wrap-break-word">
                     <p className="font-semibold uppercase text-forest-900">{enteteEffectif.republique}</p>
                     {armoiries && (
                       <Image

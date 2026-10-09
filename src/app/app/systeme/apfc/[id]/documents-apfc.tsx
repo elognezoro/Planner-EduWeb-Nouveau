@@ -27,7 +27,7 @@ function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer:
       onDragOver={(e) => { e.preventDefault(); setSurvol(true); }}
       onDragLeave={() => setSurvol(false)}
       onDrop={(e) => { e.preventDefault(); setSurvol(false); const f = e.dataTransfer.files?.[0]; if (f) onDeposer(f); }}
-      className={`flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white p-3 transition-colors disabled:pointer-events-none ${
+      className={`flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white p-3 transition-colors disabled:pointer-events-none mobile:h-32 ${
         survol ? "border-forest-500 bg-forest-50/70 text-forest-700" : "border-cream-300 text-ink-700/45 hover:border-forest-300 hover:bg-forest-50/40 hover:text-forest-700"
       }`}
     >
@@ -37,7 +37,7 @@ function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer:
         ) : survol ? (
           <><ImageUp size={22} /><span className="px-3 text-xs font-medium">Déposez l&apos;image ici</span></>
         ) : (
-          <><ImageUp size={22} /><span className="px-3 text-xs font-medium">Cliquez ou glissez-déposez</span></>
+          <><ImageUp size={22} /><span className="px-3 text-xs font-medium"><span className="mobile:hidden">Cliquez ou glissez-déposez</span><span className="hidden mobile:inline">Touchez pour choisir</span></span></>
         )}
       </span>
     </button>
@@ -48,7 +48,7 @@ function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer:
 function BoutonRetirer() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:underline disabled:opacity-60">
+    <button type="submit" disabled={pending} className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:underline disabled:opacity-60 mobile:mt-1 mobile:min-h-11">
       {pending && <Loader2 size={13} className="animate-spin" />} Retirer l&apos;image
     </button>
   );
@@ -78,7 +78,7 @@ function Zone({ apfcId, type, libelle, url }: { apfcId: string; type: string; li
       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-700/60">{libelle}</p>
       {url ? (
         <>
-          <div className="relative h-40 w-full overflow-hidden rounded-2xl border-2 border-dashed border-cream-300 bg-white">
+          <div className="relative h-40 w-full overflow-hidden rounded-2xl border-2 border-dashed border-cream-300 bg-white mobile:h-32">
             <Image src={url} alt={libelle} fill unoptimized className="object-contain p-4" sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw" />
           </div>
           <form action={supprimerDocumentApfc}>

@@ -82,7 +82,9 @@ export function UploaderCours() {
         ) : (
           <>
             <FileUp size={30} className="text-forest-600" />
-            <p className="text-sm font-semibold text-forest-900">Glissez-déposez un fichier de cours, ou cliquez pour parcourir</p>
+            <p className="text-sm font-semibold text-forest-900 mobile:hidden">Glissez-déposez un fichier de cours, ou cliquez pour parcourir</p>
+            {/* Téléphone : pas de glisser-déposer au doigt. */}
+            <p className="hidden text-sm font-semibold text-forest-900 mobile:block">Touchez pour choisir un fichier de cours</p>
             <p className="text-xs text-ink-700/55">.docx, .txt ou .md — max 10 Mo</p>
           </>
         )}

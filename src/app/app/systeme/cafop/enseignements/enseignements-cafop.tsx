@@ -71,20 +71,21 @@ export function EnseignementsCafop({
       <EnteteCafop ongletActif="enseignements" nbCentres={centres.length} regions={regions} terme={terme} lectureSeule={lectureSeule} />
 
       {/* ALLER À */}
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm">
-        <span className="font-semibold text-ink-700/45">ALLER À</span>
+      {/* Téléphone : pastilles sur une ligne qui défile au doigt. */}
+      <div className="rangee-defilante-mobile flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm mobile:px-2 mobile:py-2">
+        <span className="font-semibold text-ink-700/45 mobile:hidden">ALLER À</span>
         {[
           { libelle: "Présentation", href: "#presentation" },
           { libelle: T("Sélection d'un CAFOP"), href: "#selection" },
         ].map((a) => (
-          <a key={a.href} href={a.href} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50">
+          <a key={a.href} href={a.href} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:px-4">
             {a.libelle}
           </a>
         ))}
       </div>
 
       {/* Présentation + indicateurs */}
-      <section id="presentation" className="space-y-4 rounded-2xl border-2 border-gold-300 bg-gold-50/60 p-5 shadow-soft">
+      <section id="presentation" className="space-y-4 rounded-2xl border-2 border-gold-300 bg-gold-50/60 p-5 shadow-soft mobile:scroll-mt-20 mobile:p-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-500 text-white">
@@ -101,7 +102,7 @@ export function EnseignementsCafop({
             <button
               type="button"
               onClick={() => setModulesOuvert(true)}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-gold-500 px-5 text-sm font-bold text-white shadow-soft ring-1 ring-gold-600/20 transition-colors hover:bg-gold-600"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-gold-500 px-5 text-sm font-bold text-white shadow-soft ring-1 ring-gold-600/20 transition-colors hover:bg-gold-600 mobile:w-full mobile:justify-center"
             >
               <SlidersHorizontal size={16} /> Gestion des modules
               <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1.5 text-xs font-bold text-white">
@@ -111,15 +112,16 @@ export function EnseignementsCafop({
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {/* Téléphone : 3 tuiles compactes côte à côte (icône au-dessus du chiffre). */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 mobile:grid-cols-3 mobile:gap-2">
           {minis.map((m) => (
-            <div key={m.libelle} className="flex items-center gap-3 rounded-xl border border-cream-200 bg-white p-4">
-              <span className={`flex h-10 w-10 items-center justify-center rounded-full ${m.ton}`}>
+            <div key={m.libelle} className="flex items-center gap-3 rounded-xl border border-cream-200 bg-white p-4 mobile:flex-col mobile:items-start mobile:gap-1.5 mobile:p-3">
+              <span className={`flex h-10 w-10 items-center justify-center rounded-full mobile:h-8 mobile:w-8 ${m.ton}`}>
                 <m.Icone size={18} />
               </span>
-              <div>
+              <div className="mobile:w-full mobile:min-w-0">
                 <p className="font-display text-2xl font-bold text-forest-900">{m.valeur.toLocaleString("fr-FR")}</p>
-                <p className="text-xs text-ink-700/60">{m.libelle}</p>
+                <p className="text-xs text-ink-700/60 mobile:hyphens-auto mobile:[overflow-wrap:anywhere]">{m.libelle}</p>
               </div>
             </div>
           ))}
@@ -127,7 +129,7 @@ export function EnseignementsCafop({
       </section>
 
       {/* Sélection d'un CAFOP */}
-      <section id="selection" className="rounded-2xl border border-cream-200 bg-white shadow-soft">
+      <section id="selection" className="rounded-2xl border border-cream-200 bg-white shadow-soft mobile:scroll-mt-20">
         <div className="border-b border-cream-100 px-5 py-4">
           <h2 className="font-display text-lg font-bold text-forest-900">{T("Sélectionner un CAFOP pour gérer les notes et bulletins")}</h2>
           <p className="text-sm text-ink-700/60">
@@ -139,8 +141,9 @@ export function EnseignementsCafop({
             <p className="px-5 py-8 text-center text-sm text-ink-700/55">{T("Aucun CAFOP enregistré.")}</p>
           ) : (
             centres.map((c) => (
-              <div key={c.id} className="flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-cream-50/40">
-                <div className="flex items-center gap-3">
+              // Téléphone : toute la rangée est touchable (lien étiré), le bouton se réduit au chevron.
+              <div key={c.id} className="flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-cream-50/40 mobile:relative mobile:px-4 mobile:active:bg-cream-50">
+                <div className="flex items-center gap-3 mobile:min-w-0 mobile:flex-1">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-700">
                     <GraduationCap size={17} />
                   </span>
@@ -151,9 +154,9 @@ export function EnseignementsCafop({
                 </div>
                 <Link
                   href={`${BASE}/${c.id}`}
-                  className="inline-flex h-9 items-center gap-1 rounded-full border border-gold-300 bg-white px-4 text-sm font-semibold text-gold-800 hover:bg-gold-50"
+                  className="inline-flex h-9 items-center gap-1 rounded-full border border-gold-300 bg-white px-4 text-sm font-semibold text-gold-800 hover:bg-gold-50 mobile:h-11 mobile:w-11 mobile:shrink-0 mobile:justify-center mobile:px-0 mobile:after:absolute mobile:after:inset-0"
                 >
-                  {T("Configurer le CAFOP")} <ChevronRight size={15} />
+                  <span className="mobile:sr-only">{T("Configurer le CAFOP")}</span> <ChevronRight size={15} />
                 </Link>
               </div>
             ))
@@ -171,9 +174,9 @@ type Agir = (fn: () => Promise<{ ok: boolean; message?: string }>) => void;
 const ANNEES = [1, 2, 3] as const;
 const libelleAnnee = (n: number) => (n === 1 ? "1re Année" : `${n}e Année`);
 const champCls =
-  "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 const dateCls =
-  "h-9 w-[8.25rem] rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-9 w-[8.25rem] rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:w-[9.5rem]";
 
 /** Coefficient borné côté client, identique à la validation serveur (1..99). */
 const coefClient = (s: string) => {
@@ -219,7 +222,7 @@ function ModulesModal({ modules, onFerme }: { modules: ModuleVue[]; onFerme: () 
               key={a}
               type="button"
               onClick={() => setAnnee(a)}
-              className={`inline-flex h-9 items-center rounded-full px-4 text-sm font-semibold transition-colors ${
+              className={`inline-flex h-9 items-center rounded-full px-4 text-sm font-semibold transition-colors mobile:h-11 ${
                 a === annee ? "bg-gold-500 text-white shadow-soft" : "text-ink-700/70 hover:bg-cream-200"
               }`}
             >
@@ -233,9 +236,10 @@ function ModulesModal({ modules, onFerme }: { modules: ModuleVue[]; onFerme: () 
 
         {msg && <FormAlert ton="erreur">{msg}</FormAlert>}
 
-        {/* Tableau des modules du niveau sélectionné */}
-        <div className="overflow-x-auto rounded-xl border border-cream-200">
-          <table className="w-full border-collapse text-sm">
+        {/* Tableau des modules du niveau sélectionné — téléphone : une carte par module (champs
+            « libellé : valeur », actions en 44 px), au lieu de 10 colonnes (≈ 1 300 px). */}
+        <div className="overflow-x-auto rounded-xl border border-cream-200 mobile:overflow-visible mobile:border-0">
+          <table className="tableau-cartes-mobile w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
                 <th className="min-w-[11rem] px-3 py-2.5">Module</th>
@@ -397,22 +401,22 @@ function EditeurComposantes({
   const carteComposante = (c: ComposanteEdition & { index: number }) => (
     <div key={c.index} className="rounded-xl border border-cream-200 bg-white p-2.5">
       <div className="flex items-center gap-2">
-        <span className="shrink-0 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-bold text-forest-800">C{numeroPar.get(c.index)}</span>
+        <span className="shrink-0 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-bold text-forest-800 mobile:text-xs">C{numeroPar.get(c.index)}</span>
         <input
           value={c.nom}
           onChange={(e) => majComposanteNom(c.index, e.target.value)}
           placeholder="Nom de la composante"
-          className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm font-medium outline-none focus:border-forest-400"
+          className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm font-medium outline-none focus:border-forest-400 mobile:h-11 mobile:min-w-0"
         />
-        <button type="button" onClick={() => retirerComposante(c.index)} title="Retirer la composante" className="shrink-0 text-ink-700/40 hover:text-red-600">
+        <button type="button" onClick={() => retirerComposante(c.index)} title="Retirer la composante" aria-label="Retirer la composante" className="shrink-0 text-ink-700/40 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
           <Trash2 size={14} />
         </button>
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-7">
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-7 mobile:pl-0">
         {c.themes.map((t, ti) => (
           <span key={ti} className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-xs font-medium text-forest-800">
             {t}
-            <button type="button" onClick={() => retirerTheme(c.index, ti)} className="text-forest-700/60 hover:text-red-600" aria-label="Retirer le thème">
+            <button type="button" onClick={() => retirerTheme(c.index, ti)} className="text-forest-700/60 hover:text-red-600 mobile:-my-2 mobile:inline-flex mobile:h-9 mobile:w-9 mobile:items-center mobile:justify-center" aria-label="Retirer le thème">
               <X size={11} />
             </button>
           </span>
@@ -422,12 +426,12 @@ function EditeurComposantes({
           onChange={(e) => setThemeSaisi((s) => ({ ...s, [c.index]: e.target.value }))}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ajouterTheme(c.index); } }}
           placeholder="Thème de la composante"
-          className="h-7 w-44 rounded-full border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
+          className="h-7 w-44 rounded-full border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400 mobile:h-11 mobile:w-full mobile:text-base"
         />
         <button
           type="button"
           onClick={() => ajouterTheme(c.index)}
-          className="inline-flex h-7 items-center gap-1 rounded-full border border-cream-300 px-2.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+          className="inline-flex h-7 items-center gap-1 rounded-full border border-cream-300 px-2.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-4 mobile:text-sm"
         >
           <Plus size={12} /> Ajouter un thème
         </button>
@@ -449,14 +453,14 @@ function EditeurComposantes({
             type="button"
             onClick={ajouterGroupe}
             title="Certains modules (ex. TICE) sont structurés en compétences regroupant des composantes"
-            className="inline-flex h-8 items-center gap-1 rounded-full border border-gold-300 px-3 text-xs font-semibold text-gold-800 hover:bg-gold-50"
+            className="inline-flex h-8 items-center gap-1 rounded-full border border-gold-300 px-3 text-xs font-semibold text-gold-800 hover:bg-gold-50 mobile:h-11"
           >
             <Plus size={13} /> Ajouter une compétence
           </button>
           <button
             type="button"
             onClick={() => ajouterComposante(null)}
-            className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+            className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11"
           >
             <Plus size={13} /> Ajouter une composante
           </button>
@@ -474,20 +478,20 @@ function EditeurComposantes({
             return (
               <div key={g.cle} className="rounded-xl border-2 border-gold-300 bg-gold-50/50 p-2.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="shrink-0 rounded-full bg-gold-500 px-2 py-0.5 text-[0.65rem] font-bold text-white">Compétence {gi + 1}</span>
+                  <span className="shrink-0 rounded-full bg-gold-500 px-2 py-0.5 text-[0.65rem] font-bold text-white mobile:text-xs">Compétence {gi + 1}</span>
                   <input
                     value={g.nom}
                     onChange={(e) => renommerGroupe(g.cle, e.target.value)}
                     placeholder={`Compétence ${gi + 1} : S'approprier l'environnement numérique…`}
-                    className="h-9 min-w-[12rem] flex-1 rounded-lg border border-gold-300 bg-white px-2.5 text-sm font-semibold outline-none focus:border-gold-500"
+                    className="h-9 min-w-[12rem] flex-1 rounded-lg border border-gold-300 bg-white px-2.5 text-sm font-semibold outline-none focus:border-gold-500 mobile:order-last mobile:h-11 mobile:min-w-0 mobile:basis-full"
                   />
                   {suppressionGroupe === g.cle ? (
-                    <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[0.65rem] font-semibold text-red-700">
+                    <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[0.65rem] font-semibold text-red-700 mobile:shrink mobile:rounded-2xl mobile:text-xs">
                       Supprimer la compétence et ses {duGroupe.length} composante(s) ?
-                      <button type="button" onClick={() => supprimerGroupe(g.cle)} title="Confirmer la suppression" className="rounded-full bg-red-600 p-1 text-white hover:bg-red-700">
+                      <button type="button" onClick={() => supprimerGroupe(g.cle)} title="Confirmer la suppression" aria-label="Confirmer la suppression" className="rounded-full bg-red-600 p-1 text-white hover:bg-red-700 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:shrink-0 mobile:items-center mobile:justify-center">
                         <Check size={11} />
                       </button>
-                      <button type="button" onClick={() => setSuppressionGroupe(null)} title="Annuler" className="rounded-full bg-cream-300 p-1 text-ink-700 hover:bg-cream-400">
+                      <button type="button" onClick={() => setSuppressionGroupe(null)} title="Annuler" aria-label="Annuler" className="rounded-full bg-cream-300 p-1 text-ink-700 hover:bg-cream-400 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:shrink-0 mobile:items-center mobile:justify-center">
                         <X size={11} />
                       </button>
                     </span>
@@ -496,7 +500,8 @@ function EditeurComposantes({
                       type="button"
                       onClick={() => (duGroupe.length === 0 ? supprimerGroupe(g.cle) : setSuppressionGroupe(g.cle))}
                       title="Supprimer la compétence"
-                      className="shrink-0 text-ink-700/40 hover:text-red-600"
+                      aria-label="Supprimer la compétence"
+                      className="shrink-0 text-ink-700/40 hover:text-red-600 mobile:ml-auto mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -512,7 +517,7 @@ function EditeurComposantes({
                 <button
                   type="button"
                   onClick={() => ajouterComposante(g.cle)}
-                  className="mt-2 inline-flex h-8 items-center gap-1 rounded-full border border-gold-300 bg-white px-3 text-xs font-semibold text-gold-800 hover:bg-gold-50"
+                  className="mt-2 inline-flex h-8 items-center gap-1 rounded-full border border-gold-300 bg-white px-3 text-xs font-semibold text-gold-800 hover:bg-gold-50 mobile:h-11"
                 >
                   <Plus size={13} /> Ajouter une composante
                 </button>
@@ -582,43 +587,43 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
           <div className="flex items-center gap-1.5">
             <input value={f.nom} onChange={set("nom")} className={`${champCls} font-medium ${m.actif ? "" : "text-ink-700/45"}`} />
             {m.estStage && (
-              <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-bold text-gold-800">Stage</span>
+              <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-bold text-gold-800 mobile:text-xs">Stage</span>
             )}
           </div>
         </td>
-        <td className="px-2 py-2 text-center">
+        <td data-label="Stage pratique" className="px-2 py-2 text-center">
           <input
             type="checkbox"
             checked={f.estStage}
             onChange={(e) => setF((s) => ({ ...s, estStage: e.target.checked }))}
             title="Stage pratique"
-            className="h-4 w-4 rounded border-cream-300 text-gold-600 focus:ring-gold-400"
+            className="h-4 w-4 rounded border-cream-300 text-gold-600 focus:ring-gold-400 mobile:h-6 mobile:w-6"
           />
         </td>
-        <td className="px-2 py-2">
-          <input value={f.code} onChange={set("code")} placeholder="—" className={`${champCls} w-24`} />
+        <td data-label="Code" className="px-2 py-2">
+          <input value={f.code} onChange={set("code")} placeholder="—" className={`${champCls} w-24 mobile:w-36`} />
         </td>
-        <td className="px-2 py-2">
-          <input type="number" min={1} max={99} value={f.coefficient} onChange={set("coefficient")} className={`${champCls} w-16`} />
+        <td data-label="Coefficient" className="px-2 py-2">
+          <input type="number" min={1} max={99} value={f.coefficient} onChange={set("coefficient")} className={`${champCls} w-16 mobile:w-24`} />
         </td>
-        <td className="px-2 py-2">
-          <select value={f.semestre} onChange={set("semestre")} className={`${champCls} w-16`}>
+        <td data-label="Semestre" className="px-2 py-2">
+          <select value={f.semestre} onChange={set("semestre")} className={`${champCls} w-16 mobile:w-24`}>
             <option value="">—</option>
             <option value="1">1</option>
             <option value="2">2</option>
           </select>
         </td>
-        <td className="px-2 py-2"><input type="date" value={f.dateDebut} onChange={set("dateDebut")} className={dateCls} /></td>
-        <td className="px-2 py-2"><input type="date" value={f.dateFin} onChange={set("dateFin")} className={dateCls} /></td>
-        <td className="px-2 py-2"><input type="date" value={f.datePretest} onChange={set("datePretest")} className={dateCls} /></td>
-        <td className="px-2 py-2"><input type="date" value={f.dateEvaluation} onChange={set("dateEvaluation")} className={dateCls} /></td>
+        <td data-label="Début" className="px-2 py-2"><input type="date" value={f.dateDebut} onChange={set("dateDebut")} className={dateCls} /></td>
+        <td data-label="Fin" className="px-2 py-2"><input type="date" value={f.dateFin} onChange={set("dateFin")} className={dateCls} /></td>
+        <td data-label="Prétest" className="px-2 py-2"><input type="date" value={f.datePretest} onChange={set("datePretest")} className={dateCls} /></td>
+        <td data-label="Évaluation" className="px-2 py-2"><input type="date" value={f.dateEvaluation} onChange={set("dateEvaluation")} className={dateCls} /></td>
         <td className="px-2 py-2">
-          <div className="flex items-center justify-end gap-1.5">
+          <div className="flex items-center justify-end gap-1.5 mobile:flex-wrap mobile:justify-start mobile:gap-2 mobile:pt-1">
             <button
               type="button"
               onClick={() => setOuvert((v) => !v)}
               title="Composantes & thèmes du module"
-              className={`inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-semibold ${ouvert ? "bg-forest-100 text-forest-800" : "border border-cream-300 text-ink-700/70 hover:bg-cream-100"}`}
+              className={`inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-semibold mobile:h-11 mobile:px-4 mobile:text-sm ${ouvert ? "bg-forest-100 text-forest-800" : "border border-cream-300 text-ink-700/70 hover:bg-cream-100"}`}
             >
               <ListTree size={13} /> Composantes · {composantes.length}
             </button>
@@ -627,7 +632,8 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
               disabled={pending || !modifie}
               onClick={enregistrer}
               title="Enregistrer"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-forest-600 text-white hover:bg-forest-700 disabled:bg-cream-200 disabled:text-ink-700/40"
+              aria-label="Enregistrer le module"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-forest-600 text-white hover:bg-forest-700 disabled:bg-cream-200 disabled:text-ink-700/40 mobile:h-11 mobile:w-11"
             >
               <Save size={14} />
             </button>
@@ -635,7 +641,7 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
               type="button"
               disabled={pending}
               onClick={() => agir(() => basculerModuleCafop(m.id, !m.actif))}
-              className={`inline-flex h-8 items-center rounded-full px-2.5 text-xs font-semibold disabled:opacity-50 ${
+              className={`inline-flex h-8 items-center rounded-full px-2.5 text-xs font-semibold disabled:opacity-50 mobile:h-11 mobile:px-4 mobile:text-sm ${
                 m.actif ? "bg-forest-100 text-forest-800 hover:bg-forest-200" : "bg-cream-200 text-ink-700/70 hover:bg-cream-300"
               }`}
             >
@@ -646,7 +652,8 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
               disabled={pending}
               onClick={() => agir(() => supprimerModuleCafop(m.id))}
               title="Supprimer"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              aria-label="Supprimer le module"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:ml-auto mobile:h-11 mobile:w-11"
             >
               <Trash2 size={14} />
             </button>
@@ -655,7 +662,7 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
       </tr>
       {ouvert && (
         <tr className="border-b border-cream-100 bg-cream-50/50">
-          <td colSpan={10} className="px-4 py-3">
+          <td colSpan={10} className="px-4 py-3 mobile:px-0">
             <EditeurComposantes
               composantes={composantes}
               onChange={setComposantes}
@@ -705,12 +712,13 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
     });
 
   return (
-    <div className="rounded-2xl border-2 border-gold-300 bg-gold-50/60 p-4">
+    <div className="rounded-2xl border-2 border-gold-300 bg-gold-50/60 p-4 mobile:p-3">
       <div className="mb-3 flex items-center gap-2 text-sm font-bold text-forest-900">
         <Plus size={16} className="text-gold-700" /> Nouveau module — {libelleAnnee(annee)}
       </div>
-      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="sm:col-span-2">
+      {/* Téléphone : 2 colonnes (code / coefficient, semestre, dates en 2 × 2), module pleine largeur. */}
+      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2">
+        <div className="sm:col-span-2 mobile:col-span-2">
           <ChampLabel label="Module *">
             <input value={f.nom} onChange={set("nom")} placeholder="ex. Psychopédagogie" className={champCls} />
           </ChampLabel>
@@ -762,7 +770,7 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
           type="button"
           disabled={pending || !f.nom.trim()}
           onClick={ajouter}
-          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gold-500 px-5 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gold-500 px-5 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:justify-center"
         >
           <Plus size={15} /> Ajouter le module
         </button>

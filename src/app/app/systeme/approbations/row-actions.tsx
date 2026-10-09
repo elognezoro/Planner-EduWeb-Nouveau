@@ -15,7 +15,8 @@ function Bouton({ ton }: { ton: "approuver" | "refuser" }) {
       type="submit"
       disabled={pending}
       className={
-        "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-semibold transition-all disabled:opacity-60 " +
+        // Téléphone : boutons pleine largeur de 44 px, texte de 16 px.
+        "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-semibold transition-all disabled:opacity-60 mobile:h-11 mobile:w-full mobile:text-sm " +
         (approuver
           ? "bg-forest-700 text-cream-50 hover:bg-forest-600"
           : "border border-red-200 text-red-600 hover:bg-red-50")
@@ -63,21 +64,23 @@ export function RowActions({
   const [etatApprob, actionApprouver] = useActionState(approuverDemande, null);
 
   return (
-    <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
-      <form action={actionApprouver} className="flex flex-wrap items-end justify-end gap-2">
+    // Téléphone : champ de périmètre puis Approuver puis Refuser, chacun sur toute la largeur
+    // (« mobile:items-stretch » neutralise « sm:items-end » entre 640 et 1023 px).
+    <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end mobile:w-full mobile:items-stretch mobile:gap-3">
+      <form action={actionApprouver} className="flex flex-wrap items-end justify-end gap-2 mobile:w-full mobile:gap-3">
         <input type="hidden" name="demandeId" value={demandeId} />
         {rechercheEtablissement && (
-          <div className="w-72">
-            <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
+          <div className="w-72 mobile:w-full">
+            <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60 mobile:text-xs">
               Périmètre (Établissement)
             </label>
             <RechercheEtablissement name="perimetreId" requis defaut={etabDefaut} />
             {etabDeclare ? (
-              <p className="mt-1 text-[0.65rem] text-forest-700">
+              <p className="mt-1 text-[0.65rem] text-forest-700 mobile:text-xs">
                 Établissement choisi par le demandeur à l&apos;inscription — modifiable.
               </p>
             ) : suggestion ? (
-              <p className="mt-1 text-[0.65rem] text-forest-700">
+              <p className="mt-1 text-[0.65rem] text-forest-700 mobile:text-xs">
                 Rapproché automatiquement de la structure déclarée ({Math.round(suggestion.score * 100)} % de
                 similarité) — modifiable.
               </p>
@@ -85,8 +88,8 @@ export function RowActions({
           </div>
         )}
         {demandePerimetre && !rechercheEtablissement && options.length > 0 && (
-          <div className="w-60">
-            <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
+          <div className="w-60 mobile:w-full">
+            <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60 mobile:text-xs">
               Périmètre ({libellePortee})
             </label>
             <SelectRecherche name="perimetreId" options={options} requis defaut={defautPerimetre} placeholder={`Rechercher un(e) ${libellePortee?.toLowerCase()}…`} />
@@ -96,19 +99,19 @@ export function RowActions({
       </form>
 
       {etatApprob && !etatApprob.ok && etatApprob.message && (
-        <p className="flex max-w-[20rem] items-start gap-1.5 text-right text-[0.7rem] font-medium text-red-600">
+        <p className="flex max-w-[20rem] items-start gap-1.5 text-right text-[0.7rem] font-medium text-red-600 mobile:max-w-none mobile:text-left mobile:text-xs">
           <AlertCircle size={13} className="mt-px shrink-0" /> <span>{etatApprob.message}</span>
         </p>
       )}
 
       {sansOption && (
-        <p className="max-w-[14rem] text-right text-[0.7rem] text-gold-700">
+        <p className="max-w-[14rem] text-right text-[0.7rem] text-gold-700 mobile:max-w-none mobile:text-left mobile:text-xs">
           Aucun {libellePortee?.toLowerCase()} enregistré — créez-en un avant d&apos;approuver pour
           rattacher le périmètre.
         </p>
       )}
 
-      <form action={refuserDemande} className="flex justify-end">
+      <form action={refuserDemande} className="flex justify-end mobile:w-full">
         <input type="hidden" name="demandeId" value={demandeId} />
         <Bouton ton="refuser" />
       </form>

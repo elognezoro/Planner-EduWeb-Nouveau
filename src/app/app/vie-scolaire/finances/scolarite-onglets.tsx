@@ -275,13 +275,14 @@ export function OngletScolarite({
     <div className="space-y-5">
       <TableauRecouvrement recouvrement={recouvrement} exercice={exercice} />
 
-      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft">
+      {/* Téléphone : sous-onglets sur une ligne qui défile au doigt (au lieu de murs de pastilles). */}
+      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft rangee-defilante-mobile">
         {onglets.map((o) => (
           <button
             key={o.cle}
             type="button"
             onClick={() => setSousOnglet(o.cle)}
-            className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors ${
+            className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors mobile:h-11 ${
               sousOnglet === o.cle ? "bg-forest-800 text-cream-50" : "text-ink-700/70 hover:bg-cream-100"
             }`}
           >
@@ -366,7 +367,7 @@ function BlocBareme({
         <ListChecks size={18} className="text-forest-600" /> Barème des frais
       </h2>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-sm">
+        <table className="w-full min-w-[760px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead>
             <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
               <th className="py-1.5 pr-2">Libellé</th>
@@ -447,9 +448,9 @@ function LigneFrais({ frais, peutEcrire, onModifier }: { frais: FraisVue; peutEc
   return (
     <tr>
       <td className="py-2 pr-2 align-top font-medium text-forest-900">{frais.libelle}</td>
-      <td className="py-2 pr-2 align-top">{frais.niveauNom ?? "Tous"}</td>
-      <td className="py-2 pr-2 align-top text-right">{fcfa(frais.montant)}</td>
-      <td className="py-2 pr-2 align-top">
+      <td data-label="Niveau" className="py-2 pr-2 align-top">{frais.niveauNom ?? "Tous"}</td>
+      <td data-label="Montant" className="py-2 pr-2 align-top text-right">{fcfa(frais.montant)}</td>
+      <td data-label="Échéancier" className="py-2 pr-2 align-top">
         {frais.tranches.length === 0 ? (
           <span className="text-ink-700/50">Versement unique</span>
         ) : (
@@ -463,8 +464,8 @@ function LigneFrais({ frais, peutEcrire, onModifier }: { frais: FraisVue; peutEc
           </ul>
         )}
       </td>
-      <td className="py-2 pr-2 align-top">{frais.obligatoire ? "Obligatoire" : "Facultatif"}</td>
-      <td className="py-2 pr-2 align-top">
+      <td data-label="Caractère" className="py-2 pr-2 align-top">{frais.obligatoire ? "Obligatoire" : "Facultatif"}</td>
+      <td data-label="État" className="py-2 pr-2 align-top">
         <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${frais.actif ? "bg-forest-100 text-forest-800" : "bg-cream-200 text-ink-700/60"}`}>
           {frais.actif ? "Actif" : "Désactivé"}
         </span>
@@ -721,7 +722,7 @@ function BlocRemises({
         <BadgePercent size={18} className="text-forest-600" /> Remises & bourses
       </h2>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] text-sm">
+        <table className="w-full min-w-[560px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead>
             <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
               <th className="py-1.5 pr-2">Élève</th>
@@ -766,13 +767,13 @@ function LigneRemise({ remise, peutEcrire }: { remise: RemiseVue; peutEcrire: bo
   return (
     <tr>
       <td className="py-2 pr-2 font-medium text-forest-900">{remise.eleveNom}</td>
-      <td className="py-2 pr-2">
+      <td data-label="Type" className="py-2 pr-2">
         <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${remise.type === "bourse" ? "bg-gold-100 text-gold-800" : "bg-forest-100 text-forest-800"}`}>
           {remise.type === "bourse" ? "Bourse" : "Remise"}
         </span>
       </td>
-      <td className="py-2 pr-2">{remise.libelle}</td>
-      <td className="py-2 pr-2 text-right">{remise.pourcentage != null ? `${remise.pourcentage} %` : fcfa(remise.montant ?? 0)}</td>
+      <td data-label="Libellé" className="py-2 pr-2">{remise.libelle}</td>
+      <td data-label="Valeur" className="py-2 pr-2 text-right">{remise.pourcentage != null ? `${remise.pourcentage} %` : fcfa(remise.montant ?? 0)}</td>
       {peutEcrire && (
         <td className="py-2 text-right whitespace-nowrap">
           {erreur && <span className="mr-1.5 text-xs text-red-600">{erreur}</span>}
@@ -932,7 +933,7 @@ function BlocImpayes({ impayes }: { impayes: ImpayeVue[] }) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full min-w-[640px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead>
             <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
               <th className="py-1.5 pr-2">Élève</th>
@@ -952,23 +953,23 @@ function BlocImpayes({ impayes }: { impayes: ImpayeVue[] }) {
               filtres.map((i) => (
                 <tr key={i.eleveId}>
                   <td className="py-2 pr-2 font-medium text-forest-900">{i.eleveNom}</td>
-                  <td className="py-2 pr-2">{i.classe ?? "—"}</td>
-                  <td className="py-2 pr-2 text-right">{fcfa(i.du)}</td>
-                  <td className="py-2 pr-2 text-right">{fcfa(i.remise)}</td>
-                  <td className="py-2 pr-2 text-right">{fcfa(i.paye)}</td>
-                  <td className="py-2 text-right font-bold text-red-600">{fcfa(i.reste)}</td>
+                  <td data-label="Classe" className="py-2 pr-2">{i.classe ?? "—"}</td>
+                  <td data-label="Dû" className="py-2 pr-2 text-right">{fcfa(i.du)}</td>
+                  <td data-label="Remises" className="py-2 pr-2 text-right">{fcfa(i.remise)}</td>
+                  <td data-label="Payé" className="py-2 pr-2 text-right">{fcfa(i.paye)}</td>
+                  <td data-label="Reste" className="py-2 text-right font-bold text-red-600">{fcfa(i.reste)}</td>
                 </tr>
               ))
             )}
           </tbody>
           {filtres.length > 0 && (
-            <tfoot>
+            <tfoot className="mobile:block">
               <tr className="border-t border-cream-200 font-bold text-forest-900">
                 <td className="py-2 pr-2" colSpan={2}>Total général</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totaux.du)}</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totaux.remise)}</td>
-                <td className="py-2 pr-2 text-right">{fcfa(totaux.paye)}</td>
-                <td className="py-2 text-right text-red-600">{fcfa(totaux.reste)}</td>
+                <td data-label="Dû" className="py-2 pr-2 text-right">{fcfa(totaux.du)}</td>
+                <td data-label="Remises" className="py-2 pr-2 text-right">{fcfa(totaux.remise)}</td>
+                <td data-label="Payé" className="py-2 pr-2 text-right">{fcfa(totaux.paye)}</td>
+                <td data-label="Reste" className="py-2 text-right text-red-600">{fcfa(totaux.reste)}</td>
               </tr>
             </tfoot>
           )}
@@ -1247,7 +1248,7 @@ function JournalPaiements({ paiements, entete, peutEcrire }: { paiements: Paieme
         </button>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[820px] text-sm">
+        <table className="w-full min-w-[820px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
           <thead>
             <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
               <th className="py-1.5 pr-2">N° reçu</th>
@@ -1307,14 +1308,14 @@ function LignePaiement({ paiement, peutEcrire, onRecu }: { paiement: PaiementVue
   return (
     <>
       <tr>
-        <td className="py-2 pr-2 font-mono text-xs text-ink-700/70">{String(paiement.numeroRecu).padStart(6, "0")}</td>
-        <td className="py-2 pr-2">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(paiement.date))}</td>
-        <td className="py-2 pr-2 font-medium text-forest-900">{paiement.eleveNom}</td>
-        <td className="py-2 pr-2">{paiement.classe ?? "—"}</td>
-        <td className="py-2 pr-2">{paiement.libelle}</td>
-        <td className="py-2 pr-2 text-right">{fcfa(paiement.montant)}</td>
-        <td className="py-2 pr-2">{LIBELLE_MODE[paiement.mode] ?? paiement.mode}</td>
-        <td className="py-2 pr-2">
+        <td data-label="N° reçu" className="py-2 pr-2 font-mono text-xs text-ink-700/70">{String(paiement.numeroRecu).padStart(6, "0")}</td>
+        <td data-label="Date" className="py-2 pr-2">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(paiement.date))}</td>
+        <td data-label="Élève" className="py-2 pr-2 font-medium text-forest-900">{paiement.eleveNom}</td>
+        <td data-label="Classe" className="py-2 pr-2">{paiement.classe ?? "—"}</td>
+        <td data-label="Libellé" className="py-2 pr-2">{paiement.libelle}</td>
+        <td data-label="Montant" className="py-2 pr-2 text-right">{fcfa(paiement.montant)}</td>
+        <td data-label="Mode" className="py-2 pr-2">{LIBELLE_MODE[paiement.mode] ?? paiement.mode}</td>
+        <td data-label="État" className="py-2 pr-2">
           {paiement.annule ? (
             <span title={paiement.motifAnnulation ?? undefined} className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">Annulé</span>
           ) : (
@@ -1386,7 +1387,7 @@ function LignePaiement({ paiement, peutEcrire, onRecu }: { paiement: PaiementVue
 
 function ApercuRecu({ paiement, entete, onFermer }: { paiement: PaiementVue; entete: EnteteFinances; onFermer: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none mobile:p-2">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -1394,10 +1395,10 @@ function ApercuRecu({ paiement, entete, onFermer }: { paiement: PaiementVue; ent
           #apercu-recu-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; }
         }
       `}</style>
-      <div id="apercu-recu-impression" className="mx-auto my-8 w-full max-w-lg rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
-        <div className="mb-4 flex items-center justify-between print:hidden">
+      <div id="apercu-recu-impression" className="mx-auto my-8 w-full max-w-lg rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none mobile:my-2 mobile:rounded-2xl mobile:p-4">
+        <div className="mb-4 flex items-center justify-between print:hidden mobile:sticky mobile:top-0 mobile:z-10 mobile:-mx-4 mobile:-mt-4 mobile:gap-2 mobile:rounded-t-2xl mobile:border-b mobile:border-cream-100 mobile:bg-white mobile:px-4 mobile:py-2">
           <h2 className="font-display text-base font-bold text-forest-900">Aperçu du reçu</h2>
-          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11">
             <X size={18} />
           </button>
         </div>

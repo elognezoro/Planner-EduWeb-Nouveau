@@ -13,7 +13,7 @@ import { CouvertureApfc, type CouvertureVue } from "./couverture-apfc";
 
 const initial: EtatForm = { ok: false };
 const champCls =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 // Casse « live » (sans rognage, pour autoriser la saisie d'espaces).
 const majLive = (s: string) => s.toUpperCase();
 const titreLive = (s: string) => s.toLowerCase().replace(/(^|[\s\-'’])([a-zà-ÿ])/g, (_m, sep: string, c: string) => sep + c.toUpperCase());
@@ -140,7 +140,7 @@ export function FicheApfc({
             </label>
           </div>
           <div className="flex justify-end">
-            <SubmitButton className="w-auto px-6"><Save size={15} /> Enregistrer</SubmitButton>
+            <SubmitButton className="w-auto px-6 mobile:w-full"><Save size={15} /> Enregistrer</SubmitButton>
           </div>
         </form>
       </section>
@@ -148,7 +148,8 @@ export function FicheApfc({
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Documents officiels</h3>
         <p className="mb-4 text-sm text-ink-700/60">Glissez-déposez ou cliquez pour téléverser (logo, cachet, signature).</p>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Téléphone : 2 colonnes de zones plus basses (4 zones de 160 px empilées, sinon). */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
           <ArmoiriesApfc pays={pays} parRegion={parRegion} />
           <DocumentsApfc apfcId={id} docs={docs} terme={terme} />
         </div>

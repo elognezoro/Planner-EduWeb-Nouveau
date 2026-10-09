@@ -12,6 +12,7 @@ import {
   enregistrerSession, supprimerSession, enregistrerCategorie, supprimerCategorie,
   type EtatLms,
 } from "../actions";
+import { FormulaireEnFeuille, useConfirmationMobile } from "../outils-mobiles";
 
 const initial: EtatLms = { ok: false };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -38,7 +39,7 @@ function ChampCours({ cours, selection = [] }: { cours: { id: string; titre: str
       <span className={label}>Cours associés <span className="font-normal text-ink-700/50">(facultatif — plusieurs possibles)</span></span>
       <div className="flex flex-wrap gap-1.5">
         {cours.map((c) => (
-          <label key={c.id} className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs hover:bg-cream-50">
+          <label key={c.id} className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs hover:bg-cream-50 mobile:min-h-11 mobile:py-2 mobile:text-sm">
             <input type="checkbox" name="coursIds" value={c.id} defaultChecked={selection.includes(c.id)} className="accent-forest-600" />
             {c.titre}
           </label>
@@ -55,7 +56,7 @@ function ChampRoles({ roles, selection = [] }: { roles: OptionsCommunes["roles"]
       <span className={label}>Public cible <span className="font-normal text-ink-700/50">(aucun = tous)</span></span>
       <div className="flex flex-wrap gap-1.5">
         {roles.map((r) => (
-          <label key={r.id} className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs hover:bg-cream-50">
+          <label key={r.id} className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs hover:bg-cream-50 mobile:min-h-11 mobile:py-2 mobile:text-sm">
             <input type="checkbox" name="publicCible" value={r.id} defaultChecked={selection.includes(r.id)} className="accent-forest-600" />
             {r.libelle}
           </label>
@@ -73,14 +74,7 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
   const [ouvert, setOuvert] = useState(false);
   useFerme(etat.ok, () => { setOuvert(false); router.refresh(); });
 
-  if (!ouvert && !cours) {
-    return (
-      <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700">
-        <Plus size={16} /> Nouveau cours
-      </button>
-    );
-  }
-  return (
+  const formulaire = () => (
     <form action={action} className="space-y-3 rounded-2xl border border-cream-200 bg-cream-50/40 p-4">
       {cours && <input type="hidden" name="id" value={cours.id} />}
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
@@ -148,10 +142,27 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
         <div><label className={label}>Mention portée sur l&apos;attestation</label><input name="attestationMention" defaultValue={cours?.attestationMention ?? ""} placeholder="Ex : Formation certifiante SEDEC 2026" className={champ} /></div>
       </fieldset>
       <div className="flex justify-end gap-2">
-        {!cours && <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full border border-cream-300 px-4 text-sm text-ink-700/70 hover:bg-cream-100">Annuler</button>}
+        {!cours && <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full border border-cream-300 px-4 text-sm text-ink-700/70 hover:bg-cream-100 mobile:h-11">Annuler</button>}
         <SubmitButton className="w-auto px-5">Enregistrer</SubmitButton>
       </div>
     </form>
+  );
+
+  // Fiche d'un cours existant : toujours dépliée, à sa place (pleine largeur, y compris sur téléphone).
+  if (cours) return formulaire();
+  // Nouveau cours : déplié à la place du bouton sur ordinateur, dans une feuille sur téléphone.
+  return (
+    <FormulaireEnFeuille
+      ouvert={ouvert}
+      onFermer={() => setOuvert(false)}
+      titre="Nouveau cours"
+      declencheur={
+        <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 mobile:h-11">
+          <Plus size={16} /> Nouveau cours
+        </button>
+      }
+      rendre={formulaire}
+    />
   );
 }
 
@@ -160,7 +171,7 @@ export function BoutonPublier({ id, publie }: { id: string; publie: boolean }) {
   const [pending, start] = useTransition();
   return (
     <button type="button" disabled={pending} onClick={() => start(async () => { await basculerPublicationCours(id, !publie); router.refresh(); })}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-60 ${publie ? "bg-forest-50 text-forest-700 hover:bg-forest-100" : "bg-gold-100 text-gold-800 hover:bg-gold-200"}`}>
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold disabled:opacity-60 mobile:min-h-11 mobile:px-4 ${publie ? "bg-forest-50 text-forest-700 hover:bg-forest-100" : "bg-gold-100 text-gold-800 hover:bg-gold-200"}`}>
       {pending ? <Loader2 size={13} className="animate-spin" /> : publie ? <Eye size={13} /> : <EyeOff size={13} />}
       {publie ? "Publié" : "Brouillon"}
     </button>
@@ -171,12 +182,17 @@ export function BoutonPublier({ id, publie }: { id: string; publie: boolean }) {
 export function BoutonSupprimer({ action, id, libelle, confirmation }: { action: (id: string) => Promise<EtatLms>; id: string; libelle?: string; confirmation: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  // Téléphone : confirmation dans une feuille montante (window.confirm conservé sur ordinateur).
+  const { confirmer, feuille } = useConfirmationMobile();
   return (
-    <button type="button" disabled={pending} title={libelle ?? "Supprimer"}
-      onClick={() => { if (window.confirm(confirmation)) start(async () => { await action(id); router.refresh(); }); }}
-      className="inline-flex items-center gap-1.5 rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40">
-      {pending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}{libelle && <span className="text-xs">{libelle}</span>}
-    </button>
+    <>
+      <button type="button" disabled={pending} title={libelle ?? "Supprimer"}
+        onClick={() => confirmer(confirmation, () => start(async () => { await action(id); router.refresh(); }))}
+        className="inline-flex items-center gap-1.5 rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 mobile:min-h-11 mobile:min-w-11 mobile:justify-center mobile:p-3">
+        {pending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}{libelle && <span className="text-xs">{libelle}</span>}
+      </button>
+      {feuille}
+    </>
   );
 }
 export const SupprimerCoursBtn = (p: { id: string }) => <BoutonSupprimer action={supprimerCours} id={p.id} confirmation="Supprimer ce cours et toutes ses leçons ?" />;
@@ -192,17 +208,23 @@ export function FormModule({ coursId, module }: { coursId: string; module?: { id
   const [type, setType] = useState(module?.type ?? "texte");
   useFerme(etat.ok, () => { setOuvert(false); router.refresh(); });
 
-  if (!ouvert && !module) {
-    return <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"><Plus size={15} /> Ajouter une leçon</button>;
-  }
-  if (!ouvert && module) {
-    return <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700" title="Modifier"><Pencil size={14} /></button>;
-  }
+  const declencheur = module
+    ? <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center" title="Modifier"><Pencil size={14} /></button>
+    : <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11"><Plus size={15} /> Ajouter une leçon</button>;
+  // Ordinateur : le formulaire se déplie à la place du bouton. Téléphone : il s'ouvrait DANS la
+  // rangée de la leçon (titre écrasé, éditeur riche comprimé) → feuille montante pleine largeur.
   return (
+    <FormulaireEnFeuille
+      ouvert={ouvert}
+      onFermer={() => setOuvert(false)}
+      titre={module ? "Modifier la leçon" : "Nouvelle leçon"}
+      declencheur={declencheur}
+      rendre={() => (
     <form action={action} className="space-y-3 rounded-2xl border border-forest-200 bg-white p-4 shadow-soft">
       {module && <input type="hidden" name="id" value={module.id} />}
       <input type="hidden" name="coursId" value={coursId} />
-      <div className="flex items-center justify-between">
+      {/* Titre et fermeture déjà portés par la feuille sur téléphone. */}
+      <div className="flex items-center justify-between mobile:hidden">
         <h4 className="font-display text-sm font-bold text-forest-900">{module ? "Modifier la leçon" : "Nouvelle leçon"}</h4>
         <button type="button" onClick={() => setOuvert(false)} className="rounded-lg p-1 text-ink-700/40 hover:bg-cream-100"><X size={16} /></button>
       </div>
@@ -231,7 +253,7 @@ export function FormModule({ coursId, module }: { coursId: string; module?: { id
       )}
       {type === "fichier" && (
         <div><label className={label}>Document (PDF, max 8 Mo)</label>
-          <input name="fichier" type="file" accept=".pdf,.ppt,.pptx,.doc,.docx,image/*" className="text-xs" />
+          <input name="fichier" type="file" accept=".pdf,.ppt,.pptx,.doc,.docx,image/*" className="text-xs mobile:w-full mobile:min-w-0" />
           {module?.fichierNom && <p className="mt-1 text-xs text-ink-700/60">Actuel : {module.fichierNom} (laisser vide pour conserver)</p>}
         </div>
       )}
@@ -246,6 +268,8 @@ export function FormModule({ coursId, module }: { coursId: string; module?: { id
       </div>
       <div className="flex justify-end"><SubmitButton className="w-auto px-5">Enregistrer la leçon</SubmitButton></div>
     </form>
+      )}
+    />
   );
 }
 
@@ -253,10 +277,11 @@ export function BoutonsOrdreModule({ id }: { id: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const go = (sens: "haut" | "bas") => start(async () => { await deplacerModule(id, sens); router.refresh(); });
+  // Téléphone : flèches côte à côte, 44 px chacune, en tête de la 2e ligne de la carte (order).
   return (
-    <div className="flex flex-col">
-      <button type="button" disabled={pending} onClick={() => go("haut")} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40"><ChevronUp size={15} /></button>
-      <button type="button" disabled={pending} onClick={() => go("bas")} className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40"><ChevronDown size={15} /></button>
+    <div className="flex flex-col mobile:order-1 mobile:flex-row mobile:gap-1">
+      <button type="button" disabled={pending} onClick={() => go("haut")} aria-label="Monter la leçon" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200 mobile:text-ink-700/60"><ChevronUp size={15} className="mobile:size-[18px]" /></button>
+      <button type="button" disabled={pending} onClick={() => go("bas")} aria-label="Descendre la leçon" className="rounded p-0.5 text-ink-700/40 hover:text-forest-700 disabled:opacity-40 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center mobile:rounded-xl mobile:border mobile:border-cream-200 mobile:text-ink-700/60"><ChevronDown size={15} className="mobile:size-[18px]" /></button>
     </div>
   );
 }
@@ -269,15 +294,23 @@ export function FormCategorie() {
   const [etat, action] = useActionState(enregistrerCategorie, initial);
   const [ouvert, setOuvert] = useState(false);
   useFerme(etat.ok, () => { setOuvert(false); router.refresh(); });
-  if (!ouvert) return <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3.5 text-sm font-semibold text-forest-800 hover:bg-forest-50"><Plus size={14} /> Catégorie</button>;
+  // Téléphone : le formulaire s'ouvre dans une feuille au lieu de la rangée d'en-tête de section.
   return (
+    <FormulaireEnFeuille
+      ouvert={ouvert}
+      onFermer={() => setOuvert(false)}
+      titre="Nouvelle catégorie"
+      declencheur={<button type="button" onClick={() => setOuvert(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3.5 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11"><Plus size={14} /> Catégorie</button>}
+      rendre={() => (
     <form action={action} className="flex flex-wrap items-end gap-2 rounded-xl border border-cream-200 bg-cream-50/40 p-3">
       {etat.message && !etat.ok && <div className="w-full"><FormAlert ton="erreur">{etat.message}</FormAlert></div>}
       <div className="min-w-[10rem] flex-1"><label className={label}>Nom de la catégorie</label><input name="nom" required className={champ} /></div>
       <div className="w-20"><label className={label}>Ordre</label><input name="ordre" type="number" min={0} defaultValue={0} className={champ} /></div>
       <SubmitButton className="w-auto px-4">Ajouter</SubmitButton>
-      <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full px-3 text-sm text-ink-700/60 hover:bg-cream-100">Annuler</button>
+      <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full px-3 text-sm text-ink-700/60 hover:bg-cream-100 mobile:h-11">Annuler</button>
     </form>
+      )}
+    />
   );
 }
 
@@ -289,9 +322,17 @@ export function FormSession({ opts, session }: { opts: OptionsCommunes; session?
   const [ouvert, setOuvert] = useState(false);
   useFerme(etat.ok, () => { setOuvert(false); router.refresh(); });
 
-  if (!ouvert && !session) return <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700"><Plus size={16} /> Nouvelle session</button>;
-  if (!ouvert && session) return <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700" title="Modifier"><Pencil size={14} /></button>;
+  const declencheur = session
+    ? <button type="button" onClick={() => setOuvert(true)} className="rounded-lg p-1.5 text-ink-700/50 hover:bg-cream-100 hover:text-forest-700 mobile:p-3 mobile:inline-flex mobile:min-h-11 mobile:min-w-11 mobile:items-center mobile:justify-center" title="Modifier"><Pencil size={14} /></button>
+    : <button type="button" onClick={() => setOuvert(true)} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 mobile:h-11"><Plus size={16} /> Nouvelle session</button>;
+  // Téléphone : formulaire de 12 champs dans une feuille, plus dans la rangée de la session.
   return (
+    <FormulaireEnFeuille
+      ouvert={ouvert}
+      onFermer={() => setOuvert(false)}
+      titre={session ? "Modifier la session" : "Nouvelle session"}
+      declencheur={declencheur}
+      rendre={() => (
     <form action={action} className="space-y-3 rounded-2xl border border-cream-200 bg-cream-50/40 p-4">
       {session && <input type="hidden" name="id" value={session.id} />}
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
@@ -316,9 +357,11 @@ export function FormSession({ opts, session }: { opts: OptionsCommunes; session?
       <ChampCours cours={opts.coursListe ?? []} selection={session?.coursIds} />
       <ChampRoles roles={opts.roles} selection={session?.publicCible} />
       <div className="flex justify-end gap-2">
-        {!session && <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full border border-cream-300 px-4 text-sm text-ink-700/70 hover:bg-cream-100">Annuler</button>}
+        {!session && <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full border border-cream-300 px-4 text-sm text-ink-700/70 hover:bg-cream-100 mobile:h-11">Annuler</button>}
         <SubmitButton className="w-auto px-5">Enregistrer</SubmitButton>
       </div>
     </form>
+      )}
+    />
   );
 }

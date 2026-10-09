@@ -301,9 +301,10 @@ export default async function ComptesPage({
         titre="Comptes utilisateurs"
         description="Gérez et filtrez les comptes de votre périmètre."
         action={
-          <div className="flex flex-wrap items-center gap-2">
-            {u.roleReel === "admin" && !u.apercuActif && <BoutonRappelRattachement />}
-            <ComptesActions terme={terme} termeApfc={termeApfc} />
+          // Téléphone : « Créer un compte » + « ⋯ » (Importer, Exporter, Rappel dans une feuille).
+          <div className="flex flex-wrap items-center gap-2 mobile:w-full">
+            {u.roleReel === "admin" && !u.apercuActif && <BoutonRappelRattachement className="mobile:hidden" />}
+            <ComptesActions terme={terme} termeApfc={termeApfc} afficherRappel={u.roleReel === "admin" && !u.apercuActif} />
           </div>
         }
       />
@@ -314,17 +315,18 @@ export default async function ComptesPage({
         </Card>
       ) : (
         <>
-          {/* KPI cliquables (filtres rapides) */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* KPI cliquables (filtres rapides) — téléphone : deux tuiles compactes par rangée. */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
             <KpiCard index={0} libelle="Comptes" valeur={kpi.total} icone={<Users size={22} />} href={BASE} />
             <KpiCard index={1} libelle="Actifs" valeur={kpi.actifs} ton="forest" icone={<UserCheck size={22} />} href={`${BASE}?statut=actif`} />
             <KpiCard index={2} libelle="E-mail non confirmé" valeur={kpi.nonConfirmes} ton="gold" icone={<MailWarning size={22} />} href={`${BASE}?statut=en_attente_verification`} />
             <KpiCard index={3} libelle="Demande en attente" valeur={kpi.avecDemande} ton={kpi.avecDemande > 0 ? "red" : "cream"} icone={<ClipboardCheck size={22} />} href={`${BASE}?demande=1`} />
           </div>
 
-          {/* Barre FILTRES (listes auto-appliquées) puis recherche dédiée */}
+          {/* Barre FILTRES (listes auto-appliquées) puis recherche dédiée — téléphone : la recherche
+              passe en premier (order-first dans RechercheComptes), le bouton « Filtres » dessous. */}
           <Reveal>
-            <div className="space-y-4">
+            <div className="space-y-4 mobile:flex mobile:flex-col mobile:gap-3 mobile:space-y-0">
               <FiltresComptes base={BASE} valeurs={valeurs} options={{ roles: rolesOptions, ...options }} />
               <RechercheComptes base={BASE} valeurs={valeurs} />
             </div>
@@ -332,8 +334,10 @@ export default async function ComptesPage({
 
           {/* Table */}
           <Reveal delayIndex={1}>
-            <Card className="overflow-hidden p-0">
-              <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3">
+            {/* Téléphone : chaque compte est déjà une carte — la carte englobante s'efface (pas de
+                bordures doublées ni de cartes collées à ses bords). */}
+            <Card className="overflow-hidden p-0 mobile:rounded-none mobile:border-0 mobile:bg-transparent mobile:shadow-none">
+              <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3 mobile:border-0 mobile:px-1 mobile:pt-1">
                 <p className="text-sm font-semibold text-forest-900">
                   {totalFiltres.toLocaleString("fr-FR")} compte(s){filtreActif ? " (filtrés)" : ""}
                 </p>

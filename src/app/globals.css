@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Variante « mobile: » — téléphone et tablette À L'ÉCRAN uniquement (même seuil en rem que
+   « lg », mais bornée à « screen ») : « mobile:flex-col » ne touche ni l'ordinateur ni le
+   papier. C'est LA variante de la refonte mobile ; ne jamais utiliser « max-lg: » à sa place
+   (elle s'applique aussi à l'impression, page A4 ≈ 794 px). */
+@custom-variant mobile (@media screen and (width < 64rem));
+
 /* ─────────────────────────────────────────────────────────────
    EduWeb Planner — Design system
    Identité : vert forêt profond + or (logo). Institutionnel, premium, animé.
@@ -308,6 +314,84 @@ body {
      l'emporte sur les utilitaires d'affichage (« flex », « grid ») du même élément. */
   .masque-ecran-mobile {
     display: none;
+  }
+
+  /* RANGÉE DE BOUTONS / PASTILLES : sur une seule ligne qui défile horizontalement au doigt,
+     au lieu d'empiler des boutons pleine largeur (exports, filtres rapides, onglets…). */
+  .rangee-defilante-mobile {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+  }
+  .rangee-defilante-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  .rangee-defilante-mobile > * {
+    flex-shrink: 0;
+  }
+  .rangee-defilante-mobile :is(a, button, label) {
+    white-space: nowrap;
+  }
+
+  /* TABLEAU EN CARTES : chaque ligne devient une carte, chaque cellule une ligne
+     « libellé : valeur » (le libellé vient de l'attribut data-label de la cellule). Pour les
+     tableaux de données à colonnes nombreuses, illisibles en défilement horizontal.
+     Une cellule sans data-label occupe toute la largeur (titre de la carte, actions…). */
+  table.tableau-cartes-mobile,
+  table.tableau-cartes-mobile tbody,
+  table.tableau-cartes-mobile tfoot {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  table.tableau-cartes-mobile thead {
+    display: none;
+  }
+  table.tableau-cartes-mobile tr {
+    display: block;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--color-cream-200);
+    border-radius: 1rem;
+    padding: 0.5rem 0.875rem;
+  }
+  table.tableau-cartes-mobile td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border: 0;
+    padding: 0.375rem 0;
+    text-align: right;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  table.tableau-cartes-mobile td + td {
+    border-top: 1px solid var(--color-cream-100);
+  }
+  table.tableau-cartes-mobile td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    max-width: 45%;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: color-mix(in oklab, var(--color-ink-700) 75%, transparent);
+  }
+  table.tableau-cartes-mobile td:not([data-label]) {
+    display: block;
+    text-align: left;
+  }
+}
+
+/* Fond par défaut des cartes du tableau-cartes-mobile : dans une couche inférieure aux
+   utilitaires, pour qu'un bg-* posé sur la ligne (sélection, inactif, total) reprenne la main. */
+@layer components {
+  @media screen and (width < 64rem) {
+    table.tableau-cartes-mobile tr {
+      background-color: #fff;
+    }
   }
 }
 

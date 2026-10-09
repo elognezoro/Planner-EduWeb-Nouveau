@@ -142,7 +142,8 @@ export default async function FormationsPage() {
       />
 
       {/* Tuiles de statistiques */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Téléphone : 2 colonnes de tuiles compactes (au lieu de 4 tuiles empilées). */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
         <Tuile libelle="Guides disponibles" valeur={nbGuides} icone={<BookMarked size={22} />} couleur="bg-forest-50 text-forest-700" />
         <Tuile libelle="Familles de rôles" valeur={familles} icone={<Users size={22} />} couleur="bg-blue-50 text-blue-600" />
         <Tuile libelle="Chapitres au total" valeur={chapitres} icone={<BookOpen size={22} />} couleur="bg-gold-100 text-gold-700" />
@@ -154,7 +155,7 @@ export default async function FormationsPage() {
         <div className="flex items-center gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white"><GraduationCap size={22} /></span>
           <div>
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-forest-600">Mes formations</p>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] mobile:text-xs text-forest-600">Mes formations</p>
             <h2 className="font-display text-lg font-bold text-forest-900">{nbFormationsActives} formations actives</h2>
           </div>
         </div>
@@ -170,7 +171,7 @@ export default async function FormationsPage() {
                   <img src={f.imageUrl} alt="" className="-mx-4 -mt-4 mb-3 h-28 w-[calc(100%+2rem)] max-w-none object-cover" />
                 )}
                 <div className="mb-1 flex items-start justify-between gap-2">
-                  <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-forest-600">Formation · {f._count.modules} modules</p>
+                  <p className="text-[0.62rem] font-semibold uppercase mobile:text-xs tracking-wide text-forest-600">Formation · {f._count.modules} modules</p>
                   <ArrowUpRight size={16} className="shrink-0 text-forest-500 transition group-hover:translate-x-0.5" />
                 </div>
                 <h3 className="font-display text-base font-bold text-forest-900">{f.titre}</h3>
@@ -185,7 +186,7 @@ export default async function FormationsPage() {
           {/* Carte réelle : Guides utilisateurs */}
           <Link href={`${BASE}/guides`} className="group flex flex-col rounded-2xl border border-cream-200 p-4 transition hover:border-forest-300 hover:shadow-soft">
             <div className="mb-1 flex items-start justify-between gap-2">
-              <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-forest-600">Guides utilisateurs</p>
+              <p className="text-[0.62rem] font-semibold uppercase mobile:text-xs tracking-wide text-forest-600">Guides utilisateurs</p>
               <ArrowUpRight size={16} className="shrink-0 text-forest-500 transition group-hover:translate-x-0.5" />
             </div>
             <h3 className="font-display text-base font-bold text-forest-900">Guides utilisateurs</h3>
@@ -196,7 +197,7 @@ export default async function FormationsPage() {
           {PROJETS.map((p) => (
             <div key={p.titre} className="flex flex-col rounded-2xl border border-dashed border-cream-300 bg-cream-50/50 p-4">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-ink-700/45">{p.chapeau}</p>
+                <p className="text-[0.62rem] font-semibold uppercase mobile:text-xs tracking-wide text-ink-700/45">{p.chapeau}</p>
                 <Badge ton="attente">À venir</Badge>
               </div>
               <h3 className="font-display text-base font-bold text-forest-900/80">{p.titre}</h3>
@@ -212,12 +213,12 @@ export default async function FormationsPage() {
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-50 text-forest-700"><Users size={22} /></span>
             <div className="min-w-0">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-forest-600">Gestion des inscriptions</p>
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] mobile:text-xs text-forest-600">Gestion des inscriptions</p>
               <h2 className="font-display text-lg font-bold text-forest-900">Inscrits &amp; listes</h2>
               <p className="mt-1 text-sm text-ink-700/70">Inscrivez ou désinscrivez un utilisateur à chacune des formations, et téléchargez la liste des inscrits (CSV, Word ou PDF) — une page par formation, avec en-tête institutionnel et effectif.</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mobile:flex-col mobile:items-stretch mobile:[&>*]:min-h-11 mobile:[&>*]:justify-center">
             <Link href={`${BASE}/inscriptions`} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 hover:bg-forest-700"><Users size={15} /> Gérer les inscriptions</Link>
             <Link href={`${BASE}/inscriptions#telecharger`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Download size={15} /> Télécharger la liste des inscrits</Link>
             <Link href={`${BASE}/travaux`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><ClipboardList size={15} /> Travaux des participants</Link>
@@ -229,7 +230,7 @@ export default async function FormationsPage() {
       {roleGuide && (
         <div className="relative overflow-hidden rounded-3xl border border-cream-50/10 bg-gradient-to-br from-forest-800 via-forest-900 to-forest-950 p-6 text-cream-50 shadow-soft">
           <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-gold-500/10 blur-[90px]" aria-hidden />
-          <p className="inline-flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-gold-200/90"><Sparkles size={13} /> Recommandé pour vous</p>
+          <p className="inline-flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] mobile:text-xs text-gold-200/90"><Sparkles size={13} /> Recommandé pour vous</p>
           <h2 className="mt-2 font-display text-xl font-bold sm:text-2xl">{libelleRole}{roleGuide.dureeMinutes ? ` — ${roleGuide.dureeMinutes} min de formation` : ""}</h2>
           {roleGuide.description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-cream-200/85">{roleGuide.description}</p>}
           <Link href={`${BASE}/cours/${roleGuide.slug}`} className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-5 py-2.5 text-sm font-bold text-forest-950 shadow-[var(--shadow-gold)] hover:-translate-y-0.5">Commencer la formation <ArrowRight size={16} /></Link>
@@ -241,12 +242,12 @@ export default async function FormationsPage() {
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-100 text-gold-700"><FileText size={22} /></span>
           <div className="min-w-0">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-gold-700">Manuel académique complet</p>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] mobile:text-xs text-gold-700">Manuel académique complet</p>
             <h2 className="flex flex-wrap items-center gap-2 font-display text-lg font-bold text-forest-900">Support de formation officiel <Badge ton="succes">Disponible</Badge></h2>
             <p className="mt-1 text-sm text-ink-700/70">Syllabus, modules de formation (un par rôle réel de la plateforme), volume horaire, glossaire général — généré automatiquement et mis à jour, en mise en page A4 conforme aux standards académiques.</p>
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2 mobile:flex-col mobile:items-stretch mobile:[&>*]:min-h-11 mobile:[&>*]:justify-center">
           <Link href={`${BASE}/manuel`} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 hover:bg-forest-700"><BookOpen size={15} /> Consulter &amp; imprimer (PDF)</Link>
           <a href={`${BASE}/manuel/word`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><FileDown size={15} /> Télécharger en Word (.docx)</a>
         </div>
@@ -259,12 +260,12 @@ export default async function FormationsPage() {
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white"><Award size={22} /></span>
             <div className="min-w-0">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-forest-600">Document officiel</p>
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] mobile:text-xs text-forest-600">Document officiel</p>
               <h2 className="flex flex-wrap items-center gap-2 font-display text-lg font-bold text-forest-900">Certificat de fin de formation <Badge ton="attente">À venir</Badge></h2>
               <p className="mt-1 text-sm text-ink-700/70">Modèle officiel personnalisé par votre établissement : numérotation automatique par séquence, reprise de la signature scannée et du cachet configurés, et journal de traçabilité des certificats délivrés. Téléchargeable en Word ou imprimable en PDF.</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mobile:flex-col mobile:items-stretch mobile:[&>*]:min-h-11 mobile:[&>*]:justify-center">
             <BoutonProjet icone={<Award size={15} />} primaire>Délivrer un certificat</BoutonProjet>
             <BoutonProjet icone={<ClipboardList size={15} />}>Journal des délivrés</BoutonProjet>
             <BoutonProjet icone={<FileDown size={15} />}>Modèle vierge (.docx)</BoutonProjet>
@@ -277,7 +278,7 @@ export default async function FormationsPage() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><Presentation size={18} className="text-forest-600" /> Séminaires</h2>
           {estAdmin && (
-            <Link href={`${BASE}/seminaires`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"><Settings size={14} /> Paramétrer (couverture, certificat)</Link>
+            <Link href={`${BASE}/seminaires`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11"><Settings size={14} /> Paramétrer (couverture, certificat)</Link>
           )}
         </div>
 
@@ -294,7 +295,7 @@ export default async function FormationsPage() {
                 <div className="flex items-start gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white"><BookOpen size={22} /></span>
                   <div className="min-w-0">
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-forest-700">{s.categorie?.nom ?? "Séminaire"} · {s._count.modules} modules</p>
+                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] mobile:text-xs text-forest-700">{s.categorie?.nom ?? "Séminaire"} · {s._count.modules} modules</p>
                     <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-bold text-forest-900 sm:text-lg">{s.titre} <Badge ton="succes">Disponible</Badge></h3>
                     {s.description && <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-ink-700/75">{s.description}</p>}
                     {pct !== undefined && (
@@ -302,7 +303,7 @@ export default async function FormationsPage() {
                     )}
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-2 mobile:flex-col mobile:items-stretch mobile:[&>*]:min-h-11 mobile:[&>*]:justify-center">
                   <Link href={`${BASE}/cours/${s.slug}`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-800 bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-forest-700">
                     {pct !== undefined ? "Poursuivre le séminaire" : "Ouvrir le séminaire"} <ArrowUpRight size={15} />
                   </Link>
@@ -331,12 +332,12 @@ export default async function FormationsPage() {
               <div className="flex items-start gap-3">
                 <span className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white", bleu ? "bg-blue-700" : violet ? "bg-purple-500" : "bg-forest-600")}><BookOpen size={22} /></span>
                 <div className="min-w-0">
-                  <p className={cn("text-[0.7rem] font-semibold uppercase tracking-[0.16em]", bleu ? "text-blue-700" : violet ? "text-purple-700" : "text-forest-700")}>{s.chapeau}</p>
+                  <p className={cn("text-[0.7rem] font-semibold uppercase tracking-[0.16em] mobile:text-xs", bleu ? "text-blue-700" : violet ? "text-purple-700" : "text-forest-700")}>{s.chapeau}</p>
                   <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-bold text-forest-900 sm:text-lg">{s.titre} {s.dispo ? <Badge ton="succes">Disponible</Badge> : <Badge ton="attente">À venir</Badge>}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-ink-700/75">{s.desc}</p>
                 </div>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2 mobile:flex-col mobile:items-stretch mobile:[&>*]:min-h-11 mobile:[&>*]:justify-center">
                 {s.boutons.map((b) => b.href ? (
                   <a key={b.label} href={b.href} target="_blank" rel="noopener noreferrer" className={cn(
                     "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
@@ -360,10 +361,11 @@ export default async function FormationsPage() {
 /** Tuile de statistique colorée (infographie de la maquette). */
 function Tuile({ libelle, valeur, icone, couleur }: { libelle: string; valeur: React.ReactNode; icone: React.ReactNode; couleur: string }) {
   return (
-    <Card className="flex items-center gap-4 p-5">
-      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", couleur)}>{icone}</span>
+    // Téléphone : tuile verticale compacte (icône au-dessus), lisible en demi-largeur.
+    <Card className="flex items-center gap-4 p-5 mobile:flex-col mobile:items-start mobile:gap-2 mobile:p-4">
+      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl mobile:h-10 mobile:w-10", couleur)}>{icone}</span>
       <div>
-        <p className="font-display text-2xl font-bold text-forest-900">{valeur}</p>
+        <p className="font-display text-2xl font-bold text-forest-900 mobile:text-xl">{valeur}</p>
         <p className="text-xs text-ink-700/65">{libelle}</p>
       </div>
     </Card>

@@ -1,6 +1,6 @@
 import {
   Home, Search, Calendar, Globe, Eye, Bell, GraduationCap, Award,
-  BookOpen, FileCheck2, HelpCircle, ArrowRight, ClipboardCheck, Route, LayoutDashboard, CheckCircle2,
+  BookOpen, FileCheck2, HelpCircle, ArrowRight, ClipboardCheck, Route, LayoutDashboard, CheckCircle2, MoreHorizontal,
 } from "lucide-react";
 
 /**
@@ -87,25 +87,82 @@ export function MaquetteMenu() {
   );
 }
 
+/**
+ * L'application sur TÉLÉPHONE : en-tête compact et barre d'onglets. Affichée seulement sur un
+ * écran de téléphone ou de tablette, à la place des maquettes de la barre supérieure et du menu
+ * latéral de l'ordinateur (qui n'existent pas sur ces écrans). Jamais imprimée.
+ */
+export function MaquetteMobile() {
+  const onglets = [
+    { i: Home, t: "Accueil" },
+    { i: Calendar, t: "Horaires" },
+    { i: Bell, t: "Messages" },
+    { i: ClipboardCheck, t: "Appel" },
+  ];
+  return (
+    <div>
+      <div className="mx-auto max-w-xs overflow-hidden rounded-[1.75rem] border-4 border-forest-950 bg-cream-50">
+        {/* En-tête */}
+        <div className="relative flex items-center gap-1 border-b border-cream-200 bg-cream-50 px-2 py-2">
+          <span className="absolute -bottom-2.5 left-2"><Repere n={1} /></span>
+          <span className="absolute -bottom-2.5 right-2"><Repere n={2} /></span>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-forest-800"><ArrowRight size={16} className="rotate-180" /></span>
+          <span className="min-w-0 flex-1 truncate font-display text-sm font-bold text-forest-900">Ma page</span>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-forest-800"><MoreHorizontal size={15} /></span>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-forest-800"><Bell size={15} /></span>
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-forest-800 text-xs font-bold text-gold-300">A</span>
+        </div>
+        {/* Contenu */}
+        <div className="space-y-2 px-3 py-4">
+          <div className="h-3 w-2/3 rounded-full bg-cream-200" />
+          <div className="h-16 rounded-2xl bg-white" />
+          <div className="grid grid-cols-2 gap-2"><div className="h-12 rounded-xl bg-white" /><div className="h-12 rounded-xl bg-white" /></div>
+        </div>
+        {/* Barre d'onglets */}
+        <div className="relative flex items-stretch justify-around border-t border-cream-200 bg-white px-1 py-1.5">
+          <span className="absolute -top-2.5 left-1"><Repere n={3} /></span>
+          <span className="absolute -top-2.5 right-1"><Repere n={4} /></span>
+          {onglets.map((o, k) => (
+            <span key={o.t} className={`flex flex-col items-center gap-0.5 text-xs ${k === 0 ? "font-semibold text-forest-800" : "text-ink-700/60"}`}>
+              <o.i size={16} /> {o.t}
+            </span>
+          ))}
+          <span className="flex flex-col items-center gap-0.5 text-xs text-ink-700/60"><LayoutDashboard size={16} /> Plus</span>
+        </div>
+      </div>
+      <Legende items={[
+        { n: 1, t: "En-tête : bouton retour et titre de la page ouverte." },
+        { n: 2, t: "Réglages (recherche, pays, année scolaire…), notifications et votre compte (profil, déconnexion)." },
+        { n: 3, t: "Barre d'onglets : vos 4 espaces les plus utiles, adaptés à votre rôle." },
+        { n: 4, t: "« Plus » ouvre le menu complet, filtré selon votre rôle." },
+      ]} />
+    </div>
+  );
+}
+
+// Téléphone : la frise horizontale (720 px, deux étapes visibles) devient verticale — étapes
+// pleine largeur en rangées compactes (icône à gauche), flèches tournées vers le bas.
 function Etape({ icone: Icone, titre, sous }: { icone: typeof BookOpen; titre: string; sous: string }) {
   return (
-    <div className="flex w-40 shrink-0 flex-col items-center rounded-2xl border border-cream-200 bg-white p-3 text-center shadow-soft">
-      <span className="mb-1.5 flex h-9 w-9 items-center justify-center rounded-xl bg-forest-50 text-forest-700"><Icone size={18} /></span>
-      <p className="text-xs font-bold text-forest-900">{titre}</p>
-      <p className="text-[11px] text-ink-700/60">{sous}</p>
+    <div className="flex w-40 shrink-0 flex-col items-center rounded-2xl border border-cream-200 bg-white p-3 text-center shadow-soft mobile:w-full mobile:flex-row mobile:gap-3 mobile:px-3 mobile:py-2.5 mobile:text-left">
+      <span className="mb-1.5 flex h-9 w-9 items-center justify-center rounded-xl bg-forest-50 text-forest-700 mobile:mb-0 mobile:shrink-0"><Icone size={18} /></span>
+      <div className="contents mobile:block mobile:min-w-0">
+        <p className="text-xs font-bold text-forest-900">{titre}</p>
+        <p className="text-[11px] text-ink-700/60 mobile:text-xs">{sous}</p>
+      </div>
     </div>
   );
 }
 
 function Fleche() {
-  return <ArrowRight size={18} className="shrink-0 self-center text-forest-400" />;
+  return <ArrowRight size={18} className="shrink-0 self-center text-forest-400 mobile:rotate-90" />;
 }
 
 /** Le parcours d'un apprenant dans le LMS, du catalogue à l'attestation / au badge. */
 export function FluxLMS() {
   return (
     <div className="overflow-x-auto">
-      <div className="flex min-w-[720px] items-stretch gap-2">
+      <div className="flex min-w-[720px] items-stretch gap-2 mobile:min-w-0 mobile:flex-col">
         <Etape icone={BookOpen} titre="Guides" sous="Choisir un cours" />
         <Fleche />
         <Etape icone={HelpCircle} titre="Suivre" sous="Texte · vidéo · quiz · devoir" />
@@ -114,7 +171,7 @@ export function FluxLMS() {
         <Fleche />
         <Etape icone={GraduationCap} titre="Attestation" sous="Par cours terminé" />
       </div>
-      <div className="mt-2 flex min-w-[720px] items-center gap-2">
+      <div className="mt-2 flex min-w-[720px] items-center gap-2 mobile:mt-4 mobile:min-w-0 mobile:flex-col">
         <Etape icone={Route} titre="Parcours" sous="Plusieurs cours" />
         <Fleche />
         <Etape icone={ClipboardCheck} titre="Tout terminer" sous="Chaque cours validé" />

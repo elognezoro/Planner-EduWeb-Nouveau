@@ -18,6 +18,9 @@ import {
   PiggyBank, ShoppingCart, TrendingUp, Wallet,
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
+import { RepartitionAnneau } from "@/components/app/mobile/graphiques-mobiles";
+import { useEcranMobile, useImpressionDepuisEcranMobile } from "@/lib/mobile/appareil";
+import { fcfaCompact } from "./montant-mobile";
 import {
   scoreAchats, scoreBudget, scoreComptabilite, scoreDepenses, scorePatrimoine, scoreRecouvrement,
   scoreStocks, scoreTresorerie, tonScore,
@@ -40,6 +43,9 @@ const COULEURS = ["#246a48", "#c9a227", "#57a47b", "#e3b536", "#8cc4a4", "#ad821
 const fmtTooltip = (v: unknown) => fcfa(Math.trunc(Number(v) || 0));
 const tooltipStyle = { borderRadius: 12, border: "1px solid #e9dcbe", fontSize: 13 };
 const axisStyle = { fontSize: 11, fill: "#2b3a33" };
+/** Téléphone : graduations abrégées (« 125 M ») — « 125000k » était tronqué sur 40 px. */
+const nfCompact = new Intl.NumberFormat("fr-FR", { notation: "compact", maximumFractionDigits: 1 });
+const axisStyleMobile = { fontSize: 12, fill: "#2b3a33" };
 const TON_CLASSE: Record<string, string> = {
   bon: "text-forest-700",
   moyen: "text-gold-700",
@@ -141,6 +147,18 @@ export function Cockpit({
     return { recettes: Math.round(moyR * moisRestants), depenses: Math.round(moyD * moisRestants) };
   }, [serieMensuelle]);
 
+  // Téléphone (écran seulement, jamais à l'impression) : axes abrégés, anneau chiffré.
+  const ecranMobile = useEcranMobile();
+  // Impression lancée depuis un téléphone : graphique sans animation (sinon vide sur le papier).
+  const impression = useImpressionDepuisEcranMobile();
+  const cumul = useMemo(
+    () => ({
+      recettes: serieMensuelle.reduce((s, m) => s + m.recettes, 0),
+      depenses: serieMensuelle.reduce((s, m) => s + m.depenses, 0),
+    }),
+    [serieMensuelle],
+  );
+
   const iconeDomaine: Record<string, typeof Wallet> = {
     tresorerie: Wallet, budget: PiggyBank, recouvrement: GraduationCap, comptabilite: Calculator,
     stocks: Boxes, patrimoine: Building2, achats: ShoppingCart, depenses: Banknote,
@@ -149,15 +167,16 @@ export function Cockpit({
   return (
     <div className="space-y-5">
       {/* Cockpit exécutif : score global + santé par domaine */}
-      <Card>
-        <div className="flex flex-wrap items-center gap-5">
-          <div className="flex flex-col items-center">
-            <div className={`flex h-24 w-24 items-center justify-center rounded-full border-4 ${scoreGlobal >= 85 ? "border-forest-500" : scoreGlobal >= 60 ? "border-gold-400" : "border-red-400"}`}>
-              <span className={`font-display text-3xl font-bold ${TON_CLASSE[tonScore(scoreGlobal)]}`}>{scoreGlobal}</span>
+      {/* Téléphone : anneau compact à côté de son libellé, domaines en grille de 2 colonnes. */}
+      <Card className="mobile:p-4">
+        <div className="flex flex-wrap items-center gap-5 mobile:gap-3">
+          <div className="flex flex-col items-center mobile:flex-row mobile:gap-3">
+            <div className={`flex h-24 w-24 items-center justify-center rounded-full border-4 ${scoreGlobal >= 85 ? "border-forest-500" : scoreGlobal >= 60 ? "border-gold-400" : "border-red-400"} mobile:h-16 mobile:w-16 mobile:border-[3px]`}>
+              <span className={`font-display text-3xl font-bold ${TON_CLASSE[tonScore(scoreGlobal)]} mobile:text-2xl`}>{scoreGlobal}</span>
             </div>
-            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-ink-700/70"><Activity size={13} /> Santé globale</p>
+            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-ink-700/70 mobile:mt-0 mobile:text-sm"><Activity size={13} /> Santé globale</p>
           </div>
-          <div className="grid flex-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid flex-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 mobile:basis-full mobile:grid-cols-2">
             {domaines.map((d) => {
               const Icone = iconeDomaine[d.code] ?? Activity;
               return (
@@ -165,16 +184,16 @@ export function Cockpit({
                   key={d.code}
                   type="button"
                   onClick={() => onNaviguer(d.onglet)}
-                  className="group rounded-2xl border border-cream-200 bg-white p-3 text-left transition-colors hover:bg-cream-100"
+                  className="group rounded-2xl border border-cream-200 bg-white p-3 text-left transition-colors hover:bg-cream-100 mobile:min-w-0 mobile:p-2.5 mobile:active:bg-cream-100"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-700/70"><Icone size={13} /> {d.libelle}</span>
-                    <span className={`font-display text-lg font-bold ${TON_CLASSE[tonScore(d.score)]}`}>{d.score}</span>
+                  <div className="flex items-center justify-between mobile:flex-col mobile:items-start">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-700/70 mobile:max-w-full mobile:wrap-break-word"><Icone size={13} /> {d.libelle}</span>
+                    <span className={`font-display text-lg font-bold ${TON_CLASSE[tonScore(d.score)]} mobile:leading-tight`}>{d.score}</span>
                   </div>
                   <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-cream-200">
                     <span className={`block h-full rounded-full ${d.score >= 85 ? "bg-forest-500" : d.score >= 60 ? "bg-gold-400" : "bg-red-400"}`} style={{ width: `${d.score}%` }} />
                   </div>
-                  <p className="mt-1 text-[11px] text-ink-700/55">{d.details}</p>
+                  <p className="mt-1 text-[11px] text-ink-700/55 mobile:line-clamp-2 mobile:text-xs mobile:text-ink-700/70 mobile:wrap-anywhere">{d.details}</p>
                 </button>
               );
             })}
@@ -184,19 +203,42 @@ export function Cockpit({
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Évolution mensuelle */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 mobile:p-4">
           <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
             <TrendingUp size={17} className="text-forest-600" /> Évolution sur 12 mois
           </h3>
+          {/* Téléphone : les deux cumuls de la période, lisibles sans toucher la courbe. */}
+          <dl className="mt-3 hidden grid-cols-2 gap-2 mobile:grid">
+            <div className="rounded-2xl bg-forest-50 p-3">
+              <dt className="text-xs text-ink-700/75">Recettes (12 mois)</dt>
+              <dd className="font-display text-lg font-bold tabular-nums text-forest-800">{fcfaCompact(cumul.recettes)}</dd>
+            </div>
+            <div className="rounded-2xl bg-gold-50 p-3">
+              <dt className="text-xs text-ink-700/75">Dépenses (12 mois)</dt>
+              <dd className="font-display text-lg font-bold tabular-nums text-gold-800">{fcfaCompact(cumul.depenses)}</dd>
+            </div>
+          </dl>
           <div className="mt-3">
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={serieMensuelle} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
+            <ResponsiveContainer width="100%" height={ecranMobile ? 200 : 240}>
+              <LineChart data={serieMensuelle} margin={ecranMobile ? { top: 8, right: 8, bottom: 4, left: 0 } : { top: 8, right: 12, bottom: 4, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e9dcbe" />
-                <XAxis dataKey="libelle" tick={axisStyle} interval="preserveStartEnd" />
-                <YAxis tick={axisStyle} tickFormatter={(v) => `${Math.round(Number(v) / 1000)}k`} width={40} />
-                <Tooltip contentStyle={tooltipStyle} formatter={fmtTooltip} />
-                <Line type="monotone" dataKey="recettes" name="Recettes" stroke="#246a48" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="depenses" name="Dépenses" stroke="#c9a227" strokeWidth={2} dot={false} />
+                {ecranMobile ? (
+                  <XAxis dataKey="libelle" tick={axisStyleMobile} interval={1} tickFormatter={(v) => String(v).split(" ")[0].replace(".", "")} />
+                ) : (
+                  <XAxis dataKey="libelle" tick={axisStyle} interval="preserveStartEnd" />
+                )}
+                {ecranMobile ? (
+                  <YAxis tick={axisStyleMobile} tickFormatter={(v) => nfCompact.format(Number(v))} width={44} tickCount={4} />
+                ) : (
+                  <YAxis tick={axisStyle} tickFormatter={(v) => `${Math.round(Number(v) / 1000)}k`} width={40} />
+                )}
+                {ecranMobile ? (
+                  <Tooltip contentStyle={tooltipStyle} formatter={fmtTooltip} wrapperStyle={{ maxWidth: 220 }} />
+                ) : (
+                  <Tooltip contentStyle={tooltipStyle} formatter={fmtTooltip} />
+                )}
+                <Line isAnimationActive={impression ? false : undefined} type="monotone" dataKey="recettes" name="Recettes" stroke="#246a48" strokeWidth={2} dot={false} />
+                <Line isAnimationActive={impression ? false : undefined} type="monotone" dataKey="depenses" name="Dépenses" stroke="#c9a227" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
             <div className="mt-2 flex flex-wrap justify-center gap-4 text-xs">
@@ -204,7 +246,7 @@ export function Cockpit({
               <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-gold-500" /> Dépenses</span>
             </div>
             {projection && (
-              <p className="mt-2 text-[11px] italic text-ink-700/55">
+              <p className="mt-2 text-[11px] italic text-ink-700/55 mobile:text-xs mobile:not-italic mobile:text-ink-700/70">
                 Projection indicative (tendance des 3 derniers mois, hors saisonnalité) — reste de l&apos;année : recettes ~{fcfa(projection.recettes)}, dépenses ~{fcfa(projection.depenses)}. Analyse IA à venir (21).
               </p>
             )}
@@ -212,15 +254,27 @@ export function Cockpit({
         </Card>
 
         {/* Répartition des dépenses */}
-        <Card>
+        <Card className="mobile:p-4">
           <h3 className="font-display text-base font-bold text-forest-900">Répartition des dépenses</h3>
           {repartitionDepenses.length === 0 ? (
             <p className="mt-3 text-sm text-ink-700/60">Aucune dépense enregistrée.</p>
+          ) : ecranMobile ? (
+            // Téléphone : anneau avec le total au centre et légende CHIFFRÉE (montant + %) de
+            // toutes les catégories (5 principales + « Autres » dépliable) — la légende de
+            // l'ordinateur s'arrête à 6 libellés, sans montant.
+            <div className="mt-3">
+              <RepartitionAnneau
+                donnees={repartitionDepenses.map((d) => ({ libelle: d.nom, valeur: d.total }))}
+                couleurs={COULEURS}
+                libelleTotal="dépensés"
+                formater={fcfaCompact}
+              />
+            </div>
           ) : (
             <>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-                  <Pie data={repartitionDepenses} dataKey="total" nameKey="nom" cx="50%" cy="50%" innerRadius={44} outerRadius={76} paddingAngle={2}>
+                  <Pie isAnimationActive={impression ? false : undefined} data={repartitionDepenses} dataKey="total" nameKey="nom" cx="50%" cy="50%" innerRadius={44} outerRadius={76} paddingAngle={2}>
                     {repartitionDepenses.map((_, i) => <Cell key={i} fill={COULEURS[i % COULEURS.length]} />)}
                   </Pie>
                   <Tooltip contentStyle={tooltipStyle} formatter={fmtTooltip} />
@@ -240,7 +294,7 @@ export function Cockpit({
       </div>
 
       {/* Centre d'alertes consolidé */}
-      <Card>
+      <Card className="mobile:p-4">
         <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
           <AlertTriangle size={17} className="text-forest-600" /> Centre d&apos;alertes ({alertes.length})
         </h3>
@@ -249,13 +303,13 @@ export function Cockpit({
         ) : (
           <ul className="mt-3 space-y-2">
             {alertes.map((a, i) => (
-              <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-cream-200 bg-white px-3.5 py-2.5">
+              <li key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-cream-200 bg-white px-3.5 py-2.5 mobile:flex-col mobile:items-stretch">
                 <span className="inline-flex items-center gap-2 text-sm">
                   <span className={`inline-block h-2.5 w-2.5 rounded-full ${a.niveau === "critique" ? "bg-red-500" : a.niveau === "attention" ? "bg-gold-500" : "bg-forest-400"}`} />
                   <strong className="text-forest-900">{a.domaine}</strong>
                   <span className="text-ink-700/70">{a.message}</span>
                 </span>
-                <button type="button" onClick={() => onNaviguer(a.onglet)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50">
+                <button type="button" onClick={() => onNaviguer(a.onglet)} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:justify-center mobile:text-sm">
                   Voir <ArrowRight size={11} />
                 </button>
               </li>

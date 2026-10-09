@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { Card, Badge } from "@/components/app/ui";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
 import { RowActions } from "./row-actions";
 import { EchangeDemande, type EchangeVue } from "./echange-demande";
 import { envoyerMessageGroupe } from "./actions";
@@ -114,6 +115,10 @@ export function ApprobationsBoard({
   }, [items, q, pays, role, etat, du, au, tri]);
 
   const filtreActif = Boolean(q || pays || role || etat || du || au);
+  // Téléphone : listes, période et tri se replient dans une feuille montante (≈ 7 rangées avant
+  // la première demande sinon) ; la recherche et le compteur restent visibles.
+  const [filtresOuverts, setFiltresOuverts] = useState(false);
+  const nbFiltresActifs = [pays, role, etat, du || au].filter(Boolean).length + (tri !== "recentes" ? 1 : 0);
   const reinitialiser = () => {
     setQ("");
     setPays("");
@@ -159,9 +164,9 @@ export function ApprobationsBoard({
   return (
     <div className="space-y-4">
       {/* Barre de filtres */}
-      <Card className="space-y-3 p-4">
+      <Card className="space-y-3 p-4 mobile:p-3">
         <div className="flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55">
+          <span className="inline-flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55 mobile:text-xs">
             <SlidersHorizontal size={14} /> Filtres
           </span>
           <span className="text-xs text-ink-700/55">
@@ -185,15 +190,35 @@ export function ApprobationsBoard({
               type="button"
               onClick={() => setQ("")}
               aria-label="Effacer la recherche"
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700/70"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700/70 mobile:right-0 mobile:flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
             >
               <X size={14} />
             </button>
           )}
         </div>
 
+        {/* Téléphone : bouton « Filtres (n) » — les listes et la période sont dans la feuille. */}
+        <div className="lg:hidden print:hidden">
+          <button
+            type="button"
+            onClick={() => setFiltresOuverts(true)}
+            aria-haspopup="dialog"
+            aria-expanded={filtresOuverts}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-cream-300 bg-white px-5 font-semibold text-forest-800 active:bg-cream-100"
+          >
+            <SlidersHorizontal aria-hidden size={18} />
+            Filtres et tri
+            {nbFiltresActifs > 0 && (
+              <span className="rounded-full bg-forest-800 px-2 py-0.5 text-xs font-bold text-cream-50 tabular-nums">
+                {nbFiltresActifs}
+                <span className="sr-only"> actif{nbFiltresActifs > 1 ? "s" : ""}</span>
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Listes : pays, rôle, état de l'échange, tri */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 mobile:hidden">
           <select value={pays} onChange={(e) => setPays(e.target.value)} className={champSelect} aria-label="Filtrer par pays">
             <option value="">Tous les pays</option>
             {paysDispo.map((p) => (
@@ -224,7 +249,7 @@ export function ApprobationsBoard({
         </div>
 
         {/* Période (date de demande) + réinitialisation */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mobile:hidden">
           <div className="flex min-w-0 items-center gap-2 rounded-full border border-cream-300 bg-white px-3 text-sm text-forest-900">
             <CalendarRange size={15} className="shrink-0 text-ink-700/40" />
             <input
@@ -257,9 +282,83 @@ export function ApprobationsBoard({
         </div>
       </Card>
 
+      {/* Téléphone : mêmes filtres (même état) dans une feuille montante, plein écran au pouce. */}
+      <FeuilleBas ouvert={filtresOuverts} onFermer={() => setFiltresOuverts(false)} titre="Filtres et tri">
+        <div className="space-y-3 px-2 pb-2">
+          <select value={pays} onChange={(e) => setPays(e.target.value)} className="h-12 w-full rounded-full border border-cream-300 bg-white px-4 pr-8 text-base text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" aria-label="Filtrer par pays">
+            <option value="">Tous les pays</option>
+            {paysDispo.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+          <select value={role} onChange={(e) => setRole(e.target.value)} className="h-12 w-full rounded-full border border-cream-300 bg-white px-4 pr-8 text-base text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" aria-label="Filtrer par rôle">
+            <option value="">Tous les rôles</option>
+            {rolesDispo.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+          <select value={etat} onChange={(e) => setEtat(e.target.value as Etat)} className="h-12 w-full rounded-full border border-cream-300 bg-white px-4 pr-8 text-base text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" aria-label="Filtrer par état de l'échange">
+            <option value="">Tous les échanges</option>
+            <option value="aucun">Sans échange</option>
+            <option value="repondu">Réponse du demandeur reçue</option>
+            <option value="attente">En attente du demandeur</option>
+          </select>
+          <select value={tri} onChange={(e) => setTri(e.target.value as Tri)} className="h-12 w-full rounded-full border border-cream-300 bg-white px-4 pr-8 text-base text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" aria-label="Trier">
+            <option value="recentes">Demandes les plus récentes</option>
+            <option value="anciennes">Demandes les plus anciennes</option>
+            <option value="activite">Dernière activité d&apos;échange</option>
+          </select>
+          <fieldset className="space-y-2">
+            <legend className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-ink-700/70">
+              <CalendarRange size={15} /> Date de la demande
+            </legend>
+            <label className="flex items-center gap-3 text-sm text-ink-700/70">
+              <span className="w-8 shrink-0">Du</span>
+              <input
+                type="date"
+                value={du}
+                max={au || undefined}
+                onChange={(e) => setDu(e.target.value)}
+                className="h-12 min-w-0 flex-1 rounded-full border border-cream-300 bg-white px-4 text-base text-forest-900 outline-none focus:border-forest-400"
+              />
+            </label>
+            <label className="flex items-center gap-3 text-sm text-ink-700/70">
+              <span className="w-8 shrink-0">Au</span>
+              <input
+                type="date"
+                value={au}
+                min={du || undefined}
+                onChange={(e) => setAu(e.target.value)}
+                className="h-12 min-w-0 flex-1 rounded-full border border-cream-300 bg-white px-4 text-base text-forest-900 outline-none focus:border-forest-400"
+              />
+            </label>
+          </fieldset>
+          {(filtreActif || tri !== "recentes") && (
+            <button
+              type="button"
+              onClick={reinitialiser}
+              className="flex min-h-12 w-full items-center justify-center gap-1.5 rounded-full border border-cream-300 bg-white font-medium text-ink-700/75 active:bg-red-50"
+            >
+              <X size={16} /> Réinitialiser
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setFiltresOuverts(false)}
+            className="mt-2 min-h-12 w-full rounded-full bg-forest-800 font-semibold text-cream-50 active:bg-forest-700"
+          >
+            Voir les {itemsFiltres.length} demande{itemsFiltres.length > 1 ? "s" : ""}
+          </button>
+        </div>
+      </FeuilleBas>
+
       {/* Barre de sélection / message groupé */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-2.5">
-        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-forest-800">
+        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-forest-800 mobile:min-h-11">
           <input
             type="checkbox"
             checked={toutSelectionne}
@@ -270,7 +369,7 @@ export function ApprobationsBoard({
           {selection.size > 0 ? `${selection.size} sélectionnée(s)` : "Tout sélectionner"}
         </label>
         {selection.size > 0 && (
-          <button type="button" onClick={() => setSelection(new Set())} className="inline-flex items-center gap-1 text-xs font-medium text-ink-700/60 hover:text-ink-800">
+          <button type="button" onClick={() => setSelection(new Set())} className="inline-flex items-center gap-1 text-xs font-medium text-ink-700/60 hover:text-ink-800 mobile:min-h-11 mobile:text-sm">
             <X size={14} /> Effacer la sélection
           </button>
         )}
@@ -289,13 +388,13 @@ export function ApprobationsBoard({
             className="w-full resize-none rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
           />
           {erreur && <p className="text-xs font-medium text-amber-700">{erreur}</p>}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[0.65rem] text-ink-700/45">Chaque demandeur reçoit le message par e-mail ; copie à l&apos;administration.</p>
+          <div className="flex items-center justify-between gap-2 mobile:flex-col mobile:items-stretch">
+            <p className="text-[0.65rem] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">Chaque demandeur reçoit le message par e-mail ; copie à l&apos;administration.</p>
             <button
               type="button"
               onClick={envoyerGroupe}
               disabled={envoi || !texte.trim()}
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:justify-center"
             >
               {envoi ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
               Envoyer à {selection.size}
@@ -311,7 +410,7 @@ export function ApprobationsBoard({
             <Filter size={22} />
           </span>
           <p className="mt-3 text-sm text-ink-700/70">Aucune demande ne correspond aux filtres.</p>
-          <button type="button" onClick={reinitialiser} className="mt-2 text-xs font-semibold text-forest-700 hover:underline">
+          <button type="button" onClick={reinitialiser} className="mt-2 text-xs font-semibold text-forest-700 hover:underline mobile:min-h-11 mobile:px-4 mobile:text-sm">
             Réinitialiser les filtres
           </button>
         </Card>
@@ -323,7 +422,7 @@ export function ApprobationsBoard({
             <Card
               key={d.id}
               id={`demande-${d.id}`}
-              className={`flex scroll-mt-24 flex-col gap-4 transition-shadow ${
+              className={`flex scroll-mt-24 flex-col gap-4 transition-shadow mobile:p-4 ${
                 enEvidence === d.id
                   ? "border-gold-400 ring-2 ring-gold-400"
                   : selection.has(d.id)
@@ -338,7 +437,7 @@ export function ApprobationsBoard({
                     checked={selection.has(d.id)}
                     onChange={() => basculer(d.id)}
                     aria-label={`Sélectionner ${d.nomComplet}`}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-cream-300"
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-cream-300 mobile:h-5 mobile:w-5"
                   />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -353,12 +452,12 @@ export function ApprobationsBoard({
                       <p className="font-semibold text-forest-900">{d.nomComplet}</p>
                       <Badge ton="attente">{d.roleLibelle}</Badge>
                       {d.dernierMessageDe === "demandeur" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-700" title="Le demandeur a répondu — en attente de votre décision">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-700 mobile:text-xs" title="Le demandeur a répondu — en attente de votre décision">
                           <MessageSquareReply size={11} /> Réponse reçue
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 truncate text-sm text-ink-700/65">{d.email}</p>
+                    <p className="mt-1 truncate text-sm text-ink-700/65 mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{d.email}</p>
                     {d.structureDeclaree && (
                       <p className="mt-1 text-sm text-ink-700/65">
                         Structure déclarée : <span className="font-medium">{d.structureDeclaree}</span>

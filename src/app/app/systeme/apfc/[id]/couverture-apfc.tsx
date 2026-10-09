@@ -113,7 +113,7 @@ function LigneCouverture({
                   disabled={!remplacement}
                   title="Remplacer"
                   aria-label={`Remplacer ${c.nom}`}
-                  className="rounded-lg p-1 text-forest-700 hover:bg-forest-100 disabled:opacity-40"
+                  className="rounded-lg p-1 text-forest-700 hover:bg-forest-100 disabled:opacity-40 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                 >
                   <Check size={14} />
                 </button>
@@ -122,7 +122,7 @@ function LigneCouverture({
                   onClick={() => { setEdition(false); setMessage(null); }}
                   title="Annuler"
                   aria-label="Annuler le remplacement"
-                  className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100"
+                  className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center"
                 >
                   <X size={14} />
                 </button>
@@ -141,26 +141,26 @@ function LigneCouverture({
 
   return (
     <tr className="border-b border-cream-100 last:border-0">
-      <td className="px-3 py-2 font-medium text-forest-900">{c.nom}</td>
-      <td className="px-3 py-2 text-ink-700/70">{c.ville ?? "—"}</td>
-      <td className="px-3 py-2 font-mono text-xs text-ink-700/60">{c.code ?? "—"}</td>
+      <td className="px-3 py-2 font-medium text-forest-900 mobile:font-semibold">{c.nom}</td>
+      <td data-label="Ville" className="px-3 py-2 text-ink-700/70">{c.ville ?? "—"}</td>
+      <td data-label="Code" className="px-3 py-2 font-mono text-xs text-ink-700/60">{c.code ?? "—"}</td>
       <td className="px-3 py-2 text-center">
         {confirme ? (
           <span className="inline-flex items-center gap-1 whitespace-nowrap">
             <span className="text-xs font-medium text-red-700">Retirer ?</span>
-            <button type="button" disabled={occupe} onClick={onRetirer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={onRetirer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               {pending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
             </button>
-            <button type="button" onClick={() => setConfirme(false)} title="Annuler" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100">
+            <button type="button" onClick={() => setConfirme(false)} title="Annuler" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               <X size={14} />
             </button>
           </span>
         ) : (
           <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
-            <button type="button" disabled={occupe} onClick={ouvrirEdition} title={`Remplacer ${c.nom}`} aria-label={`Remplacer ${c.nom}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-forest-50 hover:text-forest-700 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={ouvrirEdition} title={`Remplacer ${c.nom}`} aria-label={`Remplacer ${c.nom}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-forest-50 hover:text-forest-700 disabled:opacity-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               <Pencil size={14} />
             </button>
-            <button type="button" disabled={occupe} onClick={() => setConfirme(true)} title={`Retirer ${c.nom}`} aria-label={`Retirer ${c.nom}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={() => setConfirme(true)} title={`Retirer ${c.nom}`} aria-label={`Retirer ${c.nom}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center">
               <Trash2 size={14} />
             </button>
           </span>
@@ -254,13 +254,14 @@ function ImportCouvertureCSV({ apfcId }: { apfcId: string }) {
     <div className="mt-3 space-y-3 border-t border-cream-100 pt-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-forest-900">Importer les établissements couverts (CSV)</p>
-        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100">
+        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:px-4">
           <FileDown size={13} /> Télécharger le modèle
         </button>
       </div>
 
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
+      {/* Téléphone : zone plus basse et formulation au doigt (pas de glisser-déposer). */}
       <div
         onDragOver={(e) => { e.preventDefault(); setSurvole(true); }}
         onDragLeave={() => setSurvole(false)}
@@ -269,12 +270,15 @@ function ImportCouvertureCSV({ apfcId }: { apfcId: string }) {
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fichierRef.current?.click(); } }}
-        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors mobile:py-4 ${
           survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"
         }`}
       >
         <Upload size={20} className="mx-auto mb-1 text-forest-500" />
-        <p className="text-sm font-medium text-forest-900">Glissez-déposez le fichier CSV ici</p>
+        <p className="text-sm font-medium text-forest-900">
+          <span className="mobile:hidden">Glissez-déposez le fichier CSV ici</span>
+          <span className="hidden mobile:inline">Touchez pour choisir un fichier CSV</span>
+        </p>
         <p className="text-xs text-ink-700/55">ou cliquez pour parcourir{nomFichier ? ` · ${nomFichier}` : ""}</p>
       </div>
       <input ref={fichierRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { void chargerFichier(e.target.files?.[0]); e.target.value = ""; }} />
@@ -290,7 +294,7 @@ function ImportCouvertureCSV({ apfcId }: { apfcId: string }) {
         onChange={(e) => { setTexte(e.target.value); setNomFichier(""); noterChangementTexte(e.target.value); }}
         rows={3}
         placeholder={"Ou collez le CSV ici…\ncode;nom;ville\nCI-ABJ-0012;EPP Cocody Centre;Abidjan"}
-        className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
       />
 
       {enCours && (
@@ -363,7 +367,7 @@ function ImportCouvertureCSV({ apfcId }: { apfcId: string }) {
       <form action={action} className="flex justify-end">
         <input type="hidden" name="apfcId" value={apfcId} />
         <input type="hidden" name="texte" value={texte} />
-        <SubmitButton className="w-auto px-6" disabled={!importable}>
+        <SubmitButton className="w-auto px-6 mobile:w-full" disabled={!importable}>
           <Upload size={14} /> {importable ? `Importer ${analyse!.nbValides} établissement(s)` : "Importer"}
         </SubmitButton>
       </form>
@@ -426,9 +430,10 @@ export function CouvertureApfc({
       </div>
       <p className="mb-3 text-sm text-ink-700/60">Établissements sous compétence territoriale de cette antenne.</p>
 
+      {/* Téléphone : une carte par établissement, sans zone à double défilement. */}
       {trie.length > 0 && (
-        <div className="mb-4 max-h-72 overflow-auto rounded-xl border border-cream-100">
-          <table className="w-full border-collapse text-sm">
+        <div className="mb-4 max-h-72 overflow-auto rounded-xl border border-cream-100 mobile:max-h-none mobile:overflow-visible mobile:border-0">
+          <table className="tableau-cartes-mobile w-full border-collapse text-sm">
             <thead className="sticky top-0 bg-cream-50">
               <tr className="border-b border-cream-200 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
                 <th className="px-3 py-2">Établissement</th>
@@ -459,7 +464,8 @@ export function CouvertureApfc({
         </div>
       )}
       <div className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3">
-        <div className="min-w-[16rem] flex-1">
+        {/* Téléphone : pleine largeur (16rem fixes débordaient à 320 px). */}
+        <div className="min-w-[16rem] flex-1 mobile:min-w-0 mobile:basis-full">
           <span className="mb-1.5 block text-sm font-medium text-forest-900">Ajouter un établissement</span>
           <SelecteurEtabCascade
             etabs={null}
@@ -474,7 +480,7 @@ export function CouvertureApfc({
           type="button"
           disabled={!selection || pendingAjout}
           onClick={ajouter}
-          className="inline-flex h-11 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+          className="inline-flex h-11 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:w-full mobile:justify-center"
         >
           {pendingAjout ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />} Ajouter
         </button>

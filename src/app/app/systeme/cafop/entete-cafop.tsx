@@ -4,14 +4,16 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { GraduationCap, RefreshCw, Plus, X, FileSpreadsheet, Upload, BarChart3, FileText, BookOpen, Download, Maximize2, Minimize2 } from "lucide-react";
+import { GraduationCap, RefreshCw, Plus, X, FileSpreadsheet, Upload, BarChart3, FileText, BookOpen, Download, Maximize2, Minimize2, MoreHorizontal } from "lucide-react";
 import { creerStructure, importerCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
+import { PublierTitreMobile } from "@/components/app/mobile/publier-titre";
 
 const BASE = "/app/systeme/cafop";
 const champCls =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
 const initial: EtatForm = { ok: false };
 
 export type OngletCafop = "gestion" | "enseignements" | "statistiques" | "rapports";
@@ -35,6 +37,7 @@ export function EnteteCafop({
   regions,
   terme = "CAFOP",
   lectureSeule = false,
+  compactMobile = false,
 }: {
   ongletActif: OngletCafop;
   nbCentres: number;
@@ -42,24 +45,33 @@ export function EnteteCafop({
   terme?: string;
   /** Rôle en lecture seule (adc/delc) : masque l'import et la création de CAFOP. */
   lectureSeule?: boolean;
+  /** Pages d'UN centre : sur téléphone, cet en-tête global est masqué (le sous-en-tête du centre
+   *  et l'en-tête mobile suffisent). Sans effet sur ordinateur et à l'impression. */
+  compactMobile?: boolean;
 }) {
   const router = useRouter();
   const [formOuvert, setFormOuvert] = useState(false);
   const [importOuvert, setImportOuvert] = useState(false);
+  // Téléphone : outils secondaires (modèle, import, actualiser) regroupés dans une feuille « ⋯ ».
+  const [outilsOuverts, setOutilsOuverts] = useState(false);
   const T = (s: string) => appliquerTerme(s, terme);
 
-  const onglets: { cle: OngletCafop | string; libelle: string; href: string; dispo: boolean; Icone?: typeof BookOpen }[] = [
-    { cle: "gestion", libelle: "Gestion", href: BASE, dispo: true },
-    { cle: "enseignements", libelle: "Enseignements & Évaluation", href: `${BASE}/enseignements`, dispo: true, Icone: BookOpen },
-    { cle: "statistiques", libelle: "Statistiques", href: `${BASE}/statistiques`, dispo: true, Icone: BarChart3 },
-    { cle: "rapports", libelle: "Rapports", href: `${BASE}/rapports`, dispo: true, Icone: FileText },
+  const onglets: { cle: OngletCafop | string; libelle: string; court: string; href: string; dispo: boolean; Icone?: typeof BookOpen }[] = [
+    { cle: "gestion", libelle: "Gestion", court: "Gestion", href: BASE, dispo: true },
+    { cle: "enseignements", libelle: "Enseignements & Évaluation", court: "Enseignements", href: `${BASE}/enseignements`, dispo: true, Icone: BookOpen },
+    { cle: "statistiques", libelle: "Statistiques", court: "Statistiques", href: `${BASE}/statistiques`, dispo: true, Icone: BarChart3 },
+    { cle: "rapports", libelle: "Rapports", court: "Rapports", href: `${BASE}/rapports`, dispo: true, Icone: FileText },
   ];
 
   return (
-    <div className="space-y-4 print:hidden">
+    <div className={compactMobile ? "space-y-4 print:hidden masque-ecran-mobile" : "space-y-4 print:hidden"}>
+      {/* Titre de l'en-tête mobile (les pages d'un centre publient le nom du centre). */}
+      {!compactMobile && <PublierTitreMobile titre={T("Gestion des CAFOP")} />}
       {/* En-tête + onglets */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
+        {/* Téléphone : titre et description masqués à l'œil (déjà portés par l'en-tête mobile),
+            toujours lus par les lecteurs d'écran. */}
+        <div className="titre-page-ecran-mobile flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-500 text-white">
             <GraduationCap size={22} />
           </span>
@@ -70,28 +82,33 @@ export function EnteteCafop({
             </p>
           </div>
         </div>
-        <nav className="flex flex-wrap gap-1.5">
+        {/* Téléphone : onglets sur une ligne qui défile, libellés courts. */}
+        <nav className="rangee-defilante-mobile flex flex-wrap gap-1.5 mobile:w-full">
           {onglets.map((o) => (
             <Link
               key={o.cle}
               href={o.href}
               aria-current={o.cle === ongletActif ? "page" : undefined}
-              className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors mobile:h-11 mobile:px-4 ${
                 o.cle === ongletActif ? "bg-gold-100 text-gold-800" : "border border-cream-300 text-ink-700/70 hover:bg-cream-100"
               }`}
             >
-              {o.Icone && <o.Icone size={15} />} {o.libelle}
+              {o.Icone && <o.Icone size={15} />}{" "}
+              <span>
+                <span className="mobile:hidden">{o.libelle}</span>
+                <span className="hidden mobile:inline">{o.court}</span>
+              </span>
             </Link>
           ))}
         </nav>
       </div>
 
       {/* Barre d'outils */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={lectureSeule ? "flex flex-wrap items-center gap-2 mobile:hidden" : "flex flex-wrap items-center gap-2"}>
         <button
           type="button"
           onClick={() => router.refresh()}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100 mobile:hidden"
         >
           <RefreshCw size={15} /> Actualiser
         </button>
@@ -100,24 +117,56 @@ export function EnteteCafop({
             <button
               type="button"
               onClick={telechargerModeleCsv}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100 mobile:hidden"
             >
               <FileSpreadsheet size={15} /> Modèle CSV
             </button>
             <button
               type="button"
               onClick={() => setImportOuvert(true)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100 mobile:hidden"
             >
               <Upload size={15} /> Importer CSV
             </button>
             <button
               type="button"
               onClick={() => setFormOuvert(true)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600 mobile:h-11 mobile:flex-1 mobile:justify-center"
             >
               <Plus size={16} /> {T("Nouveau CAFOP")}
             </button>
+            <div className="lg:hidden print:hidden">
+              <button
+                type="button"
+                onClick={() => setOutilsOuverts(true)}
+                aria-label="Autres outils : modèle CSV, import, actualiser"
+                aria-haspopup="dialog"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-cream-300 bg-white text-forest-800 active:bg-cream-100"
+              >
+                <MoreHorizontal size={20} />
+              </button>
+              <FeuilleBas ouvert={outilsOuverts} onFermer={() => setOutilsOuverts(false)} titre="Outils">
+                <div className="space-y-1 px-2 pb-2">
+                  {[
+                    { libelle: "Télécharger le modèle CSV", Icone: FileSpreadsheet, action: telechargerModeleCsv },
+                    { libelle: "Importer un fichier CSV", Icone: Upload, action: () => setImportOuvert(true) },
+                    { libelle: "Actualiser", Icone: RefreshCw, action: () => router.refresh() },
+                  ].map(({ libelle, Icone, action }) => (
+                    <button
+                      key={libelle}
+                      type="button"
+                      onClick={() => {
+                        setOutilsOuverts(false);
+                        action();
+                      }}
+                      className="flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 text-left font-semibold text-forest-900 active:bg-cream-100"
+                    >
+                      <Icone size={18} className="text-forest-700" /> {libelle}
+                    </button>
+                  ))}
+                </div>
+              </FeuilleBas>
+            </div>
           </>
         )}
       </div>
@@ -229,11 +278,11 @@ function ImporterCsvModal({ onFerme, onImporte, terme }: { onFerme: () => void; 
           name="texte"
           rows={5}
           placeholder={"Collez le CSV ici…\nnom;drena;localite;directeur;telephone;effectif\nCAFOP de Séguéla;Séguéla;Séguéla;M. TRAORÉ;+225 07 12 34 56 78;180"}
-          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <input type="file" name="fichier" accept=".csv,text/csv,.txt" className="text-xs" />
-          <div className="flex gap-2">
+          <input type="file" name="fichier" accept=".csv,text/csv,.txt" className="text-xs mobile:w-full mobile:text-sm" />
+          <div className="flex gap-2 mobile:w-full mobile:justify-end">
             <BoutonAnnuler onClick={onFerme} disabled={pending} />
             <SubmitButton className="w-auto px-6"><Download size={15} /> Importer</SubmitButton>
           </div>
@@ -263,7 +312,12 @@ export function Modale({
 }) {
   const [agrandi, setAgrandi] = useState(false);
   const largeur = xl ? "w-[min(58rem,calc(100vw-2rem))]" : large ? "w-[min(36rem,calc(100vw-2rem))]" : "w-[min(30rem,calc(100vw-2rem))]";
-  const dimensions = agrandi ? "h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-h-none rounded-2xl" : `${largeur} max-h-[calc(100vh-2rem)] rounded-3xl`;
+  // Téléphone : la fenêtre devient une feuille ancrée en bas, bornée à la hauteur VISIBLE (dvh) —
+  // 100vh dépassait la zone visible d'iOS et les boutons (Créer, Importer…) passaient sous la
+  // barre du navigateur. Agrandie : plein écran.
+  const dimensions = agrandi
+    ? "h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-h-none rounded-2xl mobile:h-dvh mobile:w-full mobile:rounded-none"
+    : `${largeur} max-h-[calc(100vh-2rem)] rounded-3xl mobile:w-full mobile:max-h-[92dvh] mobile:rounded-b-none`;
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onFerme} className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm" />
@@ -274,28 +328,28 @@ export function Modale({
         transition={{ duration: 0.2 }}
         role="dialog"
         aria-modal="true"
-        className={`fixed left-1/2 top-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-cream-200 bg-white shadow-soft ${dimensions}`}
+        className={`fixed left-1/2 top-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-cream-200 bg-white shadow-soft mobile:bottom-0 mobile:left-0 mobile:top-auto mobile:translate-x-0 mobile:translate-y-0 ${dimensions}`}
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-cream-100 px-5 py-3.5">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-cream-100 px-5 py-3.5 mobile:px-4 mobile:py-1.5">
           <h2 className="min-w-0 truncate font-display text-base font-bold text-forest-900">{titre}</h2>
           <div className="flex shrink-0 items-center gap-1">
             {agrandissable && (
               <button
                 type="button"
                 onClick={() => setAgrandi((v) => !v)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11"
                 aria-label={agrandi ? "Réduire la fenêtre" : "Agrandir la fenêtre"}
                 title={agrandi ? "Réduire" : "Agrandir (plein écran)"}
               >
                 {agrandi ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
               </button>
             )}
-            <button type="button" onClick={onFerme} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
+            <button type="button" onClick={onFerme} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer">
               <X size={18} />
             </button>
           </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-5 mobile:p-4 mobile:pb-[calc(1rem+var(--marge-sure-bas))]">{children}</div>
       </motion.div>
     </>
   );

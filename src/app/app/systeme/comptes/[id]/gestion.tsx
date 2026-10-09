@@ -84,7 +84,7 @@ function scopeActuel(c: CompteVue, portee: TypePortee): string {
 /** Titre de section réutilisable. */
 function Section({ icone, titre, sousTitre, children }: { icone: React.ReactNode; titre: string; sousTitre?: string; children: React.ReactNode }) {
   return (
-    <Card>
+    <Card className="mobile:p-4">
       <div className="mb-4 flex items-start gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-forest-50 text-forest-600">{icone}</span>
         <div>
@@ -265,7 +265,7 @@ function RoleAffectation({
                 : "Ce rôle est personnel (parent / élève) — le périmètre découle de ses liens (enfants, inscription)."}
             </p>
           )}
-          <SubmitButton className="w-auto px-6">Enregistrer le rôle &amp; l&apos;affectation</SubmitButton>
+          <SubmitButton className="w-auto px-6 mobile:w-full">Enregistrer le rôle &amp; l&apos;affectation</SubmitButton>
         </form>
       )}
     </Section>
@@ -298,7 +298,7 @@ function Coordonnees({ compte }: { compte: CompteVue }) {
             <Input id="telephone" name="telephone" defaultValue={compte.telephone ?? ""} placeholder="+225…" />
           </div>
         </div>
-        <SubmitButton className="w-auto px-6">Enregistrer les coordonnées</SubmitButton>
+        <SubmitButton className="w-auto px-6 mobile:w-full">Enregistrer les coordonnées</SubmitButton>
       </form>
     </Section>
   );
@@ -323,12 +323,12 @@ function Statut({ compte, estSoi }: { compte: CompteVue; estSoi: boolean }) {
             </strong>
           </span>
           {!actif && (
-            <button type="submit" name="statut" value="actif" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-700 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-600">
+            <button type="submit" name="statut" value="actif" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-700 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-600 mobile:h-11 mobile:flex-1 mobile:justify-center">
               Activer le compte
             </button>
           )}
           {compte.statut !== "suspendu" && (
-            <button type="submit" name="statut" value="suspendu" className="inline-flex h-10 items-center gap-1.5 rounded-full border border-red-200 px-5 text-sm font-semibold text-red-600 hover:bg-red-50">
+            <button type="submit" name="statut" value="suspendu" className="inline-flex h-10 items-center gap-1.5 rounded-full border border-red-200 px-5 text-sm font-semibold text-red-600 hover:bg-red-50 mobile:h-11 mobile:flex-1 mobile:justify-center">
               Suspendre
             </button>
           )}
@@ -359,19 +359,20 @@ function Securite({ compte, estSoi }: { compte: CompteVue; estSoi: boolean }) {
           {etat.motDePasseTemp && (
             <div className="rounded-2xl border border-forest-200 bg-forest-50 p-3">
               <p className="text-xs font-medium text-forest-800">{etat.message}</p>
-              <div className="mt-2 flex items-center gap-2">
-                <code className="rounded-lg bg-white px-3 py-1.5 font-mono text-sm text-forest-900">{etat.motDePasseTemp}</code>
+              {/* Téléphone : un mot de passe choisi (longueur libre, insécable) passe à la ligne au lieu de déborder. */}
+              <div className="mt-2 flex items-center gap-2 mobile:flex-wrap">
+                <code className="rounded-lg bg-white px-3 py-1.5 font-mono text-sm text-forest-900 mobile:min-w-0 mobile:[overflow-wrap:anywhere]">{etat.motDePasseTemp}</code>
                 <button
                   type="button"
                   onClick={() => { navigator.clipboard?.writeText(etat.motDePasseTemp!); setCopie(true); }}
-                  className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-medium text-forest-700 hover:bg-white"
+                  className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-medium text-forest-700 hover:bg-white mobile:h-11 mobile:px-4"
                 >
                   {copie ? <Check size={13} /> : <Copy size={13} />} {copie ? "Copié" : "Copier"}
                 </button>
               </div>
             </div>
           )}
-          <SubmitButton className="w-auto px-6">Réinitialiser le mot de passe</SubmitButton>
+          <SubmitButton className="w-auto px-6 mobile:w-full">Réinitialiser le mot de passe</SubmitButton>
         </form>
       )}
     </Section>
@@ -387,7 +388,7 @@ function Suppression({ compte, estSoi, estAdmin }: { compte: CompteVue; estSoi: 
 
   const bloque = estSoi || estAdmin;
   return (
-    <Card className="border-red-200">
+    <Card className="border-red-200 mobile:p-4">
       <div className="mb-3 flex items-start gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600"><Trash2 size={18} /></span>
         <div>
@@ -401,7 +402,7 @@ function Suppression({ compte, estSoi, estAdmin }: { compte: CompteVue; estSoi: 
           {estSoi ? "Vous ne pouvez pas supprimer votre propre compte." : "Un compte administrateur ne peut pas être supprimé ici."}
         </p>
       ) : !confirme ? (
-        <button type="button" onClick={() => setConfirme(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-red-300 px-5 text-sm font-semibold text-red-600 hover:bg-red-50">
+        <button type="button" onClick={() => setConfirme(true)} className="inline-flex h-10 items-center gap-1.5 rounded-full border border-red-300 px-5 text-sm font-semibold text-red-600 hover:bg-red-50 mobile:h-11 mobile:w-full mobile:justify-center">
           <Trash2 size={15} /> Supprimer ce compte
         </button>
       ) : (
@@ -410,10 +411,10 @@ function Suppression({ compte, estSoi, estAdmin }: { compte: CompteVue; estSoi: 
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
             <AlertTriangle size={15} /> Confirmer la suppression définitive ?
           </span>
-          <button type="submit" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-red-600 px-5 text-sm font-semibold text-white hover:bg-red-700">
+          <button type="submit" className="inline-flex h-10 items-center gap-1.5 rounded-full bg-red-600 px-5 text-sm font-semibold text-white hover:bg-red-700 mobile:h-11 mobile:flex-1 mobile:justify-center">
             Oui, supprimer
           </button>
-          <button type="button" onClick={() => setConfirme(false)} className="inline-flex h-10 items-center rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-50">
+          <button type="button" onClick={() => setConfirme(false)} className="inline-flex h-10 items-center rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-50 mobile:h-11 mobile:flex-1 mobile:justify-center">
             Annuler
           </button>
         </form>

@@ -53,11 +53,11 @@ export default async function PageWikiDetail({ params }: { params: Promise<{ slu
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Link href={`${BASE}/cours/${slug}/wiki`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+      <Link href={`${BASE}/cours/${slug}/wiki`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden">
         <ArrowLeft size={15} /> Espace collaboratif
       </Link>
 
-      <PageHeader titre={page.titre} description={`Cours « ${page.cours.titre} » · créée par ${nomDe(page.creePar)} le ${new Date(page.creeLe).toLocaleDateString("fr-FR")}`} />
+      <PageHeader titre={page.titre} titreMobile="Page wiki" titreVisibleMobile description={`Cours « ${page.cours.titre} » · créée par ${nomDe(page.creePar)} le ${new Date(page.creeLe).toLocaleDateString("fr-FR")}`} />
 
       <div className="flex flex-wrap items-center gap-2">
         <Badge ton="neutre">Dernière révision : {new Date(page.misAJourLe).toLocaleDateString("fr-FR")} par {nomDe(page.misAJourPar)}</Badge>

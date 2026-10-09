@@ -3,13 +3,15 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { UserPlus, Upload, X, Download } from "lucide-react";
+import { UserPlus, Upload, X, Download, MoreHorizontal, MailPlus, Loader2 } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
 import { ROLES } from "@/lib/rbac";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { creerCompte, importerComptes, exporterComptes, type EtatForm } from "./actions";
+import { ModaleRappelRattachement } from "./bouton-rappel-rattachement";
 
 const initial: EtatForm = { ok: false };
 const champ =
@@ -32,15 +34,17 @@ function Modal({ titre, onClose, children }: { titre: string; onClose: () => voi
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={{ duration: 0.2 }}
-        className="fixed left-1/2 top-1/2 z-50 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
+        // Téléphone : feuille ancrée en bas (hauteur en dvh : la barre de Safari et le clavier ne
+        // masquent plus les boutons), pied de formulaire collant.
+        className="fixed left-1/2 top-1/2 z-50 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft mobile:inset-x-0 mobile:top-auto mobile:bottom-0 mobile:w-full mobile:max-w-none mobile:translate-x-0 mobile:translate-y-0 mobile:rounded-b-none"
       >
         <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3.5">
           <h2 className="font-display text-base font-bold text-forest-900">{titre}</h2>
-          <button onClick={onClose} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
+          <button onClick={onClose} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100 mobile:h-11 mobile:w-11" aria-label="Fermer">
             <X size={18} />
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto p-5">{children}</div>
+        <div className="max-h-[70vh] overflow-y-auto p-5 mobile:max-h-[calc(92dvh-4.5rem)] mobile:overscroll-contain mobile:pb-0">{children}</div>
       </motion.div>
     </>
   );
@@ -100,11 +104,11 @@ function CreerForm({ onClose, rolesOptions }: { onClose: () => void; rolesOption
           <input name="motDePasse" type="text" required minLength={8} className={champ} placeholder="8 caractères min." />
         </div>
       </div>
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex justify-end gap-2 pt-2 mobile:sticky mobile:bottom-0 mobile:z-10 mobile:-mx-5 mobile:flex-col-reverse mobile:items-stretch mobile:border-t mobile:border-cream-100 mobile:bg-white mobile:px-5 mobile:pt-3 mobile:pb-[calc(1rem+var(--marge-sure-bas))]">
         <button type="button" onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
           {etat.ok ? "Fermer" : "Annuler"}
         </button>
-        <SubmitButton className="w-auto px-6">
+        <SubmitButton className="w-auto px-6 mobile:w-full">
           <UserPlus size={15} /> Créer le compte
         </SubmitButton>
       </div>
@@ -135,13 +139,14 @@ function ImportForm({ onClose }: { onClose: () => void }) {
   return (
     <form action={action} className="space-y-3">
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
-      <div className="flex items-center justify-between rounded-2xl border border-cream-200 bg-cream-50/60 px-3.5 py-2.5">
+      {/* Téléphone : la liste des colonnes passe au-dessus du bouton au lieu d'être écrasée à côté. */}
+      <div className="flex items-center justify-between rounded-2xl border border-cream-200 bg-cream-50/60 px-3.5 py-2.5 mobile:flex-col mobile:items-start mobile:gap-2">
         <p className="text-xs text-ink-700/70">Colonnes : <code>prenom; nom; email; telephone; role; statut; pays; code_etablissement; etablissement</code></p>
-        <button type="button" onClick={telechargerModele} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+        <button type="button" onClick={telechargerModele} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-4">
           <Download size={13} /> Modèle CSV
         </button>
       </div>
-      <p className="text-[0.7rem] leading-relaxed text-ink-700/55">
+      <p className="text-[0.7rem] leading-relaxed text-ink-700/55 mobile:text-xs">
         <code>role</code> : identifiant technique (ex. <code>enseignant</code>) ou libellé.{" "}
         <code>statut</code> : <code>actif</code> (défaut), <code>en_attente_verification</code> ou{" "}
         <code>suspendu</code>. <code>code_etablissement</code> (recommandé) ou <code>etablissement</code> (nom exact,
@@ -150,21 +155,21 @@ function ImportForm({ onClose }: { onClose: () => void }) {
       </p>
       <div>
         <label className="mb-1.5 block text-sm font-medium text-forest-900">Fichier CSV</label>
-        <input type="file" name="fichier" accept=".csv,text/csv" className="text-xs" />
+        <input type="file" name="fichier" accept=".csv,text/csv" className="text-xs mobile:w-full mobile:text-sm" />
       </div>
       <div>
         <label className="mb-1.5 block text-sm font-medium text-forest-900">…ou coller le CSV</label>
-        <textarea name="texte" rows={4} placeholder={"prenom;nom;email;telephone;role;statut;pays;code_etablissement;etablissement\nAwa;Kone;awa.kone@exemple.ci;;enseignant;actif;;041600;"} className="w-full rounded-2xl border border-cream-300 bg-white px-3 py-2.5 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+        <textarea name="texte" rows={4} placeholder={"prenom;nom;email;telephone;role;statut;pays;code_etablissement;etablissement\nAwa;Kone;awa.kone@exemple.ci;;enseignant;actif;;041600;"} className="w-full rounded-2xl border border-cream-300 bg-white px-3 py-2.5 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-sm" />
       </div>
       <div>
         <label className="mb-1.5 block text-sm font-medium text-forest-900">Mot de passe temporaire (tous les comptes)</label>
         <input name="motDePasse" type="text" required minLength={8} defaultValue="EduWeb-2026" className={champ} />
       </div>
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex justify-end gap-2 pt-2 mobile:sticky mobile:bottom-0 mobile:z-10 mobile:-mx-5 mobile:flex-col-reverse mobile:items-stretch mobile:border-t mobile:border-cream-100 mobile:bg-white mobile:px-5 mobile:pt-3 mobile:pb-[calc(1rem+var(--marge-sure-bas))]">
         <button type="button" onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
           {etat.ok ? "Fermer" : "Annuler"}
         </button>
-        <SubmitButton className="w-auto px-6">
+        <SubmitButton className="w-auto px-6 mobile:w-full">
           <Upload size={15} /> Importer
         </SubmitButton>
       </div>
@@ -172,18 +177,19 @@ function ImportForm({ onClose }: { onClose: () => void }) {
   );
 }
 
-function ExportButton() {
+/** Export CSV des comptes (téléchargement) — renvoie vrai si le fichier est parti. */
+function useExportComptes() {
   const [busy, setBusy] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
-  async function exporter() {
+  async function exporter(): Promise<boolean> {
     setBusy(true);
     setErreur(null);
     try {
       const res = await exporterComptes();
       if (!res.ok || !res.csv) {
         setErreur(res.message ?? "Échec de l'export.");
-        return;
+        return false;
       }
       const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
       const a = document.createElement("a");
@@ -191,15 +197,24 @@ function ExportButton() {
       a.download = res.nom ?? "comptes-eduweb.csv";
       a.click();
       URL.revokeObjectURL(a.href);
+      return true;
     } catch {
       setErreur("Erreur technique lors de l'export.");
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
+  return { busy, erreur, exporter };
+}
+
+function ExportButton() {
+  const { busy, erreur, exporter } = useExportComptes();
+
   return (
-    <div className="flex flex-col items-start">
+    // Téléphone : l'export passe dans la feuille « Plus » (ComptesActions).
+    <div className="flex flex-col items-start mobile:hidden">
       <button
         onClick={exporter}
         disabled={busy}
@@ -212,29 +227,105 @@ function ExportButton() {
   );
 }
 
-export function ComptesActions({ terme = "CAFOP", termeApfc = "APFC" }: { terme?: string; termeApfc?: string }) {
-  const [modal, setModal] = useState<null | "creer" | "import">(null);
+export function ComptesActions({
+  terme = "CAFOP",
+  termeApfc = "APFC",
+  afficherRappel = false,
+}: {
+  terme?: string;
+  termeApfc?: string;
+  /** Admin système hors aperçu : la feuille « Plus » du téléphone propose aussi le rappel de
+   *  rattachement (sur ordinateur, c'est le bouton BoutonRappelRattachement de la page). */
+  afficherRappel?: boolean;
+}) {
+  const [modal, setModal] = useState<null | "creer" | "import" | "rappel">(null);
   const fermer = () => setModal(null);
+  // Téléphone : « Créer un compte » reste en vue ; Importer, Exporter et Rappel passent dans
+  // une feuille « Plus » (4 pilules empilées occupaient ~200 px avant les compteurs).
+  const [plus, setPlus] = useState(false);
+  const exportMobile = useExportComptes();
   const rolesOptions: RoleOption[] = Object.entries(ROLES)
     .map(([v, r]) => ({ v, l: appliquerTermeApfc(appliquerTerme(r.libelle, terme), termeApfc) }))
     .sort((a, b) => a.l.localeCompare(b.l));
+  const rangee =
+    "flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 text-left text-base font-medium text-forest-900 active:bg-cream-100 disabled:opacity-50";
   return (
     <>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mobile:w-full mobile:flex-nowrap">
         <button
           onClick={() => setModal("creer")}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 transition-transform hover:-translate-y-0.5 hover:bg-forest-700"
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 transition-transform hover:-translate-y-0.5 hover:bg-forest-700 mobile:flex-1 mobile:justify-center"
         >
           <UserPlus size={16} /> Créer un compte
         </button>
         <button
           onClick={() => setModal("import")}
-          className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+          className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:hidden"
         >
           <Upload size={16} /> Importer CSV
         </button>
         <ExportButton />
+        <div className="lg:hidden print:hidden">
+          <button
+            type="button"
+            onClick={() => setPlus(true)}
+            aria-haspopup="dialog"
+            aria-label="Plus d'actions"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-forest-200 bg-white text-forest-800 active:bg-forest-50"
+          >
+            <MoreHorizontal size={18} />
+          </button>
+        </div>
       </div>
+      <FeuilleBas ouvert={plus} onFermer={() => setPlus(false)} titre="Plus d'actions">
+        <ul className="space-y-0.5 px-2 pb-2">
+          <li>
+            <button
+              type="button"
+              onClick={() => {
+                setPlus(false);
+                setModal("import");
+              }}
+              className={rangee}
+            >
+              <Upload size={19} className="shrink-0 text-forest-700" /> Importer des comptes (CSV)
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              disabled={exportMobile.busy}
+              onClick={async () => {
+                if (await exportMobile.exporter()) setPlus(false);
+              }}
+              className={rangee}
+            >
+              {exportMobile.busy ? (
+                <Loader2 size={19} className="shrink-0 animate-spin text-forest-700" />
+              ) : (
+                <Download size={19} className="shrink-0 text-forest-700" />
+              )}
+              {exportMobile.busy ? "Export en cours…" : "Exporter les comptes (CSV)"}
+            </button>
+            {exportMobile.erreur && <p className="px-3 pb-1 text-xs text-red-600">{exportMobile.erreur}</p>}
+          </li>
+          {afficherRappel && (
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setPlus(false);
+                  setModal("rappel");
+                }}
+                className={rangee}
+              >
+                <MailPlus size={19} className="shrink-0 text-gold-700" /> Rappel de rattachement
+              </button>
+            </li>
+          )}
+        </ul>
+      </FeuilleBas>
+      {afficherRappel && <ModaleRappelRattachement ouvert={modal === "rappel"} onFermer={fermer} />}
       <AnimatePresence>
         {modal === "creer" && (
           <Modal titre="Créer un compte" onClose={fermer}>

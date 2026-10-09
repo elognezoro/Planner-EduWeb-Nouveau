@@ -33,6 +33,7 @@ import {
 } from "@/lib/finances/scolarite/types";
 import { SelecteurEleve, useApresSucces } from "./scolarite-onglets";
 import { LIBELLE_MODE, fcfa, type EleveVue, type FraisVue } from "./types";
+import { MontantTuile } from "./montant-mobile";
 
 const INITIAL: EtatForm = { ok: false };
 type ActionServeur = (prev: EtatForm, fd: FormData) => Promise<EtatForm>;
@@ -103,7 +104,7 @@ export function BoutonActionConfirmee({
       {!confirmer ? (
         <button
           type="button" disabled={desactive || pending} onClick={() => setConfirmer(true)}
-          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold disabled:opacity-40 ${classes}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold disabled:opacity-40 mobile:min-h-11 mobile:px-3.5 ${classes}`}
         >
           <Icone size={13} /> {libelle}
         </button>
@@ -112,13 +113,13 @@ export function BoutonActionConfirmee({
           <span className="text-xs font-medium text-ink-700/70">Confirmer ?</span>
           <button
             type="button" onClick={executer} disabled={pending}
-            className="inline-flex items-center gap-1 rounded-full bg-forest-800 px-2.5 py-1 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-forest-800 px-2.5 py-1 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:min-h-11 mobile:px-3.5"
           >
             {pending ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} Oui
           </button>
           <button
             type="button" onClick={() => setConfirmer(false)}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-cream-300 text-ink-700/60 hover:bg-cream-100"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-cream-300 text-ink-700/60 hover:bg-cream-100 mobile:h-11 mobile:w-11"
           >
             <X size={12} />
           </button>
@@ -134,15 +135,15 @@ export function BoutonActionConfirmee({
 // ─────────────────────────────────────────────────────────────
 
 export function TableauRecouvrement({ recouvrement, exercice }: { recouvrement: RecouvrementVue; exercice: string }) {
-  const cartes: { libelle: string; valeur: string; Icone: typeof Gauge; ton?: "gold" | "rouge" }[] = [
-    { libelle: "Montant attendu", valeur: fcfa(recouvrement.attendu), Icone: Scale },
-    { libelle: "Encaissé", valeur: fcfa(recouvrement.encaisse), Icone: Wallet },
-    { libelle: "Reste à encaisser", valeur: fcfa(recouvrement.reste), Icone: Coins, ton: "gold" },
+  const cartes: { libelle: string; valeur: string; montant?: number; Icone: typeof Gauge; ton?: "gold" | "rouge" }[] = [
+    { libelle: "Montant attendu", valeur: fcfa(recouvrement.attendu), montant: recouvrement.attendu, Icone: Scale },
+    { libelle: "Encaissé", valeur: fcfa(recouvrement.encaisse), montant: recouvrement.encaisse, Icone: Wallet },
+    { libelle: "Reste à encaisser", valeur: fcfa(recouvrement.reste), montant: recouvrement.reste, Icone: Coins, ton: "gold" },
     { libelle: "Taux de recouvrement", valeur: `${recouvrement.taux} %`, Icone: Gauge },
     { libelle: "Créances en retard", valeur: `${recouvrement.enRetardNombre} · ${fcfa(recouvrement.enRetardMontant)}`, Icone: CalendarClock, ton: "rouge" },
-    { libelle: "Remises accordées", valeur: fcfa(recouvrement.totalRemises), Icone: BadgePercent },
-    { libelle: "Exonérations & bourses", valeur: fcfa(recouvrement.totalExonerations + recouvrement.totalBourses), Icone: GraduationCap },
-    { libelle: "Pénalités appliquées", valeur: fcfa(recouvrement.totalPenalites), Icone: FileWarning, ton: "gold" },
+    { libelle: "Remises accordées", valeur: fcfa(recouvrement.totalRemises), montant: recouvrement.totalRemises, Icone: BadgePercent },
+    { libelle: "Exonérations & bourses", valeur: fcfa(recouvrement.totalExonerations + recouvrement.totalBourses), montant: recouvrement.totalExonerations + recouvrement.totalBourses, Icone: GraduationCap },
+    { libelle: "Pénalités appliquées", valeur: fcfa(recouvrement.totalPenalites), montant: recouvrement.totalPenalites, Icone: FileWarning, ton: "gold" },
   ];
   return (
     <div>
@@ -151,11 +152,11 @@ export function TableauRecouvrement({ recouvrement, exercice }: { recouvrement: 
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {cartes.map((c) => (
-          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft">
+          <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-white p-3.5 shadow-soft mobile:p-3">
             <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${c.ton === "rouge" ? "bg-red-50 text-red-600" : c.ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700"}`}>
               <c.Icone size={15} />
             </span>
-            <p className="mt-1.5 font-display text-base font-bold text-forest-900">{c.valeur}</p>
+            <p className="mt-1.5 font-display text-base font-bold text-forest-900 mobile:tabular-nums mobile:wrap-anywhere">{c.montant !== undefined ? <MontantTuile montant={c.montant} /> : c.valeur}</p>
             <p className="text-xs text-ink-700/60">{c.libelle}</p>
           </div>
         ))}
@@ -346,7 +347,7 @@ function CompteEleve({
           {cartes.map((c) => (
             <div key={c.libelle} className="rounded-2xl border border-cream-200 bg-cream-50/60 p-3 text-center">
               <p className="text-xs text-ink-700/60">{c.libelle}</p>
-              <p className="font-display text-sm font-bold text-forest-900">{fcfa(c.valeur)}</p>
+              <p className="font-display text-sm font-bold text-forest-900 mobile:tabular-nums"><MontantTuile montant={c.valeur} /></p>
             </div>
           ))}
         </div>
@@ -363,7 +364,7 @@ function CompteEleve({
           <p className="text-sm text-ink-700/60">Aucune créance générée : utilisez « Générer les créances ».</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-[640px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Libellé</th>
@@ -377,10 +378,10 @@ function CompteEleve({
                 {compte.creances.map((c) => (
                   <tr key={c.id} className={c.statut === "suspendue" || c.statut === "annulee" ? "opacity-55" : ""}>
                     <td className="py-2 pr-2 font-medium text-forest-900">{c.libelle}</td>
-                    <td className="py-2 pr-2">{dateFr(c.dateEcheance)}</td>
-                    <td className="py-2 pr-2 text-right">{fcfa(c.montant)}</td>
-                    <td className="py-2 pr-2 text-right text-forest-700">{fcfa(c.paye)}</td>
-                    <td className="py-2"><BadgeCreance statut={c.statutAffiche} /></td>
+                    <td data-label="Échéance" className="py-2 pr-2">{dateFr(c.dateEcheance)}</td>
+                    <td data-label="Montant" className="py-2 pr-2 text-right">{fcfa(c.montant)}</td>
+                    <td data-label="Payé" className="py-2 pr-2 text-right text-forest-700">{fcfa(c.paye)}</td>
+                    <td data-label="État" className="py-2"><BadgeCreance statut={c.statutAffiche} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -815,7 +816,7 @@ export function OngletAidesScolarite({
           <p className="text-sm text-ink-700/60">Aucune demande en cours.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-sm">
+            <table className="w-full min-w-[680px] text-sm tableau-cartes-mobile mobile:[&_td]:whitespace-normal mobile:[&_td:empty]:hidden! mobile:[&_td_button]:min-h-11 mobile:[&_td_button]:min-w-11">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Élève</th>
@@ -829,9 +830,9 @@ export function OngletAidesScolarite({
                 {remboursements.map((r) => (
                   <tr key={r.id}>
                     <td className="py-2 pr-2 font-medium text-forest-900">{r.eleveNom}</td>
-                    <td className="py-2 pr-2 text-right">{fcfa(r.montant)}</td>
-                    <td className="py-2 pr-2">{r.motif}</td>
-                    <td className="py-2 pr-2">
+                    <td data-label="Montant" className="py-2 pr-2 text-right">{fcfa(r.montant)}</td>
+                    <td data-label="Motif" className="py-2 pr-2">{r.motif}</td>
+                    <td data-label="État" className="py-2 pr-2">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${r.statut === "validee" ? "bg-gold-100 text-gold-800" : "bg-cream-200 text-forest-800"}`}>
                         {r.statut === "validee" ? "Validée — à payer" : "Demandée"}
                       </span>
@@ -894,8 +895,8 @@ export function OngletAidesScolarite({
 function PayerRemboursement({ id, version, onSucces }: { id: string; version: number; onSucces: (m?: string) => void }) {
   const [mode, setMode] = useState("especes");
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <Select value={mode} onChange={(e) => setMode(e.target.value)} className="h-8 w-auto text-xs">
+    <span className="inline-flex items-center gap-1.5 mobile:w-full mobile:flex-wrap mobile:justify-end">
+      <Select value={mode} onChange={(e) => setMode(e.target.value)} className="h-8 w-auto text-xs mobile:h-11 mobile:min-w-0 mobile:grow mobile:basis-48 mobile:text-base">
         {Object.entries(LIBELLE_MODE).map(([v, l]) => (
           <option key={v} value={v}>{l}</option>
         ))}

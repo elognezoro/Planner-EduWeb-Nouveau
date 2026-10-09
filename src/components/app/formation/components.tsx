@@ -170,11 +170,11 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
   const annees = [cohorte.anneeDebut, cohorte.anneeFin].filter((a) => a != null).join("–");
 
   return (
-    <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+    <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft mobile:p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="font-display text-lg font-bold text-forest-900">{cohorte.libelle}</h3>
-          <p className="mt-0.5 flex items-center gap-2 text-xs text-ink-700/60">
+          <p className="mt-0.5 flex items-center gap-2 text-xs text-ink-700/60 mobile:flex-wrap mobile:gap-y-1">
             {annees && <span>{annees}</span>}
             {cohorte.lieu && <span>{cohorte.lieu}</span>}
             <span className="inline-flex items-center gap-1 rounded-full bg-cream-200 px-2 py-0.5 font-semibold text-forest-800">
@@ -185,11 +185,13 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
             </span>
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
+        {/* Téléphone : les boutons de 44 px passent à la ligne (Confirmer + Annuler + Gérer la liste
+            ne tiennent pas sur une rangée de 320-360 px). */}
+        <div className="flex items-center gap-1.5 mobile:flex-wrap mobile:justify-end">
           <button
             type="button"
             onClick={() => setOuvert((v) => !v)}
-            className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+            className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:px-4"
           >
             {ouvert ? "Masquer" : lectureSeule ? "Voir la liste" : "Gérer la liste"}
           </button>
@@ -205,7 +207,7 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
                       setConfirmationSuppr(false);
                     })
                   }
-                  className="inline-flex h-8 items-center gap-1 rounded-full bg-red-600 px-3 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                  className="inline-flex h-8 items-center gap-1 rounded-full bg-red-600 px-3 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50 mobile:h-11 mobile:px-4"
                 >
                   <Trash2 size={13} /> Confirmer
                 </button>
@@ -213,7 +215,7 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
                   type="button"
                   disabled={pending}
                   onClick={() => setConfirmationSuppr(false)}
-                  className="inline-flex h-8 items-center rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-cream-100 disabled:opacity-50"
+                  className="inline-flex h-8 items-center rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-cream-100 disabled:opacity-50 mobile:h-11 mobile:px-4"
                 >
                   Annuler
                 </button>
@@ -224,7 +226,7 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
                 disabled={pending}
                 onClick={() => setConfirmationSuppr(true)}
                 title="Supprimer la cohorte"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 mobile:h-11 mobile:w-11"
               >
                 <Trash2 size={14} />
               </button>
@@ -237,7 +239,8 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
           {/* Liste */}
           {cohorte.apprenants.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
+              {/* Téléphone : chaque participant devient une carte (nom en titre, puis libellé : valeur). */}
+              <table className="w-full border-collapse text-sm tableau-cartes-mobile">
                 <thead>
                   <tr className="border-b border-cream-200 text-left text-xs text-ink-700/60">
                     <th className="py-2 pr-3 font-semibold">Nom</th>
@@ -251,19 +254,21 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
                   {cohorte.apprenants.map((a) => (
                     <tr key={a.id} className="border-b border-cream-100 last:border-0">
                       <td className="py-2 pr-3 font-medium text-forest-900">{a.nom}</td>
-                      <td className="px-2 py-2 text-ink-700/80">{a.prenoms ?? "—"}</td>
-                      <td className="px-2 py-2 text-ink-700/70">{a.email ?? "—"}</td>
-                      <td className="px-2 py-2 font-mono text-xs text-ink-700/60">{a.matricule ?? "—"}</td>
+                      <td data-label="Prénoms" className="px-2 py-2 text-ink-700/80">{a.prenoms ?? "—"}</td>
+                      <td data-label="E-mail" className="px-2 py-2 text-ink-700/70">{a.email ?? "—"}</td>
+                      <td data-label="Matricule" className="px-2 py-2 font-mono text-xs text-ink-700/60">{a.matricule ?? "—"}</td>
                       {!lectureSeule && (
                         <td className="py-2 text-center">
                           <button
                             type="button"
                             disabled={pending}
                             onClick={() => start(async () => void (await supprimerApprenant(a.id)))}
-                            className="text-ink-700/40 hover:text-red-600 disabled:opacity-50"
+                            className="text-ink-700/40 hover:text-red-600 disabled:opacity-50 mobile:inline-flex mobile:min-h-11 mobile:items-center mobile:gap-2 mobile:text-xs mobile:font-semibold"
                             aria-label="Retirer l'apprenant"
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={13} className="mobile:size-4" />
+                            {/* Téléphone : libellé visible (la carte n'a pas d'en-tête de colonne). */}
+                            <span className="hidden mobile:inline">Retirer</span>
                           </button>
                         </td>
                       )}
@@ -287,11 +292,11 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
               </div>
             )}
             <input type="hidden" name="cohorteId" value={cohorte.id} />
-            <input name="nom" required placeholder="Nom" className="h-9 w-32 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
-            <input name="prenoms" placeholder="Prénoms" className="h-9 w-32 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
-            <input name="email" placeholder="E-mail" className="h-9 w-44 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
-            <input name="matricule" placeholder="Matricule" className="h-9 w-28 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
-            <button type="submit" className="inline-flex h-9 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+            <input name="nom" required placeholder="Nom" className="h-9 w-32 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:w-full mobile:text-base" />
+            <input name="prenoms" placeholder="Prénoms" className="h-9 w-32 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:w-full mobile:text-base" />
+            <input name="email" placeholder="E-mail" className="h-9 w-44 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:w-full mobile:text-base" />
+            <input name="matricule" placeholder="Matricule" className="h-9 w-28 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 mobile:h-11 mobile:w-full mobile:text-base" />
+            <button type="submit" className="inline-flex h-9 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11 mobile:w-full mobile:justify-center">
               <Plus size={13} /> Ajouter
             </button>
           </form>
@@ -309,7 +314,7 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
             <p className="mb-2 text-xs font-semibold text-forest-800">
               <Upload size={13} className="mr-1 inline" /> Import CSV (compatible Moodle)
             </p>
-            <p className="mb-2 text-[0.7rem] text-ink-700/60">
+            <p className="mb-2 text-[0.7rem] text-ink-700/60 mobile:text-xs">
               Colonnes reconnues : <code>lastname/nom</code>, <code>firstname/prenoms</code>,{" "}
               <code>email</code>, <code>idnumber/matricule</code>, <code>institution</code>.
             </p>
@@ -317,16 +322,16 @@ export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: Cohort
               name="texte"
               rows={3}
               placeholder={"Ou collez le CSV ici…\nnom,prenoms,email,matricule\nKouassi,Awa,awa@ex.ci,M001"}
-              className="mb-2 w-full rounded-lg border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              className="mb-2 w-full rounded-lg border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
             />
             <div className="flex flex-wrap items-center gap-2">
-              <input type="file" name="fichier" accept=".csv,text/csv" className="text-xs" />
+              <input type="file" name="fichier" accept=".csv,text/csv" className="text-xs mobile:w-full mobile:min-w-0" />
               <SubmitButton className="w-auto px-5">Importer</SubmitButton>
               <button
                 type="button"
                 disabled={pending || cohorte.apprenants.length === 0}
                 onClick={() => start(async () => void (await viderApprenants(cohorte.id)))}
-                className="inline-flex h-9 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                className="inline-flex h-9 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 mobile:h-11 mobile:px-4"
               >
                 <Eraser size={13} /> Vider
               </button>
@@ -356,16 +361,18 @@ export function StructureLien({
   return (
     <Link
       href={`${base}/${id}`}
-      className="group flex items-center justify-between gap-3 rounded-2xl border border-cream-200 bg-white p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-gold-300"
+      className="group flex items-center justify-between gap-3 rounded-2xl border border-cream-200 bg-white p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-gold-300 mobile:p-4"
     >
       <div className="min-w-0">
-        <p className="font-display text-lg font-bold text-forest-900">{nom}</p>
+        <p className="font-display text-lg font-bold text-forest-900 mobile:text-base mobile:leading-snug mobile:wrap-break-word">{nom}</p>
         <p className="text-xs text-ink-700/60">
           {region ?? "Région non renseignée"} · {cohortes} cohorte(s)
         </p>
       </div>
-      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cream-300 px-3.5 py-1.5 text-xs font-semibold text-forest-800 transition-colors group-hover:border-forest-400 group-hover:bg-forest-50">
-        <Settings size={13} /> Configuration
+      {/* Téléphone : pastille réduite à l'icône (le libellé reste lu par les lecteurs d'écran) —
+          la pilule de ~130 px ne laissait que ~140 px au nom, coupé sur 3 lignes. */}
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cream-300 px-3.5 py-1.5 text-xs font-semibold text-forest-800 transition-colors group-hover:border-forest-400 group-hover:bg-forest-50 mobile:p-2.5">
+        <Settings size={13} className="mobile:size-4.5" /> <span className="mobile:sr-only">Configuration</span>
       </span>
     </Link>
   );

@@ -102,13 +102,17 @@ export function DevoirDepot({ moduleId, devoir, soumission }: {
               <FileUp size={20} className="text-forest-600" />
               {nomFichier
                 ? <span className="font-semibold text-forest-800">{nomFichier}</span>
-                : <span className="text-ink-700/60">Glissez-déposez un fichier ici, ou cliquez pour parcourir</span>}
+                : <>
+                    <span className="text-ink-700/60 mobile:hidden">Glissez-déposez un fichier ici, ou cliquez pour parcourir</span>
+                    {/* Téléphone : pas de glisser-déposer au doigt. */}
+                    <span className="hidden text-ink-700/60 mobile:inline">Touchez pour choisir un fichier ou prendre une photo</span>
+                  </>}
               <span className="text-ink-700/45">PDF, image, doc… max 8 Mo</span>
             </div>
             <input ref={fileRef} type="file" name="fichier" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" className="hidden" onChange={(e) => majFichier(e.target.files)} />
           </div>
         )}
-        <SubmitButton className="w-auto px-6"><Upload size={15} /> {soumission ? "Redéposer" : "Déposer mon devoir"}</SubmitButton>
+        <SubmitButton className="w-auto px-6 mobile:w-full"><Upload size={15} /> {soumission ? "Redéposer" : "Déposer mon devoir"}</SubmitButton>
       </form>
     </div>
   );

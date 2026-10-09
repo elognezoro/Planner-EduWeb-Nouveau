@@ -34,25 +34,31 @@ export function HeatmapTable({
   libelleColonne?: string;
   cellSuffixe?: string;
 }) {
+  // Téléphone : la 1re colonne (noms, jours) reste COLLÉE à gauche pendant le défilement latéral
+  // — on sait toujours quelle ligne on lit ; les noms passent à la ligne au lieu d'être tronqués,
+  // les cellules sont un peu plus étroites (plus de mois visibles à la fois). Ordinateur et
+  // impression : inchangés (classes « mobile: »).
+  const premiereColonneMobile =
+    "mobile:sticky mobile:left-0 mobile:z-10 mobile:bg-white mobile:shadow-[6px_0_6px_-6px_rgba(15,53,39,0.25)]";
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto mobile:overscroll-x-contain">
       <table className="border-separate border-spacing-1 text-xs">
         <thead>
           <tr>
-            <th className="pr-2 text-left text-[0.65rem] font-medium uppercase tracking-wide text-ink-700/50">{libelleColonne}</th>
+            <th className={`pr-2 text-left text-[0.65rem] font-medium uppercase tracking-wide text-ink-700/50 mobile:text-xs mobile:normal-case mobile:tracking-normal ${premiereColonneMobile}`}>{libelleColonne}</th>
             {data.slots.map((s) => (
-              <th key={s} className="px-1 pb-1 text-center font-medium text-ink-700/60">{s}</th>
+              <th key={s} className="px-1 pb-1 text-center font-medium text-ink-700/60 mobile:leading-tight">{s}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {data.rangees.map((r) => (
             <tr key={r.libelle}>
-              <td className="max-w-[10rem] truncate pr-2 text-right font-medium text-ink-700/70" title={r.libelle}>{r.libelle}</td>
+              <td className={`max-w-[10rem] truncate pr-2 text-right font-medium text-ink-700/70 mobile:min-w-[5.5rem] mobile:max-w-[6.5rem] mobile:whitespace-normal mobile:text-left mobile:leading-tight mobile:[overflow-wrap:anywhere] ${premiereColonneMobile}`} title={r.libelle}>{r.libelle}</td>
               {r.cellules.map((c, i) => (
                 <td key={i}>
                   <div
-                    className={`flex h-9 w-12 items-center justify-center rounded-lg font-semibold ${
+                    className={`flex h-9 w-12 items-center justify-center rounded-lg font-semibold mobile:h-8${mode === "compte" ? " mobile:w-10" : ""} ${
                       c === null
                         ? "bg-cream-100 text-ink-700/30"
                         : mode === "taux"

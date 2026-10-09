@@ -44,8 +44,9 @@ export function EchangeDemandeur({ demandeId, echanges }: { demandeId: string; e
           {echanges.map((e) => (
             <li key={e.id} className={e.duDemandeur ? "flex justify-end" : "flex justify-start"}>
               <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${e.duDemandeur ? "rounded-tr-sm bg-forest-700 text-cream-50" : "rounded-tl-sm bg-cream-100 text-ink-800"}`}>
-                <p className="whitespace-pre-wrap leading-relaxed">{e.contenu}</p>
-                <p className={`mt-1 text-[0.6rem] ${e.duDemandeur ? "text-cream-200/70" : "text-ink-700/45"}`}>
+                {/* Téléphone : une URL ou un e-mail collé (insécable) se coupe au lieu de déborder. */}
+                <p className="whitespace-pre-wrap leading-relaxed mobile:[overflow-wrap:anywhere]">{e.contenu}</p>
+                <p className={`mt-1 text-[0.6rem] mobile:text-xs ${e.duDemandeur ? "text-cream-200/70" : "text-ink-700/45"}`}>
                   {e.duDemandeur ? "Vous" : "Administration"} · {e.date}
                 </p>
               </div>
@@ -65,7 +66,7 @@ export function EchangeDemandeur({ demandeId, echanges }: { demandeId: string; e
           type="button"
           onClick={envoyer}
           disabled={envoi || !texte.trim()}
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-forest-800 px-3.5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-forest-800 px-3.5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-11"
         >
           {envoi ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
           Envoyer

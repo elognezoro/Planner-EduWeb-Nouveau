@@ -88,7 +88,7 @@ export function ImportApfcCSV({
         <button
           type="button"
           onClick={() => telechargerModele(terme, pays)}
-          className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100"
+          className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:px-4"
         >
           <FileDown size={13} /> Télécharger le modèle
         </button>
@@ -104,12 +104,16 @@ export function ImportApfcCSV({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fichierRef.current?.click(); } }}
-        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors mobile:py-4 ${
           survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"
         }`}
       >
         <Upload size={20} className="mx-auto mb-1 text-forest-500" />
-        <p className="text-sm font-medium text-forest-900">Glissez-déposez le fichier CSV ici</p>
+        {/* Téléphone : formulation au doigt (pas de glisser-déposer). */}
+        <p className="text-sm font-medium text-forest-900">
+          <span className="mobile:hidden">Glissez-déposez le fichier CSV ici</span>
+          <span className="hidden mobile:inline">Touchez pour choisir un fichier CSV</span>
+        </p>
         <p className="text-xs text-ink-700/55">ou cliquez pour parcourir{nomFichier ? ` · ${nomFichier}` : ""}</p>
       </div>
       <input
@@ -134,7 +138,7 @@ export function ImportApfcCSV({
         onChange={(e) => { setTexte(e.target.value); setNomFichier(""); }}
         rows={3}
         placeholder={`Ou collez le CSV ici…\nnom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable\n${T("APFC")} d'Abidjan 1;${T("APFC")}-ABJ-001;${pays};Abidjan 1;Cocody;BP 221;27 35 91 35 02;apfc.abidjan@formation.ci;M. BAMBA Issouf;07 00 00 00 00`}
-        className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
       />
 
       {/* Aperçu — valides / erreurs AVANT import */}
@@ -201,7 +205,7 @@ export function ImportApfcCSV({
 
       <form action={action} className="flex justify-end">
         <input type="hidden" name="texte" value={texte} />
-        <SubmitButton className="w-auto px-6" disabled={!importable}>
+        <SubmitButton className="w-auto px-6 mobile:w-full" disabled={!importable}>
           <Upload size={14} /> {importable ? `Importer ${analyse!.nbValides} APFC` : "Importer"}
         </SubmitButton>
       </form>

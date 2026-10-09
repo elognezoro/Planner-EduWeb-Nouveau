@@ -8,6 +8,7 @@ import {
   creerInvitation, basculerInvitation, regenererTokenInvitation, supprimerInvitation,
   validerInscriptionSession, refuserInscriptionSession,
 } from "@/app/app/aide-formation/invitation-actions";
+import { useConfirmationMobile } from "@/app/app/aide-formation/outils-mobiles";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -36,7 +37,7 @@ export function FormNouvelleInvitation({ sessionId }: { sessionId: string }) {
         <input name="expiration" type="datetime-local" className={champ} />
       </div>
       {etat.message && <div className="sm:col-span-4"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
-      <div className="sm:col-span-4"><SubmitButton className="w-auto px-4"><Ticket size={14} /> Générer un lien</SubmitButton></div>
+      <div className="sm:col-span-4"><SubmitButton className="w-auto px-4 mobile:w-full"><Ticket size={14} /> Générer un lien</SubmitButton></div>
     </form>
   );
 }
@@ -46,6 +47,8 @@ export function LigneInvitation({ inv }: { inv: { id: string; token: string; cod
   const [pending, start] = useTransition();
   const [copie, setCopie] = useState(false);
   const exec = (fn: () => Promise<unknown>) => start(async () => { await fn(); router.refresh(); });
+  // Téléphone : confirmation dans une feuille montante (confirm natif conservé sur ordinateur).
+  const { confirmer, feuille } = useConfirmationMobile();
 
   const lien = (avecCode: boolean) => {
     const base = typeof window !== "undefined" ? window.location.origin : "";
@@ -66,12 +69,14 @@ export function LigneInvitation({ inv }: { inv: { id: string; token: string; cod
         {inv.placesMax != null && <span className="text-ink-700/55">{inv.placesMax} place(s)</span>}
         {inv.expiration && <span className="text-ink-700/55">exp. {new Date(inv.expiration).toLocaleDateString("fr-FR")}</span>}
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        <button type="button" onClick={() => copier(false)} className="inline-flex items-center gap-1 rounded-lg border border-forest-200 px-2 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+      {/* Téléphone : grille régulière de boutons de 44 px ; « Copier le lien » (action principale)
+          sur toute la largeur. Suppression confirmée dans une feuille montante. */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 mobile:grid mobile:grid-cols-2 mobile:gap-2 mobile:[&>button]:min-h-11 mobile:[&>button]:justify-center mobile:[&>button]:text-sm">
+        <button type="button" onClick={() => copier(false)} className="inline-flex items-center gap-1 rounded-lg border border-forest-200 px-2 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:col-span-2">
           {copie ? <Check size={13} /> : <Copy size={13} />} Copier le lien
         </button>
         {inv.code && (
-          <button type="button" onClick={() => copier(true)} className="inline-flex items-center gap-1 rounded-lg border border-gold-200 px-2 py-1 text-xs font-semibold text-gold-800 hover:bg-gold-50">
+          <button type="button" onClick={() => copier(true)} className="inline-flex items-center gap-1 rounded-lg border border-gold-200 px-2 py-1 text-xs font-semibold text-gold-800 hover:bg-gold-50 mobile:col-span-2">
             <Copy size={13} /> Lien + code (auto-validé)
           </button>
         )}
@@ -81,10 +86,11 @@ export function LigneInvitation({ inv }: { inv: { id: string; token: string; cod
         <button type="button" disabled={pending} onClick={() => exec(() => regenererTokenInvitation(inv.id))} className="inline-flex items-center gap-1 rounded-lg border border-cream-300 px-2 py-1 text-xs font-semibold text-forest-800 hover:bg-cream-100 disabled:opacity-50">
           <RefreshCw size={13} /> Nouveau lien
         </button>
-        <button type="button" disabled={pending} onClick={() => { if (confirm("Supprimer ce lien d'invitation ?")) exec(() => supprimerInvitation(inv.id)); }} className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50">
+        <button type="button" disabled={pending} onClick={() => confirmer("Supprimer ce lien d'invitation ?", () => exec(() => supprimerInvitation(inv.id)))} className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50 mobile:col-span-2">
           <Trash2 size={13} /> Supprimer
         </button>
       </div>
+      {feuille}
     </div>
   );
 }
@@ -94,7 +100,7 @@ export function BoutonsDemande({ inscriptionId }: { inscriptionId: string }) {
   const [pending, start] = useTransition();
   const exec = (fn: () => Promise<unknown>) => start(async () => { await fn(); router.refresh(); });
   return (
-    <div className="flex shrink-0 gap-1.5">
+    <div className="flex shrink-0 gap-1.5 mobile:w-full mobile:gap-2 mobile:[&>button]:min-h-11 mobile:[&>button]:flex-1 mobile:[&>button]:justify-center mobile:[&>button]:text-sm">
       <button type="button" disabled={pending} onClick={() => exec(() => validerInscriptionSession(inscriptionId))} className="inline-flex items-center gap-1 rounded-lg bg-forest-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-forest-700 disabled:opacity-50">
         <UserCheck size={13} /> Valider
       </button>

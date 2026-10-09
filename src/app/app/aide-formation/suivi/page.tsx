@@ -151,15 +151,17 @@ export default async function SuiviApprenantsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Gestion du contenu</Link>
+      {/* Téléphone : masqué — doublon de l'action « Gérer le contenu » de l'en-tête (et du bouton retour de la coquille). */}
+      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Gestion du contenu</Link>
       <PageHeader
         titre="Suivi des apprenants"
         description="Adoption des cours, avancement, réussite aux quiz et sessions de formation — sur l'ensemble du LMS."
-        action={<Link href={`${BASE}/gestion`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Settings2 size={15} /> Gérer le contenu</Link>}
+        action={<Link href={`${BASE}/gestion`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11"><Settings2 size={15} /> Gérer le contenu</Link>}
       />
 
       {/* KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      {/* Téléphone : 3 rangées de 2 cartes compactes (≈ 650 px de défilement en 1 colonne). */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
         <StatCard libelle="Cours publiés" valeur={coursPublies} icone={<BookOpen size={22} />} />
         <StatCard libelle="Apprenants" valeur={apprenants} ton="gold" icone={<Users size={22} />} />
         <StatCard libelle="Inscriptions" valeur={totalInscriptions} icone={<ClipboardList size={22} />} />
@@ -197,7 +199,8 @@ export default async function SuiviApprenantsPage() {
           <p className="rounded-xl bg-cream-50 px-4 py-8 text-center text-sm text-ink-700/55">Aucun quiz n&apos;a encore été créé.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[620px] border-collapse text-sm">
+            {/* Téléphone : chaque quiz devient une carte « libellé : valeur » (globals.css). */}
+            <table className="w-full min-w-[620px] border-collapse text-sm tableau-cartes-mobile">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-ink-700/60">
                   <th className="py-2.5 pr-3 font-semibold">Quiz</th>
@@ -212,13 +215,13 @@ export default async function SuiviApprenantsPage() {
                 {lignesQuiz.map((q) => (
                   <tr key={q.id} className="border-b border-cream-100 last:border-0 hover:bg-cream-50/60">
                     <td className="py-2.5 pr-3"><p className="font-medium text-forest-900">{q.lecon}</p><p className="text-xs text-ink-700/50">{q.cours}</p></td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums text-ink-700/75">{q.questions}</td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums text-ink-700/75">{q.seuil}%</td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums font-semibold text-forest-800">{q.tentatives}</td>
-                    <td className="py-2.5 pr-3 text-right">
+                    <td data-label="Questions" className="py-2.5 pr-3 text-right tabular-nums text-ink-700/75">{q.questions}</td>
+                    <td data-label="Seuil" className="py-2.5 pr-3 text-right tabular-nums text-ink-700/75">{q.seuil}%</td>
+                    <td data-label="Tentatives" className="py-2.5 pr-3 text-right tabular-nums font-semibold text-forest-800">{q.tentatives}</td>
+                    <td data-label="Réussite" className="py-2.5 pr-3 text-right">
                       {q.tentatives === 0 ? <span className="text-ink-700/40">—</span> : <Badge ton={q.reussite >= 70 ? "succes" : "attente"}>{q.reussite}%</Badge>}
                     </td>
-                    <td className="py-2.5 text-right tabular-nums text-ink-700/75">{q.tentatives === 0 ? "—" : `${q.scoreMoyen}%`}</td>
+                    <td data-label="Score moyen" className="py-2.5 text-right tabular-nums text-ink-700/75">{q.tentatives === 0 ? "—" : `${q.scoreMoyen}%`}</td>
                   </tr>
                 ))}
               </tbody>
@@ -271,7 +274,7 @@ export default async function SuiviApprenantsPage() {
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-xs font-semibold text-forest-800">{a.statut === "termine" ? <span className="inline-flex items-center gap-1"><CheckCircle2 size={12} /> Terminé</span> : `${a.progressionPct}%`}</p>
-                    <p className="text-[11px] text-ink-700/45">{dateCourte(a.derniereActivite)}</p>
+                    <p className="text-[11px] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">{dateCourte(a.derniereActivite)}</p>
                   </div>
                 </li>
               ))}
@@ -302,7 +305,7 @@ function LigneSession({ s, passee }: { s: { titre: string; format: string; dateD
       </div>
       <div className={`shrink-0 text-right ${passee ? "opacity-70" : ""}`}>
         <p className="text-sm font-semibold text-forest-800">{s._count.inscriptions}{cap != null ? `/${cap}` : ""}</p>
-        <p className="text-[11px] text-ink-700/45">{remplissage != null ? `${remplissage}% rempli` : "inscrits"}</p>
+        <p className="text-[11px] text-ink-700/45 mobile:text-xs mobile:text-ink-700/70">{remplissage != null ? `${remplissage}% rempli` : "inscrits"}</p>
       </div>
     </li>
   );

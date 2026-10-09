@@ -30,20 +30,20 @@ export function ReglageTermeApfc({ pays, terme }: { pays: string; terme: string 
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-700">
         <Tag size={17} />
       </span>
-      <label className="min-w-[12rem] flex-1">
+      <label className="min-w-[12rem] flex-1 mobile:min-w-0">
         <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-700/50">Nom local des antennes — {pays}</span>
         <input
           value={termeSaisi}
           onChange={(e) => setTermeSaisi(e.target.value)}
           placeholder="APFC"
-          className="h-9 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="h-9 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11 mobile:text-base"
         />
       </label>
       <button
         type="button"
         disabled={pending || !termeSaisi.trim()}
         onClick={enregistrer}
-        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-700 px-4 text-sm font-semibold text-white hover:bg-forest-800 disabled:opacity-50"
+        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-700 px-4 text-sm font-semibold text-white hover:bg-forest-800 disabled:opacity-50 mobile:h-11 mobile:w-full mobile:justify-center"
       >
         <Save size={15} /> Enregistrer
       </button>

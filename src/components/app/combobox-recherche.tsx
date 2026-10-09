@@ -85,24 +85,26 @@ export function ComboboxRecherche({
                 value={rech}
                 onChange={(e) => setRech(e.target.value)}
                 placeholder={rechercheLabel}
-                className="h-9 w-full rounded-xl border border-cream-300 bg-white pl-8 pr-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                className="h-9 w-full rounded-xl border border-cream-300 bg-white pl-8 pr-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11"
               />
             </div>
           </div>
+          {/* Téléphone : options de 44 px minimum, libellés longs repliés sur plusieurs lignes au lieu
+              d'être tronqués (« Nom — rôle » à 320 px), coche gardée à 14 px. Ordinateur et impression : inchangés. */}
           <ul className="max-h-60 overflow-y-auto py-1" role="listbox">
             {videLabel != null && (
               <li>
-                <button type="button" onClick={() => choisir("")} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink-700/70 hover:bg-cream-50">
-                  <span className="flex-1 truncate">{videLabel}</span>
-                  {!sel && <Check size={14} className="text-forest-600" />}
+                <button type="button" onClick={() => choisir("")} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink-700/70 hover:bg-cream-50 mobile:min-h-11">
+                  <span className="flex-1 truncate mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{videLabel}</span>
+                  {!sel && <Check size={14} className="text-forest-600 mobile:shrink-0" />}
                 </button>
               </li>
             )}
             {filtres.map((o) => (
               <li key={o.value}>
-                <button type="button" onClick={() => choisir(o.value)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-cream-50">
-                  <span className="flex-1 truncate">{o.label}</span>
-                  {sel === o.value && <Check size={14} className="text-forest-600" />}
+                <button type="button" onClick={() => choisir(o.value)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-cream-50 mobile:min-h-11">
+                  <span className="flex-1 truncate mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{o.label}</span>
+                  {sel === o.value && <Check size={14} className="text-forest-600 mobile:shrink-0" />}
                 </button>
               </li>
             ))}

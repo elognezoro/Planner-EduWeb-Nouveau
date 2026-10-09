@@ -96,7 +96,8 @@ export default async function AnalyticsPage() {
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {/* Téléphone : KPI en 2 colonnes compactes (icône au-dessus du chiffre), le dernier en pleine largeur. */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
             <StatCard libelle="Établissements" valeur={kpis.etablissements} icone={<School size={22} />} />
             <StatCard libelle="Classes" valeur={kpis.classes} icone={<GraduationCap size={22} />} ton="gold" />
             <StatCard libelle="Élèves" valeur={kpis.eleves} icone={<Users size={22} />} />
@@ -107,7 +108,7 @@ export default async function AnalyticsPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <h2 className="mb-4 font-display text-base font-bold text-forest-900">Élèves par établissement</h2>
-              <ChartBarVertical data={parEtab} nomSerie="Élèves" vide="Aucun effectif inscrit." />
+              <ChartBarVertical data={parEtab} nomSerie="Élèves" vide="Aucun effectif inscrit." unite="élèves" />
             </Card>
             <Card>
               <h2 className="mb-4 font-display text-base font-bold text-forest-900">Assiduité globale</h2>

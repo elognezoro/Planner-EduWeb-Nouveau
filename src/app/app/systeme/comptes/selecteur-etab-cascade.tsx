@@ -175,7 +175,7 @@ export function SelecteurEtabCascade({
             type="button"
             onClick={() => onChange(null)}
             aria-label="Retirer l'établissement sélectionné"
-            className="absolute right-9 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700/70"
+            className="absolute right-9 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700/70 mobile:right-8 mobile:p-2"
           >
             <X size={14} />
           </button>
@@ -200,10 +200,10 @@ export function SelecteurEtabCascade({
                   ? "Recherche dans tout le pays (nom, ville, code)…"
                   : `Recherche rapide (nom, ville${prefixeRegion ? ", " + prefixeRegion : ", région"})…`
               }
-              className="h-8 w-full bg-transparent text-sm outline-none placeholder:text-ink-700/40"
+              className="h-8 w-full bg-transparent text-sm outline-none placeholder:text-ink-700/40 mobile:h-11"
             />
             {q && !attenteSaisie && !enRecherche && (
-              <span className="shrink-0 text-[0.65rem] font-medium text-ink-700/45">
+              <span className="shrink-0 text-[0.65rem] font-medium text-ink-700/45 mobile:text-xs">
                 {nbVisibles}{modeServeur && nbVisibles >= 60 ? "+" : ""} résultat{nbVisibles > 1 ? "s" : ""}
               </span>
             )}
@@ -225,7 +225,7 @@ export function SelecteurEtabCascade({
             )}
             {groupes.map((g) => (
               <li key={g.region}>
-                <p className="flex items-center gap-1.5 bg-cream-50/80 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-forest-700">
+                <p className="flex items-center gap-1.5 bg-cream-50/80 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-forest-700 mobile:text-xs">
                   <Landmark size={11} className="shrink-0" />
                   {prefixeRegion && g.region !== SANS_REGION ? `${prefixeRegion} · ${g.region}` : g.region}
                 </p>
@@ -240,12 +240,13 @@ export function SelecteurEtabCascade({
                           onChange(e);
                           fermer();
                         }}
-                        className={`flex w-full items-center justify-between gap-2 px-3 py-2 pl-6 text-left text-sm hover:bg-forest-50 ${
+                        className={`flex w-full items-center justify-between gap-2 px-3 py-2 pl-6 text-left text-sm hover:bg-forest-50 mobile:min-h-12 ${
                           e.id === selection?.id ? "bg-forest-50/70 font-semibold text-forest-900" : "text-ink-900"
                         }`}
                       >
                         <span className="min-w-0">
-                          <span className="block truncate">{e.nom}</span>
+                          {/* Téléphone : nom complet sur plusieurs lignes (pas de survol pour lire la suite). */}
+                          <span className="block truncate mobile:whitespace-normal">{e.nom}</span>
                           {e.ville && <span className="block truncate text-xs text-ink-700/50">{e.ville}</span>}
                         </span>
                         {e.id === selection?.id && <Check size={15} className="shrink-0 text-forest-700" />}

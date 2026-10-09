@@ -7,7 +7,7 @@ export function BoutonImprimerAttestation() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-forest-700 print:hidden"
+      className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-forest-700 print:hidden mobile:w-full mobile:justify-center"
     >
       <Printer size={16} /> Imprimer / Enregistrer en PDF
     </button>

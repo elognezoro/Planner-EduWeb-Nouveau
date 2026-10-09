@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileBarChart } from "lucide-react";
+import { ArrowLeft, ChevronDown, FileBarChart } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
@@ -140,9 +140,10 @@ export default async function BulletinPage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {/* Téléphone : masqué, l'en-tête mobile porte déjà le bouton retour. */}
       <Link
         href="/app/vie-scolaire/notes-bulletins"
-        className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900"
+        className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"
       >
         <ArrowLeft size={16} /> Retour à la saisie
       </Link>
@@ -162,8 +163,10 @@ export default async function BulletinPage({
           </p>
         </Card>
       ) : (
-        <Card className="overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse text-sm">
+        <Card className="overflow-x-auto mobile:p-4">
+          {/* Matrice élèves × disciplines : ordinateur et impression ; remplacée à l'écran du
+              téléphone par les cartes ci-dessous (plus de défilement latéral). */}
+          <table className="w-full min-w-[640px] border-collapse text-sm masque-ecran-mobile">
             <thead>
               <tr className="border-b border-cream-200 text-left">
                 <th className="py-2.5 pr-3 font-semibold text-ink-700/70">Rang</th>
@@ -193,9 +196,39 @@ export default async function BulletinPage({
               ))}
             </tbody>
           </table>
-          <p className="mt-4 text-xs text-ink-700/55">
+          {/* Téléphone : une carte par élève (rang, nom, moyenne générale) ; le détail par
+              discipline, avec son coefficient, se déplie au toucher. */}
+          <ol className="space-y-2.5 lg:hidden print:hidden">
+            {lignes.map((l, idx) => (
+              <li key={l.eleve.id} className="rounded-2xl border border-cream-200 bg-cream-50/40">
+                <details className="group">
+                  <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-3.5 py-2.5 [&::-webkit-details-marker]:hidden">
+                    <span className="w-7 shrink-0 text-center text-sm font-bold tabular-nums text-ink-700/70">{idx + 1}</span>
+                    <span className="min-w-0 flex-1 font-semibold leading-snug text-forest-900 wrap-break-word">{nomComplet(l.eleve)}</span>
+                    <span className="shrink-0 text-right">
+                      <span className="block font-display text-xl font-bold leading-tight tabular-nums text-forest-800">{fmt(l.generale)}</span>
+                      <span className="block text-xs text-ink-700/70">moy. gén.</span>
+                    </span>
+                    <ChevronDown aria-hidden size={18} className="shrink-0 text-ink-700/60 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <ul className="divide-y divide-cream-100 border-t border-cream-200 px-3.5">
+                    {disciplinesListe.map((d) => (
+                      <li key={d.id} className="flex items-baseline justify-between gap-3 py-2 text-sm">
+                        <span className="min-w-0 text-ink-800 wrap-break-word">
+                          {d.nom} <span className="text-xs text-ink-700/70">coef. {coefDe(d.id)}</span>
+                        </span>
+                        <span className="shrink-0 font-semibold tabular-nums text-forest-900">{fmt(l.moyennesDisc.get(d.id) ?? null)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 text-xs text-ink-700/55 mobile:text-ink-700/70">
             Moyennes ramenées sur 20. La moyenne générale est pondérée par les coefficients de la
-            grille horaire (survol d&apos;un en-tête de discipline pour voir son coefficient).
+            grille horaire <span className="mobile:hidden">(survol d&apos;un en-tête de discipline pour voir son coefficient)</span>
+            <span className="hidden mobile:inline">(touchez un élève pour voir ses moyennes et les coefficients)</span>.
           </p>
         </Card>
       )}

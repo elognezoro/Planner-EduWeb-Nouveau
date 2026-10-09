@@ -91,7 +91,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
+      <EnteteCafop compactMobile ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="notes" terme={terme} masquerConfig={masquerConfig} />
 
       {modules.length === 0 ? (

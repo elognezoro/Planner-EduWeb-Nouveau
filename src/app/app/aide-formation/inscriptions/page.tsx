@@ -99,16 +99,16 @@ export default async function InscriptionsPage({ searchParams }: { searchParams:
         titre="Inscriptions aux cours"
         description="Inscrivez ou désinscrivez un utilisateur d'un cours de formation. Réservé à l'administrateur système."
         action={
-          <Link href={`${BASE}/formations`} className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300">
+          <Link href={`${BASE}/formations`} className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300 mobile:hidden">
             <ArrowLeft className="h-4 w-4" /> Formations
           </Link>
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3">
         <StatCard libelle="Cours et formations" valeur={coursListe.length} icone={<GraduationCap className="h-5 w-5" />} />
         <StatCard libelle="Inscriptions (total)" valeur={totalInscriptions} icone={<Users className="h-5 w-5" />} ton="gold" />
-        <StatCard libelle="Inscrits — ce cours" valeur={inscrits.length} icone={<UserCheck className="h-5 w-5" />} />
+        <StatCard libelle="Inscrits — ce cours" valeur={inscrits.length} icone={<UserCheck className="h-5 w-5" />} className="mobile:col-span-2" />
       </div>
 
       <InscriptionsClient

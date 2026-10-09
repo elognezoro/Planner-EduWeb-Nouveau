@@ -5,6 +5,7 @@ import { ScrollText, Activity, ShieldAlert, Download } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
+import { FiltresJournalMobile } from "./filtres-journal-mobile";
 
 export const metadata: Metadata = { title: "Journal d'activité" };
 export const dynamic = "force-dynamic";
@@ -142,13 +143,29 @@ export default async function JournalActivitePage({
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
+          {/* Téléphone : tuiles compactes (1 + 2) au lieu de trois cartes empilées. */}
+          <div className="grid gap-4 sm:grid-cols-3 mobile:grid-cols-2 mobile:gap-3 mobile:[&>*]:gap-3 mobile:[&>*]:p-4 mobile:[&>*:first-child]:col-span-2 mobile:[&>*:not(:first-child)]:flex-col mobile:[&>*:not(:first-child)]:items-start">
             <StatCard libelle="Évènements (filtre courant)" valeur={total} icone={<ScrollText size={22} />} />
             <StatCard libelle="Aujourd'hui" valeur={aujourdhui} icone={<Activity size={22} />} ton="gold" />
             <StatCard libelle="Évènements de sécurité" valeur={securite} icone={<ShieldAlert size={22} />} />
           </div>
 
-          <Card>
+          {/* Téléphone : bouton « Filtres » (feuille montante qui envoie le même formulaire GET)
+              + export CSV ; le formulaire en ligne ci-dessous est masqué sous 64rem. */}
+          <div className="lg:hidden print:hidden">
+            <FiltresJournalMobile
+              action={BASE}
+              source={filtreSource}
+              entite={filtreEntite}
+              acteur={filtreActeur}
+              jours={jours}
+              entites={entites}
+              periodes={PERIODES}
+              lienExport={lienExport}
+            />
+          </div>
+
+          <Card className="mobile:hidden">
             <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
               <div className="min-w-[10rem] flex-1">
                 <label className="mb-1.5 block text-sm font-medium text-forest-900">Nature</label>
@@ -189,7 +206,8 @@ export default async function JournalActivitePage({
             </form>
           </Card>
 
-          <Card>
+          {/* Téléphone : chaque évènement est une carte — la carte englobante s'efface. */}
+          <Card className="mobile:rounded-none mobile:border-0 mobile:bg-transparent mobile:p-0 mobile:shadow-none">
             <h2 className="mb-3 font-display text-base font-bold text-forest-900">
               Évènements récents{" "}
               <span className="text-sm font-normal text-ink-700/55">(200 plus récents du filtre)</span>
@@ -198,7 +216,10 @@ export default async function JournalActivitePage({
               <p className="py-4 text-sm text-ink-700/55">Aucun évènement pour ce filtre.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[820px] border-collapse text-sm">
+                {/* Téléphone : cartes (date en tête, puis acteur, action, nature). Rôle, cible et IP
+                    sont masqués : « hidden! » car la règle « td » de .tableau-cartes-mobile, hors
+                    couche Tailwind, l'emporterait sur « mobile:hidden ». */}
+                <table className="tableau-cartes-mobile w-full min-w-[820px] border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-cream-200 text-left">
                       <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Date</th>
@@ -213,17 +234,17 @@ export default async function JournalActivitePage({
                   <tbody>
                     {entrees.map((e) => (
                       <tr key={e.id} className="border-b border-cream-100 last:border-0">
-                        <td className="whitespace-nowrap py-2.5 pr-4 text-ink-700/70">{dateHeure(e.creeLe)}</td>
-                        <td className="px-2 py-2.5 text-forest-900">{e.acteurEmail ?? "—"}</td>
-                        <td className="px-2 py-2.5 text-ink-700/70">{e.acteurRole ?? "—"}</td>
-                        <td className="px-2 py-2.5 font-medium text-forest-900">{libelleAction(e.action)}</td>
-                        <td className="px-2 py-2.5 font-mono text-xs text-ink-700/55">{e.cible ?? "—"}</td>
-                        <td className="px-2 py-2.5">
+                        <td className="whitespace-nowrap py-2.5 pr-4 text-ink-700/70 mobile:text-sm mobile:font-semibold">{dateHeure(e.creeLe)}</td>
+                        <td data-label="Acteur" className="px-2 py-2.5 text-forest-900">{e.acteurEmail ?? "—"}</td>
+                        <td data-label="Rôle" className="px-2 py-2.5 text-ink-700/70 mobile:hidden!">{e.acteurRole ?? "—"}</td>
+                        <td data-label="Action" className="px-2 py-2.5 font-medium text-forest-900">{libelleAction(e.action)}</td>
+                        <td data-label="Cible" className="px-2 py-2.5 font-mono text-xs text-ink-700/55 mobile:hidden!">{e.cible ?? "—"}</td>
+                        <td data-label="Nature" className="px-2 py-2.5">
                           <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${classesSource(e.source)}`}>
                             {LIBELLE_SOURCE[e.source] ?? e.source}
                           </span>
                         </td>
-                        <td className="px-2 py-2.5 font-mono text-xs text-ink-700/55">{e.ip ?? "—"}</td>
+                        <td data-label="IP" className="px-2 py-2.5 font-mono text-xs text-ink-700/55 mobile:hidden!">{e.ip ?? "—"}</td>
                       </tr>
                     ))}
                   </tbody>

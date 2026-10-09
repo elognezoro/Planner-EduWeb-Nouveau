@@ -19,6 +19,7 @@ import {
 import { rafraichirPositionsAction, souscrireAction, passerAnnuelAction } from "@/lib/transport/actions";
 import { Card } from "@/components/app/ui";
 import { BusMap, type BusMarker } from "@/components/app/transport/bus-map";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 import { TransportConduite } from "./transport-conduite";
 import { TransportGestion } from "./transport-gestion";
 
@@ -65,7 +66,7 @@ export function TransportClient(props: Props) {
       )}
 
       {onglets.filter((o) => o.visible).length > 1 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 rangee-defilante-mobile">
           {onglets
             .filter((o) => o.visible)
             .map((o) => (
@@ -73,7 +74,7 @@ export function TransportClient(props: Props) {
                 key={o.id}
                 type="button"
                 onClick={() => setOnglet(o.id)}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition mobile:min-h-11 ${
                   onglet === o.id
                     ? "bg-forest-800 text-cream-50"
                     : "border border-cream-300 text-forest-800 hover:bg-cream-100"
@@ -133,6 +134,9 @@ function Suivi({ settings, positionsInitiales, abonnement, dernierPaiement, buse
     };
   }, [peutSuivre]);
 
+  // Téléphone : carte moins haute (300 px au lieu de 420) — elle captait le glissement du doigt
+  // sur 70 % de l'écran et l'abonnement, dessous, devenait difficile à atteindre.
+  const ecranMobile = useEcranMobile();
   const nomBus = React.useMemo(() => new Map(buses.map((b) => [b.id, b.label || b.matricule])), [buses]);
   const markers: BusMarker[] = positions.map((p) => ({
     id: p.busId,
@@ -147,8 +151,8 @@ function Suivi({ settings, positionsInitiales, abonnement, dernierPaiement, buse
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="mb-3 flex items-center justify-between">
+      <Card className="mobile:p-3">
+        <div className="mb-3 flex items-center justify-between mobile:flex-wrap mobile:gap-x-3 mobile:gap-y-1">
           <h2 className="font-display text-base font-bold text-forest-900">Position des cars</h2>
           <span className="inline-flex items-center gap-1.5 text-xs text-ink-700/60">
             <span className="h-2 w-2 animate-pulse rounded-full bg-forest-500" /> mise à jour toutes les 5 s
@@ -160,7 +164,7 @@ function Suivi({ settings, positionsInitiales, abonnement, dernierPaiement, buse
             {abonnement.subscribed ? "" : "— l'abonnement donne accès au suivi lorsque le car émet sa position."}
           </p>
         ) : (
-          <BusMap markers={markers} center={center} height={420} />
+          <BusMap markers={markers} center={center} height={ecranMobile ? 300 : 420} />
         )}
       </Card>
 
@@ -256,7 +260,7 @@ function AbonnementCarte({
 
       {!apercu && !abonnement.subscribed && (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mobile:grid mobile:grid-cols-2">
             {(["month", "year"] as SubscriptionPeriod[]).map((p) => (
               <button
                 key={p}
@@ -299,7 +303,7 @@ function ChampReference({ reference, setReference }: { reference: string; setRef
         value={reference}
         onChange={(e) => setReference(e.target.value)}
         placeholder="ex. identifiant de la transaction"
-        className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:min-h-11 mobile:text-base"
       />
       <p className="mt-1 text-xs text-ink-700/60">Effectuez le paiement, puis saisissez sa référence. L'établissement validera ensuite votre abonnement.</p>
     </div>
@@ -322,7 +326,7 @@ export function BoutonAction({
       type="button"
       onClick={onClick}
       disabled={pending}
-      className={`inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-semibold text-cream-50 shadow-soft transition disabled:opacity-60 ${
+      className={`inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-semibold text-cream-50 shadow-soft transition disabled:opacity-60 mobile:w-full ${
         ton === "rouge" ? "bg-red-600 hover:bg-red-700" : "bg-forest-800 hover:bg-forest-700"
       }`}
     >

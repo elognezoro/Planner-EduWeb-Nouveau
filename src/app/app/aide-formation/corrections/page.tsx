@@ -3,7 +3,7 @@ import { ClipboardCheck, Inbox, CheckCircle2 } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
-import { CorrectionForm } from "./correction-form";
+import { CorrectionAdaptee } from "./correction-adaptee";
 
 export const metadata: Metadata = { title: "Corrections — Aide et Formation" };
 export const dynamic = "force-dynamic";
@@ -48,11 +48,11 @@ export default async function CorrectionsPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="font-medium text-forest-900">{nomApprenant(s.utilisateur)}</p>
-                      <p className="truncate text-xs text-ink-700/55">{s.devoir.module.cours?.titre ?? ""} › {s.devoir.module.titre} · déposé le {new Date(s.dateSoumission).toLocaleDateString("fr-FR")}</p>
+                      <p className="truncate text-xs text-ink-700/55 mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{s.devoir.module.cours?.titre ?? ""} › {s.devoir.module.titre} · déposé le {new Date(s.dateSoumission).toLocaleDateString("fr-FR")}</p>
                     </div>
                     <Badge ton="attente">À corriger</Badge>
                   </div>
-                  <CorrectionForm soumission={{ id: s.id, texte: s.texte, fichierUrl: s.fichierUrl, fichierNom: s.fichierNom, note: s.note, appreciation: s.appreciation, statut: s.statut, noteSur: s.devoir.noteSur }} />
+                  <CorrectionAdaptee soumission={{ id: s.id, texte: s.texte, fichierUrl: s.fichierUrl, fichierNom: s.fichierNom, note: s.note, appreciation: s.appreciation, statut: s.statut, noteSur: s.devoir.noteSur }} />
                 </Card>
               ))
             )}
@@ -66,11 +66,11 @@ export default async function CorrectionsPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="font-medium text-forest-900">{nomApprenant(s.utilisateur)}</p>
-                      <p className="truncate text-xs text-ink-700/55">{s.devoir.module.cours?.titre ?? ""} › {s.devoir.module.titre}</p>
+                      <p className="truncate text-xs text-ink-700/55 mobile:whitespace-normal mobile:[overflow-wrap:anywhere]">{s.devoir.module.cours?.titre ?? ""} › {s.devoir.module.titre}</p>
                     </div>
                     <span className="inline-flex items-center gap-1 text-sm font-semibold text-forest-800"><CheckCircle2 size={14} /> {s.note != null ? `${s.note}/${s.devoir.noteSur}` : "Corrigé"}</span>
                   </div>
-                  <CorrectionForm soumission={{ id: s.id, texte: s.texte, fichierUrl: s.fichierUrl, fichierNom: s.fichierNom, note: s.note, appreciation: s.appreciation, statut: s.statut, noteSur: s.devoir.noteSur }} />
+                  <CorrectionAdaptee soumission={{ id: s.id, texte: s.texte, fichierUrl: s.fichierUrl, fichierNom: s.fichierNom, note: s.note, appreciation: s.appreciation, statut: s.statut, noteSur: s.devoir.noteSur }} />
                 </Card>
               ))}
             </section>

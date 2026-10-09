@@ -6,7 +6,7 @@ import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { NAVIGATION, navigationPourRole, TOUS } from "@/lib/rbac/navigation";
 import { ROLES, ROLES_ORDONNES, libelleRole, roleEffectifRBAC, type RoleId, type TypePortee, type GroupeRole } from "@/lib/rbac/roles";
 import { BoutonImprimerGuide } from "./bouton-imprimer";
-import { MaquetteBarre, MaquetteMenu, FluxLMS, MaquetteAttestation } from "./guide-visuels";
+import { MaquetteBarre, MaquetteMenu, MaquetteMobile, FluxLMS, MaquetteAttestation } from "./guide-visuels";
 
 export const metadata: Metadata = { title: "Guide complet — Aide et Formation" };
 export const dynamic = "force-dynamic";
@@ -456,7 +456,7 @@ function BlocVue({ b }: { b: Bloc }) {
   );
 }
 
-const lienSommaire = "block rounded-lg px-3 py-1.5 text-sm text-forest-800 hover:bg-forest-50";
+const lienSommaire = "block rounded-lg px-3 py-1.5 text-sm text-forest-800 hover:bg-forest-50 mobile:py-3";
 
 export default async function GuidePlateformePage() {
   const u = await requireUtilisateur();
@@ -464,8 +464,8 @@ export default async function GuidePlateformePage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <div className="flex items-center justify-between print:hidden">
-        <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+      <div className="flex items-center justify-between print:hidden mobile:[&>button]:h-11 mobile:[&>button]:w-full mobile:[&>button]:justify-center">
+        <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden">
           <ArrowLeft size={15} /> Retour aux guides
         </Link>
         <BoutonImprimerGuide />
@@ -516,11 +516,18 @@ export default async function GuidePlateformePage() {
       <section id="premiers-pas" className="space-y-3 scroll-mt-24">
         <h2 className="font-display text-xl font-black text-forest-900">2 · Premiers pas</h2>
         <Card className="space-y-5">{PREMIERS_PAS.map((b, i) => <BlocVue key={i} b={b} />)}</Card>
-        <div className="space-y-2">
+        {/* Téléphone : la barre supérieure et le menu latéral de l'ordinateur n'existent pas sur ce
+            écran — on présente l'en-tête et la barre d'onglets mobiles. Placé AVANT les blocs
+            ordinateur pour que le dernier enfant (marges « space-y ») reste le même. */}
+        <div className="hidden space-y-2 mobile:block print:hidden">
+          <h3 className="font-display text-base font-bold text-forest-900">Sur téléphone : l&apos;en-tête et la barre d&apos;onglets</h3>
+          <Card className="mobile:p-4"><MaquetteMobile /></Card>
+        </div>
+        <div className="space-y-2 mobile:hidden">
           <h3 className="font-display text-base font-bold text-forest-900">La barre supérieure, repère par repère</h3>
           <Card><MaquetteBarre /></Card>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 mobile:hidden">
           <h3 className="font-display text-base font-bold text-forest-900">Le menu latéral, adapté à votre rôle</h3>
           <Card><MaquetteMenu /></Card>
         </div>

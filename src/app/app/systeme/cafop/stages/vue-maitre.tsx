@@ -14,6 +14,7 @@ import {
 } from "@/lib/formation/stages-actions";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { grouperParCompetence, type ComposanteModule } from "@/lib/formation/structure-module";
+import { useEcranMobile } from "@/lib/mobile/appareil";
 
 // ── Contrats de données (alignés sur la page serveur) ──
 export interface ModuleApplicableVue {
@@ -87,8 +88,8 @@ export interface StagiaireVue {
 
 const initial: EtatForm = { ok: false };
 const champ =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
-const labelCls = "mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60";
+  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:h-11";
+const labelCls = "mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60 mobile:text-xs";
 
 const STATUTS: { v: "present" | "absent" | "retard"; libelle: string; court: string }[] = [
   { v: "present", libelle: "Présent", court: "P" },
@@ -137,6 +138,7 @@ export function VueMaitreStages({
     <div className="space-y-6">
       <PageHeader
         titre={`Mes stagiaires — ${cafopNom}`}
+        titreMobile="Mes stagiaires"
         description="Vous ne voyez que les stagiaires qui vous sont attribués par le Directeur / l'ADC."
       />
 
@@ -149,8 +151,9 @@ export function VueMaitreStages({
       ) : (
         <>
           <Card className="p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/50">Année de formation</span>
+            {/* Téléphone : années sur une ligne qui défile au doigt. */}
+            <div className="rangee-defilante-mobile flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/50 mobile:hidden">Année de formation</span>
               {annees.map((a) => {
                 const nb = stagiaires.filter((s) => s.annee === a).length;
                 const actif = a === anneeActive;
@@ -159,7 +162,7 @@ export function VueMaitreStages({
                     key={a}
                     type="button"
                     onClick={() => setAnneeActive(a)}
-                    className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                    className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors mobile:min-h-11 mobile:px-4 mobile:text-sm ${
                       actif ? "border-forest-700 bg-forest-800 text-cream-50" : "border-cream-300 bg-white text-forest-800 hover:bg-forest-50"
                     }`}
                   >
@@ -194,7 +197,7 @@ function CarteStagiaire({ cafopId, stagiaire, defaultDate }: { cafopId: string; 
       <button
         type="button"
         onClick={() => setOuvert((v) => !v)}
-        className="flex w-full flex-wrap items-center justify-between gap-3 px-5 py-4 text-left"
+        className="flex w-full flex-wrap items-center justify-between gap-3 px-5 py-4 text-left mobile:px-4"
       >
         <div>
           <p className="font-display text-base font-bold text-forest-900">{nomComplet}</p>
@@ -214,7 +217,7 @@ function CarteStagiaire({ cafopId, stagiaire, defaultDate }: { cafopId: string; 
       </button>
 
       {ouvert && (
-        <div className="space-y-6 border-t border-cream-100 px-5 py-5">
+        <div className="space-y-6 border-t border-cream-100 px-5 py-5 mobile:px-4">
           <FichePresence cafopId={cafopId} stagiaire={stagiaire} defaultDate={defaultDate} />
           <HistoriquePresences stagiaire={stagiaire} />
           <FilDialogue stagiaire={stagiaire} />
@@ -261,6 +264,8 @@ function FichePresence({ cafopId, stagiaire, defaultDate }: { cafopId: string; s
   const [composantesSel, setComposantesSel] = useState<Set<string>>(new Set());
   const [themesSel, setThemesSel] = useState<Set<string>>(new Set());
   const [statut, setStatut] = useState<"present" | "absent" | "retard">("present");
+  // aria-pressed sur téléphone seulement : absent au rendu serveur, sur ordinateur et à l'impression.
+  const ecranMobile = useEcranMobile();
   const [motif, setMotif] = useState("");
 
   const moduleCourant = stagiaire.modulesApplicables.find((m) => m.id === moduleId) ?? null;
@@ -312,7 +317,7 @@ function FichePresence({ cafopId, stagiaire, defaultDate }: { cafopId: string; s
       <h3 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-forest-900">
         <ClipboardCheck size={16} className="text-forest-700" /> Fiche de présence
       </h3>
-      <div className="space-y-3 rounded-2xl border border-cream-200 bg-cream-50/50 p-4">
+      <div className="space-y-3 rounded-2xl border border-cream-200 bg-cream-50/50 p-4 mobile:p-3">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className={labelCls}>Date</label>
@@ -360,15 +365,15 @@ function FichePresence({ cafopId, stagiaire, defaultDate }: { cafopId: string; s
                   <div className="space-y-2">
                     {g.composantes.map((c) => (
                       <div key={c.nom}>
-                        <label className="flex items-center gap-2 text-sm font-medium text-forest-900">
-                          <input type="checkbox" checked={composantesSel.has(c.nom)} onChange={() => basculerComposante(c.nom)} />
+                        <label className="flex items-center gap-2 text-sm font-medium text-forest-900 mobile:min-h-11 mobile:gap-3">
+                          <input type="checkbox" checked={composantesSel.has(c.nom)} onChange={() => basculerComposante(c.nom)} className="mobile:h-5 mobile:w-5 mobile:shrink-0" />
                           {c.nom}
                         </label>
                         {c.themes.length > 0 && (
                           <div className="ml-6 mt-1 flex flex-wrap gap-x-4 gap-y-1">
                             {c.themes.map((t) => (
-                              <label key={t} className="flex items-center gap-1.5 text-xs text-ink-700/75">
-                                <input type="checkbox" checked={themesSel.has(t)} onChange={() => basculerTheme(t)} />
+                              <label key={t} className="flex items-center gap-1.5 text-xs text-ink-700/75 mobile:min-h-10 mobile:gap-2.5 mobile:text-sm">
+                                <input type="checkbox" checked={themesSel.has(t)} onChange={() => basculerTheme(t)} className="mobile:h-5 mobile:w-5 mobile:shrink-0" />
                                 {t}
                               </label>
                             ))}
@@ -384,34 +389,37 @@ function FichePresence({ cafopId, stagiaire, defaultDate }: { cafopId: string; s
         )}
 
         <div className="flex flex-wrap items-end gap-3">
-          <div>
+          <div className="mobile:w-full">
             <label className={labelCls}>Statut</label>
-            <div className="flex gap-1.5">
+            {/* Téléphone : contrôle segmenté pleine largeur, libellés complets, cibles de 44 px. */}
+            <div className="flex gap-1.5 mobile:grid mobile:grid-cols-3 mobile:gap-2">
               {STATUTS.map((o) => (
                 <button
                   key={o.v}
                   type="button"
                   onClick={() => setStatut(o.v)}
-                  className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold transition-colors ${
+                  aria-pressed={ecranMobile ? statut === o.v : undefined}
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold transition-colors mobile:h-11 mobile:w-auto mobile:rounded-xl mobile:text-sm ${
                     statut === o.v ? STYLE_STATUT[o.v] : "border-cream-300 bg-white text-ink-700/50 hover:border-forest-300"
                   }`}
                   title={o.libelle}
                 >
-                  {o.court}
+                  <span className="mobile:hidden">{o.court}</span>
+                  <span className="hidden mobile:inline">{o.libelle}</span>
                 </button>
               ))}
             </div>
           </div>
           {statut !== "present" && (
-            <div className="min-w-[12rem] flex-1">
+            <div className="min-w-[12rem] flex-1 mobile:min-w-0 mobile:basis-full">
               <label className={labelCls}>Motif</label>
-              <input value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Motif…" className={champ} />
+              <input value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Motif…" className={`${champ} mobile:text-base`} />
             </div>
           )}
           <button
             onClick={enregistrer}
             disabled={pending}
-            className="ml-auto inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+            className="ml-auto inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60 mobile:ml-0 mobile:h-11 mobile:w-full mobile:justify-center"
           >
             {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Enregistrer
           </button>
@@ -454,8 +462,28 @@ function HistoriquePresences({ stagiaire }: { stagiaire: StagiaireVue }) {
           <p className="text-sm text-ink-700/60">Aucune présence enregistrée pour l&apos;instant.</p>
         )}
 
+        {/* Téléphone : le tableau (420 px) est remplacé, juste au-dessus, par une liste
+            (placée avant lui pour que le tableau reste le dernier enfant du space-y-3 sur ordinateur). */}
         {recentes.length > 0 && (
-          <div className="overflow-x-auto">
+          <ul className="lg:hidden print:hidden divide-y divide-cream-100 mobile:mb-0">
+            {recentes.map((p, i) => (
+              <li key={i} className="py-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="min-w-0 text-sm text-ink-700/80">
+                    <span className="font-semibold text-forest-900">{p.dateLabel}</span>
+                    {p.heureSeance ? ` · ${p.heureSeance}` : ""}
+                  </span>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${STYLE_STATUT[p.statut] ?? "bg-cream-200 text-ink-700"}`}>
+                    {p.statut === "present" ? "Présent" : p.statut === "absent" ? "Absent" : "Retard"}
+                  </span>
+                </div>
+                {p.motif && <p className="mt-0.5 text-xs text-ink-700/60">{p.motif}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+        {recentes.length > 0 && (
+          <div className="overflow-x-auto mobile:hidden">
             <table className="w-full min-w-[420px] text-left text-xs">
               <thead>
                 <tr className="text-ink-700/50">
@@ -528,7 +556,7 @@ function FilDialogue({ stagiaire }: { stagiaire: StagiaireVue }) {
               <li key={d.id} className={d.duMaitre ? "flex justify-end" : "flex justify-start"}>
                 <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${d.duMaitre ? "rounded-tr-sm bg-forest-700 text-cream-50" : "rounded-tl-sm bg-cream-100 text-ink-800 ring-1 ring-cream-200"}`}>
                   <p className="whitespace-pre-wrap leading-relaxed">{d.contenu}</p>
-                  <p className={`mt-1 text-[0.6rem] ${d.duMaitre ? "text-cream-200/70" : "text-ink-700/45"}`}>
+                  <p className={`mt-1 text-[0.6rem] mobile:text-xs ${d.duMaitre ? "text-cream-200/70" : "text-ink-700/45"}`}>
                     {d.auteurNom} · {d.dateLabel}
                   </p>
                 </div>
@@ -543,12 +571,12 @@ function FilDialogue({ stagiaire }: { stagiaire: StagiaireVue }) {
             onChange={(e) => setTexte(e.target.value)}
             rows={2}
             placeholder="Votre message au Directeur / à l'ADC…"
-            className="min-h-[42px] flex-1 resize-none rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            className="min-h-[42px] flex-1 resize-none rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:min-w-0 mobile:text-base"
           />
           <button
             onClick={envoyer}
             disabled={pending || !texte.trim()}
-            className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-forest-800 px-3.5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+            className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-forest-800 px-3.5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50 mobile:h-11"
           >
             {pending ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Envoyer
           </button>
@@ -691,7 +719,7 @@ function GrilleEvaluation({
 
       {grilleProf && (
         <details className="mb-3 rounded-xl border border-cream-200 bg-cream-50/50 px-3 py-2 text-xs">
-          <summary className="cursor-pointer font-semibold text-forest-800">Grille du professeur de CAFOP (lecture) — {grilleProf.noteGlobale.toLocaleString("fr-FR")}/20</summary>
+          <summary className="cursor-pointer font-semibold text-forest-800 mobile:py-2 mobile:text-sm">Grille du professeur de CAFOP (lecture) — {grilleProf.noteGlobale.toLocaleString("fr-FR")}/20</summary>
           <ul className="mt-2 space-y-1">
             {grilleProf.criteres.map((c, i) => (
               <li key={i} className="flex justify-between text-ink-700/70">
@@ -705,28 +733,29 @@ function GrilleEvaluation({
 
       <div className="space-y-2">
         {criteres.map((c, i) => (
-          <div key={i} className="flex items-center gap-2">
+          // Téléphone : intitulé sur sa propre ligne, note / barème / retrait dessous.
+          <div key={i} className="flex items-center gap-2 mobile:flex-wrap mobile:border-b mobile:border-cream-100 mobile:pb-2">
             <input
               value={c.critere}
               onChange={(e) => majLigne(i, "critere", e.target.value)}
               placeholder="Intitulé du critère…"
-              className={`${champ} flex-1`}
+              className={`${champ} flex-1 mobile:basis-full`}
             />
             <input
               type="number" min={0} value={c.note} onChange={(e) => majLigne(i, "note", e.target.value)}
-              placeholder="Note" className={`${champ} w-20`}
+              placeholder="Note" className={`${champ} w-20 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base`}
             />
             <span className="text-xs text-ink-700/50">/</span>
             <input
               type="number" min={1} value={c.sur} onChange={(e) => majLigne(i, "sur", e.target.value)}
-              placeholder="Sur" className={`${champ} w-16`}
+              placeholder="Sur" className={`${champ} w-16 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:text-base`}
             />
-            <button type="button" onClick={() => retirerLigne(i)} className="shrink-0 text-ink-700/40 hover:text-red-600" aria-label="Retirer le critère">
+            <button type="button" onClick={() => retirerLigne(i)} className="shrink-0 text-ink-700/40 hover:text-red-600 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:items-center mobile:justify-center" aria-label="Retirer le critère">
               <X size={16} />
             </button>
           </div>
         ))}
-        <button type="button" onClick={ajouterLigne} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-medium text-forest-800 hover:bg-forest-50">
+        <button type="button" onClick={ajouterLigne} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:min-h-11 mobile:px-4 mobile:text-sm">
           <Plus size={13} /> Ajouter un critère
         </button>
       </div>
@@ -738,7 +767,7 @@ function GrilleEvaluation({
           onChange={(e) => setAppreciation(e.target.value)}
           rows={2}
           placeholder="Appréciation générale…"
-          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:text-base"
         />
       </div>
 
@@ -758,12 +787,13 @@ function GrilleEvaluation({
         <span className="rounded-full bg-forest-50 px-3 py-1.5 text-xs font-semibold text-forest-800">
           Note globale (aperçu) : {noteGlobalePreview.toLocaleString("fr-FR")}/20
         </span>
-        <div className="flex items-center gap-3">
+        {/* Téléphone : bouton pleine largeur à hauteur libre (le libellé passe sur 2 lignes), message dessous. */}
+        <div className="flex items-center gap-3 mobile:w-full mobile:flex-col-reverse mobile:items-stretch mobile:gap-2">
           {message && <span className={`text-xs font-medium ${message.ok ? "text-forest-700" : "text-red-600"}`}>{message.texte}</span>}
           <button
             onClick={enregistrer}
             disabled={pending}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60 mobile:h-auto mobile:min-h-11 mobile:w-full mobile:justify-center mobile:py-2"
           >
             {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
             {!existante ? "Enregistrer la grille" : confirmer ? "Confirmer l'envoi de la demande" : "Envoyer la demande de modification"}

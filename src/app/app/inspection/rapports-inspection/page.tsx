@@ -155,14 +155,14 @@ export default async function RapportsInspectionPage({
         titre="Rapports d'inspection"
         description="Rédigez le rapport d'inspection à partir de la grille : points forts, axes de progrès, recommandations."
         action={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 mobile:w-full">
             <span className="inline-flex items-center rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold text-forest-800">
               {pays} · {anneeScolaire}
             </span>
             {visite && (
               <Link
                 href={`/app/inspection/visites/${visite.id}/grille/imprimer`}
-                className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 mobile:h-11"
               >
                 <Download size={15} /> Exporter
               </Link>
@@ -172,7 +172,7 @@ export default async function RapportsInspectionPage({
               <button
                 type="submit"
                 form="form-rapport-inspection"
-                className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700"
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 mobile:h-11 mobile:flex-1 mobile:justify-center"
               >
                 <Check size={15} /> Valider
               </button>
@@ -181,7 +181,7 @@ export default async function RapportsInspectionPage({
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
         <StatCard libelle="Visites" valeur={visites.length} icone={<Stamp size={22} />} />
         <StatCard libelle="Réalisées" valeur={realisees} icone={<CheckCircle2 size={22} />} ton="gold" />
         <StatCard libelle="Recommandations" valeur={recosTotal} icone={<ListChecks size={22} />} />
@@ -195,6 +195,7 @@ export default async function RapportsInspectionPage({
       />
 
       {visite ? (
+        <>
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Colonne GAUCHE (2/3) : les 3 sections éditables reliées à la grille de supervision. */}
           <div className="lg:col-span-2">
@@ -212,9 +213,10 @@ export default async function RapportsInspectionPage({
             />
           </div>
 
-          {/* Colonne DROITE (1/3) : score global + profil d'évaluation par compétence. */}
-          <div className="space-y-6">
-            <Card id="score-global" className="scroll-mt-24">
+          {/* Colonne DROITE (1/3) : score global + profil d'évaluation par compétence.
+              Téléphone : affichée AVANT le formulaire (la note d'abord, la rédaction ensuite). */}
+          <div className="space-y-6 mobile:order-first">
+            <Card id="score-global" className="scroll-mt-24 mobile:scroll-mt-36">
               <h2 className="mb-3 flex items-center gap-2 font-display text-base font-bold text-forest-900">
                 <Gauge size={18} /> Score global
               </h2>
@@ -256,7 +258,7 @@ export default async function RapportsInspectionPage({
                   </p>
                   <Link
                     href={`/app/inspection/visites/${visite.id}/grille`}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-xs font-semibold text-cream-50 transition-colors hover:bg-forest-700"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-xs font-semibold text-cream-50 transition-colors hover:bg-forest-700 mobile:min-h-11 mobile:text-sm"
                   >
                     <ListChecks size={14} /> Remplir la grille
                   </Link>
@@ -265,6 +267,20 @@ export default async function RapportsInspectionPage({
             </Card>
           </div>
         </div>
+        {/* Téléphone : « Valider » toujours à portée du pouce pendant la saisie (le bouton de
+            l'en-tête est loin au-dessus), à gauche du bouton de l'assistant IA. */}
+        {!lectureSeule && (
+          <div className="lg:hidden print:hidden mobile:sticky mobile:bottom-[calc(var(--hauteur-barre-onglets,0px)+1.25rem)] mobile:z-30 mobile:mr-[4.25rem]">
+            <button
+              type="submit"
+              form="form-rapport-inspection"
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-forest-800 px-5 font-semibold text-cream-50 shadow-lg active:bg-forest-700"
+            >
+              <Check size={18} /> Valider le rapport
+            </button>
+          </div>
+        )}
+        </>
       ) : (
         <Card>
           <p className="text-sm text-ink-700/60">

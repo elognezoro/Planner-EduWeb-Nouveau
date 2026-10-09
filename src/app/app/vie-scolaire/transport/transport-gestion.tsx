@@ -31,7 +31,7 @@ function fcfa(n: number): string {
   return `${n.toLocaleString("fr-FR")} FCFA`;
 }
 const inputCls =
-  "w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  "w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 mobile:min-h-11 mobile:text-base";
 
 export function TransportGestion({
   settings,
@@ -109,21 +109,21 @@ function PaiementsSection({ paiements, pending, lancer }: { paiements: Transport
         <ul className="divide-y divide-cream-100">
           {paiements.map((p) => (
             <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-              <div>
+              <div className="mobile:min-w-0">
                 <div className="font-semibold text-forest-900">
                   {fcfa(p.amountFcfa)} · {p.period === "year" ? "Annuel" : "Mensuel"}
                   {p.isUpgrade ? " (passage à l'annuel)" : ""}
                 </div>
-                <div className="text-xs text-ink-700/60">
+                <div className="text-xs text-ink-700/60 mobile:break-all">
                   {p.payerEmail ?? "—"} · réf. {p.reference || "—"} · {new Date(p.createdAt).toLocaleString("fr-FR")}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 mobile:grid mobile:w-full mobile:grid-cols-2">
                 <button
                   type="button"
                   disabled={pending}
                   onClick={() => lancer(() => confirmerPaiementAction(p.id), "Paiement confirmé, abonnement prolongé.")}
-                  className="inline-flex items-center gap-1 rounded-full bg-forest-800 px-4 py-2 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+                  className="inline-flex items-center gap-1 rounded-full bg-forest-800 px-4 py-2 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60 mobile:h-11 mobile:justify-center mobile:text-sm"
                 >
                   <Check size={14} /> Confirmer
                 </button>
@@ -131,7 +131,7 @@ function PaiementsSection({ paiements, pending, lancer }: { paiements: Transport
                   type="button"
                   disabled={pending}
                   onClick={() => lancer(() => rejeterPaiementAction(p.id), "Paiement rejeté.")}
-                  className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+                  className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60 mobile:h-11 mobile:justify-center mobile:text-sm"
                 >
                   <X size={14} /> Rejeter
                 </button>
@@ -163,7 +163,7 @@ function BusSection({ buses, pending, lancer }: { buses: TransportBus[]; pending
                 type="button"
                 disabled={pending}
                 onClick={() => lancer(() => supprimerBusAction(b.id), "Car supprimé.")}
-                className="text-ink-700/50 hover:text-red-600 disabled:opacity-60"
+                className="text-ink-700/50 hover:text-red-600 disabled:opacity-60 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:shrink-0 mobile:items-center mobile:justify-center"
                 aria-label="Supprimer"
               >
                 <Trash2 size={16} />
@@ -222,7 +222,7 @@ function CreneauxSection({ slots, pending, lancer }: { slots: TransportSlot[]; p
                 type="button"
                 disabled={pending}
                 onClick={() => lancer(() => supprimerCreneauAction(s.id), "Créneau supprimé.")}
-                className="text-ink-700/50 hover:text-red-600 disabled:opacity-60"
+                className="text-ink-700/50 hover:text-red-600 disabled:opacity-60 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:shrink-0 mobile:items-center mobile:justify-center"
                 aria-label="Supprimer"
               >
                 <Trash2 size={16} />
@@ -257,7 +257,7 @@ function CreneauxSection({ slots, pending, lancer }: { slots: TransportSlot[]; p
                 key={w.value}
                 type="button"
                 onClick={() => toggleDay(w.value)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition mobile:min-h-11 mobile:min-w-11 mobile:text-sm ${
                   days.includes(w.value) ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-cream-100"
                 }`}
               >
@@ -295,12 +295,12 @@ function ConducteursSection({ conducteurs, pending, lancer }: { conducteurs: Tra
         <ul className="mb-4 divide-y divide-cream-100">
           {conducteurs.map((d) => (
             <li key={d.userId} className="flex items-center justify-between py-2.5 text-sm">
-              <span className="text-forest-900">{d.email ?? d.userId}</span>
+              <span className="text-forest-900 mobile:min-w-0 mobile:break-all">{d.email ?? d.userId}</span>
               <button
                 type="button"
                 disabled={pending}
                 onClick={() => lancer(() => retirerConducteurAction(d.userId), "Conducteur retiré.")}
-                className="text-ink-700/50 hover:text-red-600 disabled:opacity-60"
+                className="text-ink-700/50 hover:text-red-600 disabled:opacity-60 mobile:inline-flex mobile:h-11 mobile:w-11 mobile:shrink-0 mobile:items-center mobile:justify-center"
                 aria-label="Retirer"
               >
                 <Trash2 size={16} />

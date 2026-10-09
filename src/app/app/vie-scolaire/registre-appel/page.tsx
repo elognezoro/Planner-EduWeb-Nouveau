@@ -352,7 +352,7 @@ export default async function RegistreAppelPage({
         description="Enregistrement des présences, absences et retards."
         action={
           classeSel ? (
-            <div className="flex items-center gap-2 print:hidden">
+            <div className="flex items-center gap-2 print:hidden rangee-defilante-mobile">
               <BoutonImprimer />
               <BoutonExporter classeId={classeSel.id} date={dateSel} disciplineId={disciplineSel} heureSeance={heureSel} />
             </div>
@@ -381,7 +381,7 @@ export default async function RegistreAppelPage({
       ) : (
         <>
           {/* Navigation rapide */}
-          <Card className="p-4 print:hidden">
+          <Card className="p-4 print:hidden mobile:hidden">
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="font-semibold uppercase tracking-wide text-ink-700/50">Aller à</span>
               {[["#bilan", "Bilan de l'appel"], ["#liste", "Liste des élèves"], ["#heatmap", "Heatmap de présence"]].map(([href, l]) => (
@@ -394,7 +394,7 @@ export default async function RegistreAppelPage({
 
           {/* En-tête officiel — adapté au pays de l'établissement */}
           {enTete && (
-            <Card className="relative py-5">
+            <Card className="relative py-5 mobile:hidden">
               {/* Pile officielle : nom du pays, ARMOIRIES (emblème configuré sur
                   l'établissement, sinon drapeau national du référentiel), devise, ministère. */}
               <div className="text-center">
@@ -446,14 +446,14 @@ export default async function RegistreAppelPage({
           {/* Bilan de l'appel */}
           {classeSel && (
             <div id="bilan" className="scroll-mt-24">
-            <Card>
-              <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Bilan de l&apos;appel</h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
+            <Card className="mobile:p-4">
+              <h2 className="mb-4 mobile:mb-3 font-display text-lg font-bold text-forest-900">Bilan de l&apos;appel</h2>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8 mobile:gap-2">
                 {bilan.map((k) => (
-                  <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-cream-50/50 p-3 text-center">
-                    <span className={`mx-auto flex h-8 w-8 items-center justify-center ${accents[k.accent ?? "neutre"]}`}>{k.icone}</span>
-                    <p className={`font-display text-xl font-bold ${accents[k.accent ?? "neutre"]}`}>{k.valeur}</p>
-                    <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-700/60">{k.libelle}</p>
+                  <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-cream-50/50 p-3 text-center mobile:flex mobile:items-center mobile:gap-2.5 mobile:p-2.5 mobile:text-left">
+                    <span className={`mx-auto flex h-8 w-8 items-center justify-center mobile:hidden ${accents[k.accent ?? "neutre"]}`}>{k.icone}</span>
+                    <p className={`font-display text-xl font-bold mobile:shrink-0 ${accents[k.accent ?? "neutre"]}`}>{k.valeur}</p>
+                    <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-700/60 mobile:mt-0 mobile:min-w-0 mobile:text-xs mobile:text-ink-700/75">{k.libelle}</p>
                   </div>
                 ))}
               </div>

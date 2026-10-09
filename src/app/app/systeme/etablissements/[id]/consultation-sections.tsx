@@ -12,6 +12,7 @@ import {
 } from "@/lib/reseau-catholique/agregats";
 import { HeatmapTable } from "@/components/app/heatmap";
 import { GrilleEDT, chargerCreneaux, contexteHoraires } from "@/components/app/emplois-du-temps/grille-edt";
+import { ChoixMobile } from "./choix-mobile";
 
 /**
  * Onglets de CONSULTATION (lecture seule) d'un établissement du réseau catholique,
@@ -62,9 +63,11 @@ const LIBELLE_ROLE_PERSONNEL: Record<string, string> = {
 
 function Info({ libelle, valeur }: { libelle: string; valeur: React.ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-1.5">
-      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-ink-700/50">{libelle}</span>
-      <span className="min-w-0 text-right text-sm font-medium text-forest-900">{valeur ?? "—"}</span>
+    // Téléphone : le libellé passe AU-DESSUS de la valeur — « Directeur d'École Primaire » en
+    // capitales ne peut plus élargir la carte (et toute la page) au-delà de l'écran.
+    <div className="flex items-baseline justify-between gap-4 py-1.5 mobile:flex-col mobile:items-start mobile:gap-0.5">
+      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-ink-700/50 mobile:shrink">{libelle}</span>
+      <span className="min-w-0 text-right text-sm font-medium text-forest-900 mobile:w-full mobile:text-left mobile:wrap-break-word">{valeur ?? "—"}</span>
     </div>
   );
 }
@@ -107,11 +110,11 @@ export async function OngletApercu({ e }: { e: EtabConsult }) {
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {chiffres.map((c) => (
-          <Card key={c.libelle} className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-600">
+          <Card key={c.libelle} className="flex items-center gap-3 p-4 mobile:flex-col mobile:items-start mobile:gap-2 mobile:p-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-600 mobile:h-8 mobile:w-8 mobile:rounded-lg">
               <c.icone size={19} />
             </span>
-            <span>
+            <span className="mobile:min-w-0 mobile:max-w-full">
               <span className="block font-display text-xl font-bold text-forest-900">{c.valeur.toLocaleString("fr-FR")}</span>
               <span className="text-xs text-ink-700/60">{c.libelle}</span>
             </span>
@@ -190,7 +193,7 @@ export async function OngletConfiguration({ e }: { e: EtabConsult }) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
-                    <th className="py-1.5 pr-2">Niveau</th><th className="py-1.5 pr-2">Cycle</th>
+                    <th className="py-1.5 pr-2">Niveau</th><th className="py-1.5 pr-2 mobile:hidden">Cycle</th>
                     <th className="py-1.5 pr-2 text-right">Effectif</th><th className="py-1.5 pr-2 text-right">Classes</th><th className="py-1.5 text-right">Vacation</th>
                   </tr>
                 </thead>
@@ -198,7 +201,7 @@ export async function OngletConfiguration({ e }: { e: EtabConsult }) {
                   {niveaux.map((n) => (
                     <tr key={n.id}>
                       <td className="py-1.5 pr-2 font-medium text-forest-900">{n.niveau.nom}</td>
-                      <td className="py-1.5 pr-2">{LIBELLE_CYCLE[n.niveau.cycle] ?? n.niveau.cycle}</td>
+                      <td className="py-1.5 pr-2 mobile:hidden">{LIBELLE_CYCLE[n.niveau.cycle] ?? n.niveau.cycle}</td>
                       <td className="py-1.5 pr-2 text-right">{n.effectif.toLocaleString("fr-FR")}</td>
                       <td className="py-1.5 pr-2 text-right">{n.nbClasses}</td>
                       <td className="py-1.5 text-right">{n.vacation === "double" ? "Double" : "Simple"}</td>
@@ -270,8 +273,8 @@ export async function OngletEleves({ e, classeId }: { e: EtabConsult; classeId?:
 
   return (
     <div className="space-y-4">
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+      <Card className="p-4 mobile:border-0 mobile:bg-transparent mobile:p-0 mobile:shadow-none">
+        <div className="flex flex-wrap items-center gap-2 text-sm mobile:hidden">
           <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">Classes :</span>
           <Link href={`${lienBase(e)}?onglet=eleves`} className={`rounded-full px-3 py-1 text-xs font-medium ${!classeId ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"}`}>
             Toutes ({totalEleves.toLocaleString("fr-FR")} élèves)
@@ -283,6 +286,19 @@ export async function OngletEleves({ e, classeId }: { e: EtabConsult; classeId?:
             </Link>
           ))}
         </div>
+        <ChoixMobile
+          libelle="Classe"
+          titre="Choisir une classe"
+          options={[
+            { cle: "", libelle: `Toutes (${totalEleves.toLocaleString("fr-FR")} élèves)`, href: `${lienBase(e)}?onglet=eleves`, actif: !classeId },
+            ...classes.map((c) => ({
+              cle: c.id,
+              libelle: `${c.nom} (${c._count.inscriptions})`,
+              href: `${lienBase(e)}?onglet=eleves&classe=${c.id}`,
+              actif: classeId === c.id,
+            })),
+          ]}
+        />
       </Card>
       {visibles.length === 0 ? (
         <Card><p className="text-sm text-ink-700/60">Aucune classe pour cet établissement.</p></Card>
@@ -296,7 +312,7 @@ export async function OngletEleves({ e, classeId }: { e: EtabConsult; classeId?:
                 <p className="text-sm text-ink-700/60">Aucun élève inscrit dans cette classe.</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[480px] text-sm">
+                  <table className="w-full min-w-[480px] text-sm mobile:min-w-0">
                     <thead>
                       <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                         <th className="py-1.5 pr-2">#</th><th className="py-1.5 pr-2">Nom et prénoms</th>
@@ -365,7 +381,9 @@ export async function OngletPersonnel({ e, ficheId }: { e: EtabConsult; ficheId?
             <ul className="divide-y divide-cream-100">
               {membres.map((m) => (
                 <li key={m.id} className="flex flex-wrap items-center gap-3 py-2">
-                  <div className="min-w-0 flex-1">
+                  {/* Téléphone : nom et e-mail seuls en ligne 1 (sinon écrasés par les spécialités et
+                      « Voir la fiche ») ; spécialités et lien passent dessous. */}
+                  <div className="min-w-0 flex-1 mobile:basis-full">
                     <Link href={`${lienBase(e)}?onglet=personnel&fiche=${m.id}`} className="font-medium text-forest-900 hover:underline">
                       {nomComplet(m)}
                     </Link>
@@ -374,12 +392,12 @@ export async function OngletPersonnel({ e, ficheId }: { e: EtabConsult; ficheId?
                   {r === "enseignant" && (
                     <div className="flex max-w-full flex-wrap gap-1">
                       {(specialites.get(m.id) ?? []).map((s) => (
-                        <span key={s} className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.68rem] font-medium text-forest-800">{s}</span>
+                        <span key={s} className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.68rem] font-medium text-forest-800 mobile:text-xs">{s}</span>
                       ))}
                       {(specialites.get(m.id) ?? []).length === 0 && <span className="text-xs text-ink-700/45">Spécialités non renseignées</span>}
                     </div>
                   )}
-                  <Link href={`${lienBase(e)}?onglet=personnel&fiche=${m.id}`} className="shrink-0 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50">
+                  <Link href={`${lienBase(e)}?onglet=personnel&fiche=${m.id}`} className="shrink-0 rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:inline-flex mobile:min-h-10 mobile:items-center mobile:px-4 mobile:ml-auto">
                     Voir la fiche
                   </Link>
                 </li>
@@ -496,8 +514,8 @@ export async function OngletCahier({ e, classeId }: { e: EtabConsult; classeId?:
   ]);
   return (
     <div className="space-y-4">
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+      <Card className="p-4 mobile:border-0 mobile:bg-transparent mobile:p-0 mobile:shadow-none">
+        <div className="flex flex-wrap items-center gap-2 text-sm mobile:hidden">
           <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">Classes :</span>
           <Link href={`${lienBase(e)}?onglet=cahier-texte`} className={`rounded-full px-3 py-1 text-xs font-medium ${!classeId ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"}`}>Toutes</Link>
           {classes.map((c) => (
@@ -507,6 +525,14 @@ export async function OngletCahier({ e, classeId }: { e: EtabConsult; classeId?:
             </Link>
           ))}
         </div>
+        <ChoixMobile
+          libelle="Classe"
+          titre="Choisir une classe"
+          options={[
+            { cle: "", libelle: "Toutes", href: `${lienBase(e)}?onglet=cahier-texte`, actif: !classeId },
+            ...classes.map((c) => ({ cle: c.id, libelle: c.nom, href: `${lienBase(e)}?onglet=cahier-texte&classe=${c.id}`, actif: classeId === c.id })),
+          ]}
+        />
       </Card>
       {seances.length === 0 ? (
         <Card><p className="text-sm text-ink-700/60">Aucune séance publiée au cahier de texte{classeId ? " pour cette classe" : ""}.</p></Card>
@@ -624,8 +650,8 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
           </Card>
         ))}
       </div>
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+      <Card className="p-4 mobile:border-0 mobile:bg-transparent mobile:p-0 mobile:shadow-none">
+        <div className="flex flex-wrap items-center gap-2 text-sm mobile:hidden">
           <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">Classes :</span>
           <Link href={`${lienBase(e)}?onglet=registre-appel`} className={`rounded-full px-3 py-1 text-xs font-medium ${!classeId ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"}`}>Toutes</Link>
           {classes.map((c) => (
@@ -635,16 +661,24 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
             </Link>
           ))}
         </div>
+        <ChoixMobile
+          libelle="Classe"
+          titre="Choisir une classe"
+          options={[
+            { cle: "", libelle: "Toutes", href: `${lienBase(e)}?onglet=registre-appel`, actif: !classeId },
+            ...classes.map((c) => ({ cle: c.id, libelle: c.nom, href: `${lienBase(e)}?onglet=registre-appel&classe=${c.id}`, actif: classeId === c.id })),
+          ]}
+        />
       </Card>
       {!classeId && parClasse.size > 0 && (
         <Card>
           <TitreSection icone={<CalendarCheck2 size={17} className="text-forest-600" />} titre="Bilan par classe" note="60 derniers jours" />
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
+            <table className="w-full min-w-[480px] text-sm mobile:min-w-0">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Classe</th><th className="py-1.5 pr-2 text-right">Appels</th>
-                  <th className="py-1.5 pr-2 text-right">Présence</th><th className="py-1.5 text-right">Abs. non justifiées</th>
+                  <th className="py-1.5 pr-2 text-right">Présence</th><th className="py-1.5 text-right">Abs.<span className="mobile:hidden"> non justifiées</span><span className="hidden mobile:inline"> NJ</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-cream-100">
@@ -667,7 +701,8 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
           <p className="text-sm text-ink-700/60">Aucun appel sur les 60 derniers jours.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-sm">
+            {/* Téléphone : une carte par appel (tableau-cartes-mobile, libellés data-label). */}
+            <table className="tableau-cartes-mobile w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Date</th><th className="py-1.5 pr-2">Classe</th><th className="py-1.5 pr-2">Discipline</th>
@@ -680,12 +715,12 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
                   const absents = a.presences.filter((p) => p.statut === "absent").length;
                   return (
                     <tr key={a.id}>
-                      <td className="py-1.5 pr-2">{dateCourte(a.date)}</td>
-                      <td className="py-1.5 pr-2 font-medium text-forest-900">{a.classe.nom}</td>
-                      <td className="py-1.5 pr-2">{a.discipline?.nom ?? "—"}</td>
-                      <td className="py-1.5 pr-2">{a.heureSeance ?? "—"}</td>
-                      <td className="py-1.5 pr-2 text-right text-forest-700">{presents}</td>
-                      <td className="py-1.5 text-right text-red-600">{absents}</td>
+                      <td className="py-1.5 pr-2 mobile:font-semibold mobile:text-forest-900">{dateCourte(a.date)}</td>
+                      <td data-label="Classe" className="py-1.5 pr-2 font-medium text-forest-900">{a.classe.nom}</td>
+                      <td data-label="Discipline" className="py-1.5 pr-2">{a.discipline?.nom ?? "—"}</td>
+                      <td data-label="Créneau" className="py-1.5 pr-2">{a.heureSeance ?? "—"}</td>
+                      <td data-label="Présents" className="py-1.5 pr-2 text-right text-forest-700">{presents}</td>
+                      <td data-label="Absents" className="py-1.5 text-right text-red-600">{absents}</td>
                     </tr>
                   );
                 })}
@@ -751,7 +786,7 @@ export async function OngletNotes({ e, classeId, eleveId }: { e: EtabConsult; cl
           <p className="text-sm text-ink-700/60">Aucune classe.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
+            <table className="tableau-cartes-mobile w-full min-w-[480px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Classe</th><th className="py-1.5 pr-2">Niveau</th>
@@ -764,11 +799,11 @@ export async function OngletNotes({ e, classeId, eleveId }: { e: EtabConsult; cl
                   return (
                     <tr key={c.id}>
                       <td className="py-1.5 pr-2 font-medium text-forest-900">{c.nom}</td>
-                      <td className="py-1.5 pr-2">{c.niveau.nom}</td>
-                      <td className="py-1.5 pr-2 text-right">{a?.nb ?? 0}</td>
-                      <td className="py-1.5 pr-2 text-right font-semibold text-forest-800">{a ? fmt2(a.somme / a.nb) : "—"}</td>
+                      <td data-label="Niveau" className="py-1.5 pr-2">{c.niveau.nom}</td>
+                      <td data-label="Notes saisies" className="py-1.5 pr-2 text-right">{a?.nb ?? 0}</td>
+                      <td data-label="Moyenne /20" className="py-1.5 pr-2 text-right font-semibold text-forest-800">{a ? fmt2(a.somme / a.nb) : "—"}</td>
                       <td className="py-1.5 text-right">
-                        <Link href={`${lienBase(e)}?onglet=notes&classe=${c.id}`} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50">Détail</Link>
+                        <Link href={`${lienBase(e)}?onglet=notes&classe=${c.id}`} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:flex mobile:min-h-11 mobile:items-center mobile:justify-center mobile:text-sm">Détail</Link>
                       </td>
                     </tr>
                   );
@@ -825,7 +860,7 @@ export async function OngletNotes({ e, classeId, eleveId }: { e: EtabConsult; cl
           <p className="text-sm text-ink-700/60">Aucune note saisie pour cette classe.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
+            <table className="w-full min-w-[480px] text-sm mobile:min-w-0">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Discipline</th>
@@ -852,7 +887,7 @@ export async function OngletNotes({ e, classeId, eleveId }: { e: EtabConsult; cl
       <Card>
         <TitreSection icone={<Users size={17} className="text-forest-600" />} titre="Élèves de la classe" note="cliquer pour le bulletin" />
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[480px] text-sm">
+          <table className="w-full min-w-[480px] text-sm mobile:min-w-0">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">#</th><th className="py-1.5 pr-2">Nom et prénoms</th>
@@ -866,7 +901,7 @@ export async function OngletNotes({ e, classeId, eleveId }: { e: EtabConsult; cl
                   <td className="py-1.5 pr-2 font-medium text-forest-900">{nomComplet(el)}</td>
                   <td className="py-1.5 pr-2 text-right font-semibold text-forest-800">{el.moy ? fmt2(el.moy.somme / el.moy.nb) : "—"}</td>
                   <td className="py-1.5 text-right">
-                    <Link href={`${lienBase(e)}?onglet=notes&classe=${classeId}&eleve=${el.id}`} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50">Bulletin</Link>
+                    <Link href={`${lienBase(e)}?onglet=notes&classe=${classeId}&eleve=${el.id}`} className="rounded-full border border-cream-300 px-3 py-1 text-xs font-medium text-forest-800 hover:bg-forest-50 mobile:inline-flex mobile:min-h-10 mobile:items-center">Bulletin</Link>
                   </td>
                 </tr>
               ))}
@@ -940,7 +975,7 @@ async function BulletinEleve({ e, classeId, eleveId }: { e: EtabConsult; classeI
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-sm">
+              <table className="tableau-cartes-mobile w-full min-w-[560px] text-sm">
                 <thead>
                   <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                     <th className="py-1.5 pr-2">Discipline</th><th className="py-1.5 pr-2">Évaluations (période · note)</th>
@@ -951,21 +986,21 @@ async function BulletinEleve({ e, classeId, eleveId }: { e: EtabConsult; classeI
                   {[...parDiscipline.entries()].sort((a, b) => a[0].localeCompare(b[0], "fr")).map(([nom, d]) => (
                     <tr key={nom}>
                       <td className="py-2 pr-2 align-top font-medium text-forest-900">{nom}</td>
-                      <td className="py-2 pr-2">
-                        <div className="flex flex-wrap gap-1.5">
+                      <td data-label="Évaluations" className="py-2 pr-2">
+                        <div className="flex flex-wrap gap-1.5 mobile:justify-end">
                           {d.notes.map((n) => (
-                            <span key={n.id} className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.7rem] text-forest-800" title={n.libelle}>
+                            <span key={n.id} className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.7rem] text-forest-800 mobile:text-xs" title={n.libelle}>
                               P{n.periode} · {n.valeur.toLocaleString("fr-FR")}/{n.sur.toLocaleString("fr-FR")}
                             </span>
                           ))}
                         </div>
                       </td>
-                      <td className="py-2 pr-2 text-right align-top text-ink-700/70">{d.coef.toLocaleString("fr-FR")}</td>
-                      <td className="py-2 text-right align-top font-semibold text-forest-800">{fmt2(d.somme / d.nb)}</td>
+                      <td data-label="Coef." className="py-2 pr-2 text-right align-top text-ink-700/70">{d.coef.toLocaleString("fr-FR")}</td>
+                      <td data-label="Moyenne /20" className="py-2 text-right align-top font-semibold text-forest-800">{fmt2(d.somme / d.nb)}</td>
                     </tr>
                   ))}
                 </tbody>
-                <tfoot>
+                <tfoot className="mobile:block">
                   <tr className="border-t-2 border-forest-200">
                     <td className="py-2 pr-2 font-semibold text-forest-900" colSpan={3}>Moyenne générale (pondérée par les coefficients)</td>
                     <td className="py-2 text-right font-display text-lg font-bold text-forest-900">{sommeCoefs > 0 ? fmt2(sommePonderee / sommeCoefs) : "—"} / 20</td>
@@ -1028,12 +1063,14 @@ export async function OngletStats({ e }: { e: EtabConsult }) {
         ) : (
           <div className="space-y-2">
             {niveaux.map((n) => (
-              <div key={n.id} className="flex items-center gap-3">
-                <span className="w-24 shrink-0 text-sm font-medium text-forest-900">{n.niveau.nom}</span>
-                <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-cream-100">
+              // Téléphone : nom et effectif sur une ligne, barre pleine largeur dessous (elle ne
+              // disposait que d'environ 80 px : écarts entre niveaux imperceptibles).
+              <div key={n.id} className="flex items-center gap-3 mobile:flex-wrap mobile:gap-x-3 mobile:gap-y-1">
+                <span className="w-24 shrink-0 text-sm font-medium text-forest-900 mobile:w-auto mobile:min-w-0 mobile:flex-1 mobile:truncate">{n.niveau.nom}</span>
+                <div className="h-4 min-w-0 flex-1 overflow-hidden rounded-full bg-cream-100 mobile:order-last mobile:h-3 mobile:basis-full">
                   <div className="h-full rounded-full bg-forest-500" style={{ width: `${Math.round((n.effectif / maxEff) * 100)}%` }} />
                 </div>
-                <span className="w-20 shrink-0 text-right text-sm text-ink-700/70">{n.effectif.toLocaleString("fr-FR")}</span>
+                <span className="w-20 shrink-0 text-right text-sm text-ink-700/70 mobile:w-auto mobile:font-semibold mobile:text-forest-900">{n.effectif.toLocaleString("fr-FR")}</span>
               </div>
             ))}
           </div>
@@ -1104,7 +1141,7 @@ export async function OngletEDT({
             <Link
               key={s.id}
               href={`${base}&edt=${s.id}`}
-              className={`rounded-full px-3.5 py-1.5 text-sm font-medium ${
+              className={`rounded-full px-3.5 py-1.5 text-sm font-medium mobile:inline-flex mobile:min-h-11 mobile:flex-1 mobile:items-center mobile:justify-center ${
                 s.actif ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"
               }`}
             >
@@ -1114,8 +1151,8 @@ export async function OngletEDT({
         </div>
       </Card>
 
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+      <Card className="p-4 mobile:border-0 mobile:bg-transparent mobile:p-0 mobile:shadow-none">
+        <div className="flex flex-wrap items-center gap-2 text-sm mobile:hidden">
           <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">
             {parEnseignant ? "Enseignants :" : "Classes :"}
           </span>
@@ -1147,6 +1184,26 @@ export async function OngletEDT({
                   </Link>
                 ))}
         </div>
+        <ChoixMobile
+          libelle={parEnseignant ? "Enseignant" : "Classe"}
+          titre={parEnseignant ? "Choisir un enseignant" : "Choisir une classe"}
+          vide={parEnseignant ? "Aucun enseignant dans l'emploi du temps." : "Aucune classe dans l'emploi du temps."}
+          options={
+            parEnseignant
+              ? enseignants.map((en) => ({
+                  cle: en.enseignantId,
+                  libelle: en.enseignantNom,
+                  href: `${base}&edt=enseignant&ens=${en.enseignantId}`,
+                  actif: ensCourant === en.enseignantId,
+                }))
+              : classes.map((c) => ({
+                  cle: c.classeId,
+                  libelle: c.classeNom,
+                  href: `${base}&edt=classe&classe=${c.classeId}`,
+                  actif: classeCourante === c.classeId,
+                }))
+          }
+        />
       </Card>
 
       <Card>
@@ -1221,7 +1278,7 @@ export async function OngletAbsences({ e }: { e: EtabConsult }) {
           <p className="text-sm text-ink-700/60">Aucune demande d&apos;autorisation d&apos;absence pour cet établissement.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-sm">
+            <table className="tableau-cartes-mobile w-full min-w-[680px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Demandeur</th><th className="py-1.5 pr-2">Fonction</th>
@@ -1235,11 +1292,11 @@ export async function OngletAbsences({ e }: { e: EtabConsult }) {
                   return (
                     <tr key={d.id}>
                       <td className="py-1.5 pr-2 font-medium text-forest-900" title={d.motif ?? undefined}>{nomComplet(d.demandeur)}</td>
-                      <td className="py-1.5 pr-2 text-ink-700/70">{d.demandeur.roleActif.libelle}</td>
-                      <td className="py-1.5 pr-2 whitespace-nowrap">{periode(d.dateDebut, d.dateFin)}</td>
-                      <td className="py-1.5 pr-2 text-right">{d.estEnseignant ? d.nbSeancesAffectees : "—"}</td>
-                      <td className="py-1.5 pr-2">{d.estEnseignant ? (d.avecSuppleance ? "Suppléance" : "Rattrapage") : "—"}</td>
-                      <td className="py-1.5"><span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${b.classe}`}>{b.libelle}</span></td>
+                      <td data-label="Fonction" className="py-1.5 pr-2 text-ink-700/70">{d.demandeur.roleActif.libelle}</td>
+                      <td data-label="Période" className="py-1.5 pr-2 whitespace-nowrap mobile:whitespace-normal">{periode(d.dateDebut, d.dateFin)}</td>
+                      <td data-label="Séances" className="py-1.5 pr-2 text-right">{d.estEnseignant ? d.nbSeancesAffectees : "—"}</td>
+                      <td data-label="Couverture" className="py-1.5 pr-2">{d.estEnseignant ? (d.avecSuppleance ? "Suppléance" : "Rattrapage") : "—"}</td>
+                      <td data-label="Statut" className="py-1.5"><span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${b.classe} mobile:text-xs`}>{b.libelle}</span></td>
                     </tr>
                   );
                 })}
@@ -1307,7 +1364,7 @@ export async function OngletInspection({ e }: { e: EtabConsult }) {
           <p className="text-sm text-ink-700/60">Aucune visite enregistrée pour cet établissement.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
+            <table className="tableau-cartes-mobile w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Date</th><th className="py-1.5 pr-2">Type</th>
@@ -1321,14 +1378,14 @@ export async function OngletInspection({ e }: { e: EtabConsult }) {
                   const b = BADGE_VISITE[v.statut] ?? BADGE_VISITE.planifiee;
                   return (
                     <tr key={v.id}>
-                      <td className="py-1.5 pr-2 whitespace-nowrap">{dateCourte(v.date)}</td>
-                      <td className="py-1.5 pr-2">{LIBELLE_TYPE_VISITE[v.type] ?? v.type}</td>
-                      <td className="max-w-[16rem] truncate py-1.5 pr-2 font-medium text-forest-900" title={v.observations ?? v.objet}>{v.objet}</td>
-                      <td className="py-1.5 pr-2">{v.enseignant ? nomComplet(v.enseignant) : "—"}</td>
-                      <td className="py-1.5 pr-2 text-ink-700/70">{nomComplet(v.inspecteur)}</td>
-                      <td className="py-1.5 pr-2 text-right">{v.noteGlobale != null ? `${v.noteGlobale.toLocaleString("fr-FR")}` : "—"}</td>
-                      <td className="py-1.5 pr-2 text-right">{v._count.recommandations}</td>
-                      <td className="py-1.5"><span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${b.classe}`}>{b.libelle}</span></td>
+                      <td className="py-1.5 pr-2 whitespace-nowrap mobile:font-semibold mobile:text-forest-900">{dateCourte(v.date)}</td>
+                      <td data-label="Type" className="py-1.5 pr-2">{LIBELLE_TYPE_VISITE[v.type] ?? v.type}</td>
+                      <td data-label="Objet" className="max-w-[16rem] truncate py-1.5 pr-2 font-medium text-forest-900 mobile:max-w-none mobile:whitespace-normal" title={v.observations ?? v.objet}>{v.objet}</td>
+                      <td data-label="Enseignant visité" className="py-1.5 pr-2">{v.enseignant ? nomComplet(v.enseignant) : "—"}</td>
+                      <td data-label="Inspecteur / ACE" className="py-1.5 pr-2 text-ink-700/70">{nomComplet(v.inspecteur)}</td>
+                      <td data-label="Note" className="py-1.5 pr-2 text-right">{v.noteGlobale != null ? `${v.noteGlobale.toLocaleString("fr-FR")}` : "—"}</td>
+                      <td data-label="Recommandations" className="py-1.5 pr-2 text-right">{v._count.recommandations}</td>
+                      <td data-label="Statut" className="py-1.5"><span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${b.classe} mobile:text-xs`}>{b.libelle}</span></td>
                     </tr>
                   );
                 })}
@@ -1373,7 +1430,7 @@ export async function OngletRapport({ e, peutTelechargerWord }: { e: EtabConsult
           <p className="text-sm text-ink-700/60">Aucune classe.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[620px] text-sm">
+            <table className="tableau-cartes-mobile w-full min-w-[620px] text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                   <th className="py-1.5 pr-2">Classe</th><th className="py-1.5 pr-2">Niveau</th>
@@ -1386,12 +1443,12 @@ export async function OngletRapport({ e, peutTelechargerWord }: { e: EtabConsult
                 {parClasse.map((c) => (
                   <tr key={c.classeId}>
                     <td className="py-1.5 pr-2 font-medium text-forest-900">{c.nom}</td>
-                    <td className="py-1.5 pr-2">{c.niveau}</td>
-                    <td className="py-1.5 pr-2 text-right">{c.eleves}</td>
-                    <td className="py-1.5 pr-2 text-right">{c.tauxPresence != null ? `${c.tauxPresence.toLocaleString("fr-FR")} %` : "—"}</td>
-                    <td className="py-1.5 pr-2 text-right">{c.absentsNJ}</td>
-                    <td className="py-1.5 pr-2 text-right font-semibold text-forest-800">{c.moyenne != null ? c.moyenne.toLocaleString("fr-FR") : "—"}</td>
-                    <td className="py-1.5 text-right">{c.nbNotes}</td>
+                    <td data-label="Niveau" className="py-1.5 pr-2">{c.niveau}</td>
+                    <td data-label="Élèves" className="py-1.5 pr-2 text-right">{c.eleves}</td>
+                    <td data-label="Présence" className="py-1.5 pr-2 text-right">{c.tauxPresence != null ? `${c.tauxPresence.toLocaleString("fr-FR")} %` : "—"}</td>
+                    <td data-label="Abs. non justifiées" className="py-1.5 pr-2 text-right">{c.absentsNJ}</td>
+                    <td data-label="Moyenne /20" className="py-1.5 pr-2 text-right font-semibold text-forest-800">{c.moyenne != null ? c.moyenne.toLocaleString("fr-FR") : "—"}</td>
+                    <td data-label="Notes" className="py-1.5 text-right">{c.nbNotes}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1402,7 +1459,7 @@ export async function OngletRapport({ e, peutTelechargerWord }: { e: EtabConsult
       {peutTelechargerWord ? (
         <a
           href={`${lienBase(e)}/rapport-word`}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 mobile:w-full mobile:justify-center"
         >
           <Download size={16} /> Télécharger le rapport (Word)
         </a>

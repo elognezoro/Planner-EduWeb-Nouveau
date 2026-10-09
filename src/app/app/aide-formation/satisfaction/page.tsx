@@ -84,14 +84,14 @@ export default async function SatisfactionPage({ searchParams }: { searchParams:
         action={
           <Link
             href={BASE}
-            className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300"
+            className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300 mobile:hidden"
           >
             <ArrowLeft className="h-4 w-4" /> Aide &amp; Formation
           </Link>
         }
       />
 
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="rangee-defilante-mobile mb-6 flex flex-wrap gap-2 mobile:[&>*]:py-2.5">
         {SEMINAIRES.map((s) => (
           <Link
             key={s.slug}
@@ -116,7 +116,7 @@ export default async function SatisfactionPage({ searchParams }: { searchParams:
         </Card>
       ) : (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3">
             <StatCard libelle="Réponses reçues" valeur={total} icone={<Users className="h-5 w-5" />} />
             <StatCard
               libelle="Satisfaction moyenne"

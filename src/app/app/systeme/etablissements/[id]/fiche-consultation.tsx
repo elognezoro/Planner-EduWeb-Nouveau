@@ -9,6 +9,7 @@ import {
   OngletInspection, OngletNotes, OngletPersonnel, OngletRapport, OngletRegistre, OngletStats,
   type EtabConsult,
 } from "./consultation-sections";
+import { ChoixMobile } from "./choix-mobile";
 
 const ONGLETS = [
   { id: "apercu", libelle: "Aperçu" },
@@ -89,14 +90,26 @@ export async function FicheConsultation({
         </Link>
         <Link
           href="/app/systeme/etablissements/reseau"
-          className="text-sm font-medium text-forest-700 hover:underline"
+          className="text-sm font-medium text-forest-700 hover:underline mobile:inline-flex mobile:min-h-11 mobile:items-center"
         >
           Statistiques du réseau →
         </Link>
       </div>
 
+      {/* Téléphone : les 12 onglets (6 lignes de pastilles avant tout contenu) laissent place à
+          un bouton « Section : … » qui ouvre la liste dans une feuille montante. */}
+      <ChoixMobile
+        libelle="Section"
+        titre="Sections de consultation"
+        options={ONGLETS.map((o) => ({
+          cle: o.id,
+          libelle: o.libelle,
+          href: `/app/systeme/etablissements/${e.id}${o.id === "apercu" ? "" : `?onglet=${o.id}`}`,
+          actif: onglet === o.id,
+        }))}
+      />
       {/* Barre d'onglets (liens — tout est rendu côté serveur) */}
-      <nav aria-label="Sections de consultation" className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-cream-50/60 p-1.5">
+      <nav aria-label="Sections de consultation" className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-cream-50/60 p-1.5 mobile:hidden">
         {ONGLETS.map((o) => (
           <Link
             key={o.id}

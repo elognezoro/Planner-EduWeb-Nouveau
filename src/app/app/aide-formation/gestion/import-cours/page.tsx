@@ -16,7 +16,7 @@ export default async function ImportCoursPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour à la gestion</Link>
+      <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Retour à la gestion</Link>
       <PageHeader
         titre="Créer un cours depuis un fichier"
         description="Déposez un document de cours : la plateforme le transforme automatiquement en cours interactif (leçons, quiz), en brouillon, que vous ajustez ensuite."

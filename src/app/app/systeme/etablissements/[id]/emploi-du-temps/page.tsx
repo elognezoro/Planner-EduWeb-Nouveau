@@ -10,12 +10,14 @@ import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton, type QualitePersistee } from "./generation-button";
 import { BoutonReinitialiserEdt } from "./bouton-reinitialiser-edt";
 import { SelecteurCible } from "./selecteur-cible";
+import { SelecteurEdtMobile } from "./selecteur-edt-mobile";
 import { GrilleInteractive } from "./grille-interactive";
 import { BoutonEnvoyerEdt } from "./bouton-envoyer-edt";
 import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
 import { EnTeteOfficielEdt } from "@/components/app/emplois-du-temps/en-tete-officiel-edt";
 import { BilanServiceEnseignant } from "@/components/app/emplois-du-temps/bilan-service-enseignant";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
+import { EdtJourMobile } from "@/components/app/mobile/edt-jour-mobile";
 import { DemiJourneesLibres, DemiJourneesLibresEnseignant } from "@/components/app/emplois-du-temps/demi-journees-libres";
 import { creneauxHoraires, bandesPause, minutesParPeriode, periodesMatinApresMidi } from "@/lib/emploi-du-temps/horaires";
 import { HEURES_DUES_1ER_CYCLE, HEURES_DUES_2ND_CYCLE } from "@/lib/referentiels/service-enseignant";
@@ -293,15 +295,25 @@ export default async function EmploiDuTempsPage({
         />
       </div>
 
-      <Card className="print:hidden">
-        <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-ink-700/70">
-          <span>{classes.length} classe(s)</span>
-          <span>·</span>
-          <span>{Math.max(nbSalles, etab.nbSallesDisponibles)} salle(s) disponible(s)</span>
-          <span>·</span>
-          <span>{nbProfs} enseignant(s) déclaré(s)</span>
-          <span>·</span>
-          <span>{creneaux.length} créneau(x) généré(s)</span>
+      <Card className="print:hidden mobile:p-4">
+        {/* Téléphone : les chiffres clés en tuiles 2 × 2 (la phrase à « · » s'y cassait sur 3-4
+            lignes avec des points orphelins) ; inchangé sur ordinateur. */}
+        <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-ink-700/70 mobile:grid mobile:grid-cols-2 mobile:gap-2 mobile:text-xs">
+          <span className="mobile:rounded-2xl mobile:bg-cream-50 mobile:px-3 mobile:py-2.5 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200">
+            <span className="mobile:block mobile:font-display mobile:text-xl mobile:font-bold mobile:text-forest-900">{classes.length}</span>{" "}classe(s)
+          </span>
+          <span className="mobile:hidden">·</span>
+          <span className="mobile:rounded-2xl mobile:bg-cream-50 mobile:px-3 mobile:py-2.5 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200">
+            <span className="mobile:block mobile:font-display mobile:text-xl mobile:font-bold mobile:text-forest-900">{Math.max(nbSalles, etab.nbSallesDisponibles)}</span>{" "}salle(s) disponible(s)
+          </span>
+          <span className="mobile:hidden">·</span>
+          <span className="mobile:rounded-2xl mobile:bg-cream-50 mobile:px-3 mobile:py-2.5 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200">
+            <span className="mobile:block mobile:font-display mobile:text-xl mobile:font-bold mobile:text-forest-900">{nbProfs}</span>{" "}enseignant(s) déclaré(s)
+          </span>
+          <span className="mobile:hidden">·</span>
+          <span className="mobile:rounded-2xl mobile:bg-cream-50 mobile:px-3 mobile:py-2.5 mobile:ring-1 mobile:ring-inset mobile:ring-cream-200">
+            <span className="mobile:block mobile:font-display mobile:text-xl mobile:font-bold mobile:text-forest-900">{creneaux.length}</span>{" "}créneau(x) généré(s)
+          </span>
         </div>
         {peutEcrire ? (
           <>
@@ -342,7 +354,7 @@ export default async function EmploiDuTempsPage({
       {/* Niveaux qui n'auront PAS d'emploi du temps : alerte explicite (cahier §6 — jamais
           d'incomplet silencieux). Ex. : TleD configurée sans effectif → 0 classe → 0 EDT. */}
       {(niveauxACalculer.length > 0 || niveauxSansEffectif.length > 0) && (
-        <Card className="border-gold-300 bg-gold-50/60 print:hidden">
+        <Card className="border-gold-300 bg-gold-50/60 print:hidden mobile:p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle size={18} className="mt-0.5 shrink-0 text-gold-700" />
             <div className="space-y-1.5 text-sm text-ink-800">
@@ -375,7 +387,7 @@ export default async function EmploiDuTempsPage({
       )}
 
       {creneaux.length === 0 ? (
-        <Card className="flex flex-col items-center py-14 text-center">
+        <Card className="flex flex-col items-center py-14 text-center mobile:px-4">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-forest-50 text-forest-500">
             <CalendarDays size={26} />
           </span>
@@ -384,7 +396,7 @@ export default async function EmploiDuTempsPage({
           </p>
         </Card>
       ) : (
-        <Card className="edt-feuille">
+        <Card className="edt-feuille mobile:p-4">
           {/* En-tête officiel de l'établissement — visible uniquement à l'impression (PDF). */}
           <EnTeteOfficielEdt
             etab={{
@@ -397,8 +409,9 @@ export default async function EmploiDuTempsPage({
             }}
             sousTitre={sousTitreImpression}
           />
-          {/* Sélecteur de vue */}
-          <form method="get" action={BASE(id)} className="mb-5 flex flex-wrap items-end gap-3 print:hidden">
+          {/* Sélecteur de vue — téléphone : contrôle segmenté + feuille de choix de la cible
+              (SelecteurEdtMobile, frère ci-dessous) ; ce formulaire y est masqué. */}
+          <form method="get" action={BASE(id)} className="mb-5 flex flex-wrap items-end gap-3 print:hidden mobile:hidden">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-forest-900">Vue</label>
               <select name="vue" defaultValue={vue} className="h-10 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
@@ -415,9 +428,12 @@ export default async function EmploiDuTempsPage({
             </div>
             <button type="submit" className="h-10 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700">Afficher</button>
           </form>
+          <SelecteurEdtMobile base={BASE(id)} vue={vue} options={optionsCible} cible={cible} cibleLibelle={cibleLibelle} />
 
-          {/* Impression PDF (en-tête officiel inclus), envoi aux concernés, réinitialisation. */}
-          <div className="mb-5 flex flex-wrap items-center gap-3 print:hidden">
+          {/* Impression PDF (en-tête officiel inclus), envoi aux concernés, réinitialisation.
+              Téléphone : une ligne de pastilles compactes qui défile horizontalement, toutes à la
+              même hauteur (44 px) au lieu de 40/44/48 px mêlés. */}
+          <div className="mb-5 flex flex-wrap items-center gap-3 print:hidden mobile:-mx-4 mobile:flex-nowrap mobile:gap-2 mobile:overflow-x-auto mobile:px-4 mobile:pb-1 mobile:[&>*]:shrink-0 mobile:[&_a]:whitespace-nowrap mobile:[&_button]:whitespace-nowrap mobile:[&>button]:h-11 mobile:[&_a]:h-11">
             <BoutonImprimerEdt />
             {/* Téléchargements en LOT : chaque archive contient des HTML autonomes imprimables. */}
             <a
@@ -448,6 +464,7 @@ export default async function EmploiDuTempsPage({
                 couleurs={couleursRecord}
                 horaires={horaires ?? undefined}
                 bandes={bandes ?? undefined}
+                peutDeplacer={peutEcrire}
               />
               {/* Volumes hebdomadaires de la classe : par discipline + total. */}
               <VolumesHebdo creneaux={filtres} minutes={minutes} />
@@ -464,7 +481,22 @@ export default async function EmploiDuTempsPage({
             </>
           ) : (
             <>
-            <div className="edt-grille-wrap overflow-x-auto">
+            {/* Téléphone : la journée en cartes (la grille reste celle de l'ordinateur et du papier). */}
+            <div className="lg:hidden print:hidden">
+              <EdtJourMobile
+                seances={filtres.map((c) => ({
+                  id: c.id, jour: c.jour, periode: c.periode, duree: c.duree, disciplineId: c.disciplineId,
+                  disciplineNom: c.disciplineNom, enseignantNom: c.enseignantNom, salleNom: c.salleNom, classeNom: c.classeNom,
+                }))}
+                jours={JOURS}
+                horaires={horaires ?? undefined}
+                bandes={bandes ?? undefined}
+                couleurs={couleursRecord}
+                creneauxParJour={etab.creneauxParJour}
+                vue={vue}
+              />
+            </div>
+            <div className="edt-grille-wrap overflow-x-auto mobile:hidden">
               <table className="w-full min-w-[720px] table-fixed border-collapse text-sm">
                 <thead>
                   <tr>

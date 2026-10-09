@@ -68,15 +68,16 @@ export default async function UtilisateursConnectesPage({
         description="Présence sur la plateforme, du temps réel à l'année — sur votre périmètre d'administration. Cliquez un utilisateur pour ses actions et pages visitées."
       />
 
-      <Card>
-        {/* Fenêtres d'observation : un onglet par période, avec son compteur. */}
-        <div className="flex flex-wrap gap-2">
+      <Card className="mobile:p-4">
+        {/* Fenêtres d'observation : un onglet par période, avec son compteur.
+            Téléphone : une seule rangée qui défile au doigt, jusqu'aux bords de la carte. */}
+        <div className="rangee-defilante-mobile flex flex-wrap gap-2 mobile:-mx-4 mobile:px-4">
           {FENETRES.map((f, i) => (
             <Link
               key={f.cle}
               href={`/app/utilisateurs-connectes?fenetre=${f.cle}`}
               aria-current={f.cle === fenetre ? "page" : undefined}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors mobile:min-h-11 ${
                 f.cle === fenetre
                   ? "border-forest-700 bg-forest-800 text-white"
                   : "border-cream-300 bg-white text-ink-800 hover:border-forest-300 hover:bg-cream-50"
@@ -118,7 +119,9 @@ export default async function UtilisateursConnectesPage({
           </div>
         ) : (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-sm">
+            {/* Téléphone : une carte par utilisateur (identité en titre, rôle, structure, dernier
+                accès, puis « Détail » en bouton pleine largeur). */}
+            <table className="tableau-cartes-mobile w-full min-w-[680px] text-left text-sm">
               <thead>
                 <tr className="border-b border-cream-200 text-xs uppercase tracking-wide text-ink-700/55">
                   <th className="py-2 pr-3 font-semibold">Utilisateur</th>
@@ -154,9 +157,9 @@ export default async function UtilisateursConnectesPage({
                           </span>
                         </Link>
                       </td>
-                      <td className="py-2.5 pr-3 text-ink-800">{l.roleActif.libelle}</td>
-                      <td className="py-2.5 pr-3 text-ink-800">{structure}</td>
-                      <td className="py-2.5 pr-3 whitespace-nowrap text-ink-700/75">
+                      <td data-label="Rôle" className="py-2.5 pr-3 text-ink-800">{l.roleActif.libelle}</td>
+                      <td data-label="Structure" className="py-2.5 pr-3 text-ink-800">{structure}</td>
+                      <td data-label="Dernier accès" className="py-2.5 pr-3 whitespace-nowrap text-ink-700/75 mobile:whitespace-normal">
                         <span className="inline-flex items-center gap-1.5">
                           <Clock size={13} className="text-ink-700/40" />
                           {l.dernierAccesLe ? tempsRelatif(l.dernierAccesLe, maintenant) : "—"}
@@ -165,7 +168,7 @@ export default async function UtilisateursConnectesPage({
                       <td className="py-2.5 text-right">
                         <Link
                           href={`/app/utilisateurs-connectes/${l.id}?fenetre=${fenetre}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs font-medium text-forest-800 hover:border-forest-300"
+                          className="inline-flex items-center gap-1 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs font-medium text-forest-800 hover:border-forest-300 mobile:flex mobile:h-11 mobile:w-full mobile:justify-center mobile:text-sm"
                           aria-label={`Actions et pages de ${[l.prenoms, l.nom].filter(Boolean).join(" ") || l.email}`}
                         >
                           Détail <ChevronRight size={13} />

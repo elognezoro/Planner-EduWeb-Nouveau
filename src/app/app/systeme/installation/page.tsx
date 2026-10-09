@@ -164,20 +164,22 @@ export default async function InstallationPage() {
           <Card className="p-0">
             <ul className="divide-y divide-cream-100">
               {etapes.map((e) => (
-                <li key={e.titre} className="flex items-start gap-3 px-5 py-4">
+                // Téléphone : le lien d'action passe SOUS le texte (aligné sur lui) au lieu de
+                // l'écraser à ~40 px de large (un mot par ligne).
+                <li key={e.titre} className="flex items-start gap-3 px-5 py-4 mobile:flex-wrap mobile:px-4">
                   {e.fait ? (
                     <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-forest-600" />
                   ) : (
                     <Circle size={20} className="mt-0.5 shrink-0 text-ink-700/25" />
                   )}
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 mobile:basis-[calc(100%-2.25rem)]">
                     <p className={`text-sm font-semibold ${e.fait ? "text-forest-900" : "text-ink-900"}`}>{e.titre}</p>
                     <p className="text-xs text-ink-700/65">{e.description}</p>
                   </div>
                   {!e.fait && e.lien && (
                     <Link
                       href={e.lien}
-                      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50 mobile:mt-1 mobile:ml-8 mobile:min-h-11 mobile:px-4 mobile:text-sm"
                     >
                       {e.lienLibelle} <ArrowRight size={13} />
                     </Link>

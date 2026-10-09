@@ -16,15 +16,15 @@ export function LienForm() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <Label htmlFor="parentEmail">E-mail du parent</Label>
-          <Input id="parentEmail" name="parentEmail" type="email" required placeholder="parent@exemple.ci" />
+          <Input id="parentEmail" name="parentEmail" type="email" required placeholder="parent@exemple.ci" className="mobile:text-base" />
         </div>
         <div>
           <Label htmlFor="eleveEmail">E-mail de l&apos;élève</Label>
-          <Input id="eleveEmail" name="eleveEmail" type="email" required placeholder="eleve@exemple.ci" />
+          <Input id="eleveEmail" name="eleveEmail" type="email" required placeholder="eleve@exemple.ci" className="mobile:text-base" />
         </div>
         <div>
           <Label htmlFor="lien">Lien</Label>
-          <Select id="lien" name="lien" defaultValue="">
+          <Select id="lien" name="lien" defaultValue="" className="mobile:text-base">
             <option value="">— Préciser —</option>
             <option value="père">Père</option>
             <option value="mère">Mère</option>
@@ -32,7 +32,7 @@ export function LienForm() {
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-8">Créer le lien</SubmitButton>
+      <SubmitButton className="w-auto px-8 mobile:w-full">Créer le lien</SubmitButton>
     </form>
   );
 }

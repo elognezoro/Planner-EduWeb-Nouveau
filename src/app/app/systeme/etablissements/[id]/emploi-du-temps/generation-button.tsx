@@ -14,7 +14,7 @@ function Btn() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-8 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5 disabled:opacity-70"
+      className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-8 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5 disabled:opacity-70 mobile:w-full mobile:justify-center"
     >
       {pending ? <Loader2 size={18} className="animate-spin" /> : <CalendarCog size={18} />}
       {pending ? "Génération en cours…" : "Lancer la génération"}
@@ -46,7 +46,7 @@ function CompteARebours({ estimationSecondes }: { estimationSecondes: number }) 
     <span
       role="timer"
       aria-live="polite"
-      className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-xs font-medium text-ink-800 tabular-nums"
+      className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-xs font-medium text-ink-800 tabular-nums mobile:w-full mobile:justify-center"
     >
       <Timer size={14} className="text-forest-700" />
       {restant > 0 ? (
@@ -59,6 +59,22 @@ function CompteARebours({ estimationSecondes }: { estimationSecondes: number }) 
     </span>
   );
 }
+
+/** Explication de chaque compteur de contraintes SOUPLES (définitions alignées sur le calcul
+ *  réel du solveur, penalitesBrutesClasse) : bulle au survol sur ordinateur, panneau de détail
+ *  au toucher sur téléphone. */
+const AIDES_PASTILLES = {
+  trous:
+    "Heures d'attente : créneaux vides entre le premier et le dernier cours d'une journée de classe — les élèves patientent sans cours. Plus ce nombre est bas, plus les journées sont compactes (0 = aucun trou).",
+  repartition:
+    "Nombre de fois où une même discipline revient plusieurs fois dans la MÊME journée pour une classe, au lieu d'être répartie sur la semaine. Plus ce nombre est bas, mieux la semaine est équilibrée.",
+  consecutives:
+    "Heures d'une même discipline enchaînées AU-DELÀ de 2 heures d'affilée pour une classe (fatigue, attention en baisse). 0 = jamais plus de 2 heures de suite de la même matière.",
+  finJournee:
+    "Cours placés sur la TOUTE DERNIÈRE période de la journée, moment de moindre concentration des élèves. Plus ce nombre est bas, plus les fins de journée sont allégées.",
+  pauseMidi:
+    "Journées de classe dont la période CENTRALE est occupée par un cours : la classe n'a pas de vraie coupure à la mi-journée ce jour-là. Chaque journée concernée compte pour 1.",
+} as const;
 
 /** Rapport de qualité PERSISTÉ en base à la génération (Etablissement.qualiteEdt) : le bloc
  *  « Qualité de l'emploi du temps » reste consultable tant que l'EDT existe. Les corrections
@@ -92,13 +108,15 @@ export function GenerationButton({
 
   return (
     <div className="space-y-4 print:hidden">
-      <div className="flex flex-wrap items-center gap-3">
-        <form action={action} className="flex flex-wrap items-center gap-3">
+      {/* Téléphone : boutons empilés pleine largeur (au lieu de pilules de largeurs inégales
+          posées de travers), compte à rebours centré sous « Lancer la génération ». */}
+      <div className="flex flex-wrap items-center gap-3 mobile:flex-col mobile:items-stretch mobile:gap-2">
+        <form action={action} className="flex flex-wrap items-center gap-3 mobile:flex-col mobile:items-stretch mobile:gap-2">
           <input type="hidden" name="etablissementId" value={etablissementId} />
           <Btn />
           <ZoneCompteARebours estimationSecondes={estimationSecondes} />
         </form>
-        <BoutonReinitialiserPage />
+        <BoutonReinitialiserPage className="mobile:h-11 mobile:justify-center" />
       </div>
 
       {etat.ok && etat.message && (
@@ -151,7 +169,7 @@ export function GenerationButton({
                 Optimisation des contraintes souples : {qualiteAffichee.scoreInitial}/100 → {qualiteAffichee.score}/100.
               </p>
               {!etat.qualite && qualitePersistee?.genereLe && (
-                <p className="mt-0.5 text-[0.68rem] text-ink-700/50" suppressHydrationWarning>
+                <p className="mt-0.5 text-[0.68rem] text-ink-700/50 mobile:text-xs mobile:text-ink-700/70" suppressHydrationWarning>
                   Rapport de la génération du{" "}
                   {new Date(qualitePersistee.genereLe).toLocaleString("fr-FR", {
                     day: "numeric",
@@ -165,43 +183,38 @@ export function GenerationButton({
               )}
               {/* Pénalités des contraintes SOUPLES — une BULLE explique chacune au survol
                   (définitions alignées sur le calcul réel du solveur, penalitesBrutesClasse). */}
-              <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
+              <div className="mt-3 flex flex-wrap gap-1.5 text-xs mobile:gap-2">
                 {(
                   [
                     {
                       cle: "trous",
                       l: "Heures creuses",
                       v: qualiteAffichee.penalites.trous,
-                      aide:
-                        "Heures d'attente : créneaux vides entre le premier et le dernier cours d'une journée de classe — les élèves patientent sans cours. Plus ce nombre est bas, plus les journées sont compactes (0 = aucun trou).",
+                      aide: AIDES_PASTILLES.trous,
                     },
                     {
                       cle: "repartition",
                       l: "Répétitions/jour",
                       v: qualiteAffichee.penalites.repartition,
-                      aide:
-                        "Nombre de fois où une même discipline revient plusieurs fois dans la MÊME journée pour une classe, au lieu d'être répartie sur la semaine. Plus ce nombre est bas, mieux la semaine est équilibrée.",
+                      aide: AIDES_PASTILLES.repartition,
                     },
                     {
                       cle: "consecutives",
                       l: "Heures consécutives",
                       v: qualiteAffichee.penalites.consecutives,
-                      aide:
-                        "Heures d'une même discipline enchaînées AU-DELÀ de 2 heures d'affilée pour une classe (fatigue, attention en baisse). 0 = jamais plus de 2 heures de suite de la même matière.",
+                      aide: AIDES_PASTILLES.consecutives,
                     },
                     {
                       cle: "finJournee",
                       l: "Fin de journée",
                       v: qualiteAffichee.penalites.finJournee,
-                      aide:
-                        "Cours placés sur la TOUTE DERNIÈRE période de la journée, moment de moindre concentration des élèves. Plus ce nombre est bas, plus les fins de journée sont allégées.",
+                      aide: AIDES_PASTILLES.finJournee,
                     },
                     {
                       cle: "pauseMidi",
                       l: "Sans pause midi",
                       v: qualiteAffichee.penalites.pauseMidi,
-                      aide:
-                        "Journées de classe dont la période CENTRALE est occupée par un cours : la classe n'a pas de vraie coupure à la mi-journée ce jour-là. Chaque journée concernée compte pour 1.",
+                      aide: AIDES_PASTILLES.pauseMidi,
                     },
                   ] as const
                 ).map((p) => (
@@ -211,7 +224,7 @@ export function GenerationButton({
                     title={p.aide}
                     aria-pressed={detailCle === p.cle}
                     onClick={() => setDetailCle(detailCle === p.cle ? null : p.cle)}
-                    className={`cursor-pointer rounded-full px-2.5 py-0.5 font-medium underline decoration-dotted decoration-1 underline-offset-2 transition-shadow ${
+                    className={`cursor-pointer rounded-full px-2.5 py-0.5 font-medium underline decoration-dotted decoration-1 underline-offset-2 transition-shadow mobile:min-h-10 mobile:px-3 mobile:py-2 ${
                       p.v === 0 ? "bg-forest-100 text-forest-800 decoration-forest-400" : "bg-cream-200 text-ink-700/75 decoration-ink-700/40"
                     } ${detailCle === p.cle ? "ring-2 ring-forest-400" : "hover:ring-1 hover:ring-cream-300"}`}
                   >
@@ -219,14 +232,22 @@ export function GenerationButton({
                   </button>
                 ))}
               </div>
-              <p className="mt-1.5 text-[0.68rem] text-ink-700/50">
+              <p className="mt-1.5 text-[0.68rem] text-ink-700/50 mobile:hidden">
                 Ces compteurs mesurent le confort de l&apos;emploi du temps (contraintes souples) —
                 plus ils sont bas, mieux c&apos;est. Survolez une pastille pour l&apos;explication,
                 cliquez-la pour voir les classes concernées.
               </p>
+              {/* Téléphone : pas de survol au doigt — l'explication s'affiche au toucher, dans le
+                  panneau de détail ci-dessous. */}
+              <p className="mt-1.5 hidden text-xs text-ink-700/70 mobile:block">
+                Plus ces compteurs sont bas, plus l&apos;emploi du temps est confortable. Touchez une
+                pastille pour l&apos;explication et les classes concernées.
+              </p>
               {/* Classes concernées par la pastille sélectionnée (détail remonté par le solveur). */}
               {detailCle && (
-                <div className="mt-2 rounded-xl border border-cream-200 bg-cream-50/70 p-2.5 text-xs" role="region" aria-live="polite">
+                <div className="mt-2 rounded-xl border border-cream-200 bg-cream-50/70 p-2.5 text-xs mobile:p-3" role="region" aria-live="polite">
+                  {/* Téléphone : l'explication de la pastille (bulle « title » invisible au doigt). */}
+                  <p className="mb-2 hidden leading-relaxed text-ink-700/80 mobile:block">{AIDES_PASTILLES[detailCle]}</p>
                   {(() => {
                     const libelle = {
                       trous: "Heures creuses",

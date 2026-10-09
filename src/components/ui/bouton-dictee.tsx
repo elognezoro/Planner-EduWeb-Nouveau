@@ -84,8 +84,10 @@ export function BoutonDictee({ onTexte, compact, label = "Dicter" }: {
   if (!dispo) return null;
 
   const actif = etat !== "idle";
+  // Téléphone : la pastille compacte (barre d'outils de l'éditeur, assistant) passe à 14 px et à
+  // une cible de 44 px de haut. Ordinateur : inchangée.
   const cls = compact
-    ? "inline-flex items-center gap-1 rounded-full border border-cream-300 px-2 py-0.5 text-[11px] font-semibold text-forest-700 hover:bg-cream-100"
+    ? "inline-flex items-center gap-1 rounded-full border border-cream-300 px-2 py-0.5 text-[11px] font-semibold text-forest-700 hover:bg-cream-100 mobile:min-h-11 mobile:gap-1.5 mobile:px-3 mobile:text-xs"
     : "inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50";
   const taille = compact ? 11 : 13;
 
@@ -102,7 +104,7 @@ export function BoutonDictee({ onTexte, compact, label = "Dicter" }: {
         {etat === "transcrit" ? <Loader2 size={taille} className="animate-spin" /> : etat === "enregistre" ? <Square size={taille} /> : <Mic size={taille} />}
         {etat === "transcrit" ? "Transcription…" : etat === "enregistre" ? "Arrêter" : label}
       </button>
-      {erreur && <span className="text-[11px] font-medium text-amber-700">{erreur}</span>}
+      {erreur && <span className="text-[11px] font-medium text-amber-700 mobile:text-xs">{erreur}</span>}
     </span>
   );
 }

@@ -184,7 +184,8 @@ export default async function StatsEtablissementPage({
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Téléphone : KPI en 2 colonnes compactes (icône au-dessus du chiffre). */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mobile:grid-cols-2 mobile:gap-3 mobile:*:flex-col mobile:*:items-start mobile:*:gap-2 mobile:*:p-4 mobile:*:last:odd:col-span-2 mobile:*:last:odd:flex-row mobile:*:last:odd:items-center mobile:*:last:odd:gap-4">
             <StatCard libelle="Classes" valeur={kpis.classes} icone={<School size={22} />} />
             <StatCard libelle="Élèves inscrits" valeur={kpis.eleves} icone={<Users size={22} />} ton="gold" />
             <StatCard libelle="Salles" valeur={kpis.salles} icone={<DoorOpen size={22} />} />

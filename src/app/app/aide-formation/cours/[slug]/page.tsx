@@ -63,10 +63,10 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   if (!accesContenu) {
     return (
       <div className="cours-agrandi mx-auto w-full max-w-3xl space-y-6">
-        <Link href={`${BASE}/formations`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+        <Link href={`${BASE}/formations`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden">
           <ArrowLeft size={15} /> Toutes les formations
         </Link>
-        <PageHeader titre={cours.titre} description={cours.description ?? undefined} />
+        <PageHeader titre={cours.titre} titreMobile="Formation" titreVisibleMobile description={cours.description ?? undefined} />
         <Card className="flex flex-col items-center gap-3 py-10 text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-100 text-gold-700"><Lock size={26} /></span>
           <h2 className="font-display text-lg font-bold text-forest-900">Formation réservée aux inscrits</h2>
@@ -258,11 +258,11 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   return (
     // « cours-agrandi » : polices +2 pt (globals.css) ; pleine largeur pour maximiser la zone de lecture.
     <div className="cours-agrandi mx-auto w-full max-w-none space-y-6">
-      <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+      <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden">
         <ArrowLeft size={15} /> Tous les guides
       </Link>
 
-      <PageHeader titre={cours.titre} description={cours.description ?? undefined} />
+      <PageHeader titre={cours.titre} titreMobile={cours.estGuide ? "Guide" : "Formation"} titreVisibleMobile description={cours.description ?? undefined} />
       {cours.statut !== "publie" && <Badge ton="attente">Brouillon — aperçu administrateur</Badge>}
 
       <div>
@@ -292,7 +292,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
                     key={g.cle}
                     href={lienFormation(g.cle)}
                     className={cn(
-                      "shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                      "shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-colors mobile:px-3.5 mobile:py-3",
                       gi === idxCourant ? "bg-forest-700 text-cream-50" : "text-forest-800/80 hover:bg-forest-100",
                     )}
                   >
@@ -304,7 +304,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
           )}
 
           {paginer && (
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 mobile:flex-col mobile:items-start mobile:gap-0.5">
               <h2 className="font-display text-base font-bold text-forest-900">{groupeCourant.cle}</h2>
               <span className="shrink-0 text-xs font-medium text-ink-700/55">Formation {idxCourant + 1} / {groupes.length} · {groupeCourant.modules.length} module(s)</span>
             </div>
@@ -326,20 +326,22 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
 
           {/* Navigation : Page précédente / Page suivante entre formations. */}
           {paginer && (
-            <div className="flex items-center justify-between gap-3 border-t border-cream-200 pt-4">
+            // Téléphone : deux boutons de même largeur ; le nom de la formation suivante (qui
+            // déformait la pilule sur 2-3 lignes) est masqué — il figure dans la barre ci-dessus.
+            <div className="flex items-center justify-between gap-3 border-t border-cream-200 pt-4 mobile:grid mobile:grid-cols-2 mobile:gap-2">
               {formationPrec ? (
-                <Link href={lienFormation(formationPrec.cle)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 shadow-soft hover:bg-cream-100">
+                <Link href={lienFormation(formationPrec.cle)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 shadow-soft hover:bg-cream-100 mobile:min-h-11 mobile:justify-center mobile:rounded-2xl mobile:px-2">
                   <ArrowLeft size={15} /> Page précédente
                 </Link>
               ) : (
                 <span />
               )}
               {formationSuiv ? (
-                <Link href={lienFormation(formationSuiv.cle)} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-5 py-2 text-sm font-semibold text-cream-50 shadow-soft hover:bg-forest-700">
-                  Page suivante · {formationSuiv.cle} <ArrowRight size={15} />
+                <Link href={lienFormation(formationSuiv.cle)} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-5 py-2 text-sm font-semibold text-cream-50 shadow-soft hover:bg-forest-700 mobile:min-h-11 mobile:justify-center mobile:rounded-2xl mobile:px-2">
+                  <span>Page suivante<span className="mobile:hidden"> · {formationSuiv.cle}</span></span> <ArrowRight size={15} />
                 </Link>
               ) : (
-                <span className="text-xs font-medium text-ink-700/50">Dernière formation</span>
+                <span className="text-xs font-medium text-ink-700/50 mobile:self-center mobile:text-center">Dernière formation</span>
               )}
             </div>
           )}
@@ -376,30 +378,32 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
             <p className="text-xs text-ink-700/65">Tout le contenu du cours (narrations théoriques, concepts, principes) et les épreuves, en un document imprimable / PDF.</p>
           </div>
         </div>
+        {/* Téléphone : libellé de rangée au-dessus, puis 3 boutons de même largeur (44 px de haut)
+            aux libellés courts, au lieu de pilules qui s'enroulaient irrégulièrement. */}
         <div className="mt-3 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-forest-700">Apprenant</span>
+          <div className="flex flex-wrap items-center gap-2 mobile:grid mobile:grid-cols-3 mobile:[&>a]:min-h-11 mobile:[&>a]:justify-center mobile:[&>a]:px-2">
+            <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-forest-700 mobile:col-span-3 mobile:mr-0">Apprenant</span>
             <a href={`${BASE}/cours/${slug}/livret/pdf`} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-forest-700">
               <FileDown size={15} /> PDF
             </a>
             <a href={`${BASE}/cours/${slug}/livret/word`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50">
-              <FileDown size={15} /> Word (.docx)
+              <FileDown size={15} /> <span>Word<span className="mobile:hidden"> (.docx)</span></span>
             </a>
-            <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-800 transition-colors hover:bg-cream-100">
-              <Printer size={15} /> Consulter / imprimer
+            <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-800 transition-colors hover:bg-cream-100 mobile:min-h-11 mobile:justify-center mobile:px-2">
+              <Printer size={15} /> <span className="mobile:hidden">Consulter / imprimer</span><span className="hidden mobile:inline">Ouvrir</span>
             </Link>
           </div>
           {estTuteur && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-gold-700">Formateur — corrigés</span>
+            <div className="flex flex-wrap items-center gap-2 mobile:grid mobile:grid-cols-3 mobile:[&>a]:min-h-11 mobile:[&>a]:justify-center mobile:[&>a]:px-2">
+              <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-gold-700 mobile:col-span-3 mobile:mr-0 mobile:pt-1">Formateur — corrigés</span>
               <a href={`${BASE}/cours/${slug}/livret/pdf?corrige=1`} className="inline-flex items-center gap-1.5 rounded-full bg-gold-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gold-700">
                 <FileDown size={15} /> PDF
               </a>
               <a href={`${BASE}/cours/${slug}/livret/word?corrige=1`} className="inline-flex items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-700 transition-colors hover:bg-gold-100">
-                <FileDown size={15} /> Word (.docx)
+                <FileDown size={15} /> <span>Word<span className="mobile:hidden"> (.docx)</span></span>
               </a>
-              <Link href={`${BASE}/cours/${slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-800 transition-colors hover:bg-cream-100">
-                <Printer size={15} /> Consulter / imprimer
+              <Link href={`${BASE}/cours/${slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-800 transition-colors hover:bg-cream-100 mobile:min-h-11 mobile:justify-center mobile:px-2">
+                <Printer size={15} /> <span className="mobile:hidden">Consulter / imprimer</span><span className="hidden mobile:inline">Ouvrir</span>
               </Link>
             </div>
           )}
@@ -441,7 +445,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
             {suiviCours.length === 0 ? (
               <p className="text-sm text-ink-700/60">Aucun apprenant inscrit à ce cours pour l&apos;instant.</p>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto masque-ecran-mobile">
                 <table className="w-full min-w-[440px] text-sm">
                   <thead><tr className="text-left text-xs uppercase tracking-wide text-ink-700/50"><th className="py-1 pr-2 font-semibold">Apprenant</th><th className="pr-2 font-semibold">Progression</th><th className="pr-2 font-semibold">Statut</th><th className="font-semibold">Activité</th></tr></thead>
                   <tbody>
@@ -456,6 +460,23 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
                   </tbody>
                 </table>
               </div>
+            )}
+            {/* Téléphone : liste compacte (nom, % en gras ; statut et date en 2e ligne) à la place du
+                tableau de 440 px en défilement latéral. */}
+            {suiviCours.length > 0 && (
+              <ul className="divide-y divide-cream-100 lg:hidden print:hidden">
+                {suiviCours.map((s, i) => (
+                  <li key={i} className="flex items-center justify-between gap-3 py-2.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-ink-800">{[s.utilisateur.prenoms, s.utilisateur.nom].filter(Boolean).join(" ") || s.utilisateur.email}</p>
+                      <p className="text-xs text-ink-700/60">
+                        {s.statut === "termine" ? <span className="text-forest-700">Terminé</span> : "En cours"} · {new Date(s.derniereActivite).toLocaleDateString("fr-FR")}
+                      </p>
+                    </div>
+                    <span className="shrink-0 font-display text-base font-bold text-forest-800">{s.progressionPct}%</span>
+                  </li>
+                ))}
+              </ul>
             )}
             {nbInscrits > suiviCours.length && (
               <p className="mt-2 text-xs text-ink-700/55">Affichage des {suiviCours.length} apprenants les plus récemment actifs, sur {nbInscrits} inscrits.</p>

@@ -42,17 +42,20 @@ export default async function GestionLmsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <Link href={`${BASE}/formations`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour aux formations</Link>
+      {/* Téléphone : doublon du bouton retour de l'en-tête mobile → masqué. */}
+      <Link href={`${BASE}/formations`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900 mobile:hidden"><ArrowLeft size={15} /> Retour aux formations</Link>
       <PageHeader
         titre="Gestion du contenu — Aide et Formation"
         description="Créer et publier des cours, des leçons et des sessions de formation."
         action={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link href={`${BASE}/gestion/parcours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Route size={15} /> Parcours &amp; badges</Link>
-            <Link href={`${BASE}/gestion/import`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Upload size={15} /> Importer</Link>
-            <Link href={`${BASE}/gestion/invitations`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Ticket size={15} /> Invitations</Link>
-            <Link href={`${BASE}/gestion/inscriptions-role`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><UserCheck size={15} /> Inscriptions par rôle</Link>
-            <Link href={`${BASE}/suivi`} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700"><LineChart size={15} /> Suivi des apprenants</Link>
+          // Téléphone : grille régulière de 2 colonnes (au lieu de 3-4 rangées de largeurs inégales),
+          // l'action principale « Suivi des apprenants » sur toute la largeur.
+          <div className="flex flex-wrap items-center gap-2 mobile:grid mobile:grid-cols-2">
+            <Link href={`${BASE}/gestion/parcours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:justify-center mobile:px-2 mobile:text-xs"><Route size={15} /> Parcours &amp; badges</Link>
+            <Link href={`${BASE}/gestion/import`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:justify-center mobile:px-2 mobile:text-xs"><Upload size={15} /> Importer</Link>
+            <Link href={`${BASE}/gestion/invitations`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:justify-center mobile:px-2 mobile:text-xs"><Ticket size={15} /> Invitations</Link>
+            <Link href={`${BASE}/gestion/inscriptions-role`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100 mobile:h-11 mobile:justify-center mobile:px-2 mobile:text-xs"><UserCheck size={15} /> Inscriptions par rôle</Link>
+            <Link href={`${BASE}/suivi`} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 mobile:col-span-2 mobile:h-11 mobile:justify-center"><LineChart size={15} /> Suivi des apprenants</Link>
           </div>
         }
       />
@@ -62,7 +65,7 @@ export default async function GestionLmsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><BookOpen size={18} className="text-forest-600" /> Cours <span className="rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800">{cours.length}</span></h2>
           <div className="flex flex-wrap items-center gap-2">
-            <Link href={`${BASE}/gestion/import-cours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"><Wand2 size={15} /> Depuis un fichier</Link>
+            <Link href={`${BASE}/gestion/import-cours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50 mobile:h-11"><Wand2 size={15} /> Depuis un fichier</Link>
             <FormCours opts={opts} />
           </div>
         </div>
@@ -83,9 +86,11 @@ export default async function GestionLmsPage() {
                     <span className="inline-flex items-center gap-1"><Users size={12} /> {c._count.inscriptions} inscrit(s)</span>
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5">
+                {/* Téléphone : actions sur toute la largeur, libellé court « Modifier » (la pilule
+                    « Rubrique, leçons & fiche » se cassait sur 2-3 lignes). */}
+                <div className="flex items-center gap-1.5 mobile:w-full mobile:justify-between">
                   <BoutonPublier id={c.id} publie={c.statut === "publie"} />
-                  <Link href={`${BASE}/gestion/cours/${c.id}`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-cream-100"><Pencil size={13} /> Rubrique, leçons &amp; fiche</Link>
+                  <Link href={`${BASE}/gestion/cours/${c.id}`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-cream-100 mobile:min-h-11 mobile:px-4"><Pencil size={13} /> <span className="mobile:hidden">Rubrique, leçons &amp; fiche</span><span className="hidden mobile:inline">Modifier</span></Link>
                   <SupprimerCoursBtn id={c.id} />
                 </div>
               </div>
@@ -96,7 +101,7 @@ export default async function GestionLmsPage() {
 
       {/* Sessions */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 mobile:flex-wrap mobile:gap-2">
           <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><CalendarClock size={18} className="text-forest-600" /> Sessions <span className="rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800">{sessions.length}</span></h2>
           <FormSession opts={opts} />
         </div>
@@ -122,7 +127,7 @@ export default async function GestionLmsPage() {
 
       {/* Catégories */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 mobile:flex-wrap mobile:gap-2">
           <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><Tags size={18} className="text-forest-600" /> Catégories</h2>
           <FormCategorie />
         </div>

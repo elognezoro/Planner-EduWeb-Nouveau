@@ -54,7 +54,7 @@ export function EpinglesBlock({
                   type="submit"
                   aria-label={`Retirer l'épinglage ${e.classeNom} ${e.disciplineNom}`}
                   title="Retirer l'épinglage (l'EDT choisira librement)"
-                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600 mobile:h-11 mobile:w-11"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -96,7 +96,7 @@ export function EpinglesBlock({
             </Select>
           </div>
         </div>
-        <SubmitButton className="w-auto px-6">Épingler</SubmitButton>
+        <SubmitButton className="w-auto px-6 mobile:w-full">Épingler</SubmitButton>
       </form>
     </div>
   );

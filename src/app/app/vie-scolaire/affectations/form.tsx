@@ -37,7 +37,7 @@ export function AffectationForm({
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <Label htmlFor="enseignantId">Enseignant</Label>
-          <Select id="enseignantId" name="enseignantId" defaultValue="" required>
+          <Select id="enseignantId" name="enseignantId" defaultValue="" required className="mobile:text-base">
             <option value="" disabled>
               Choisir…
             </option>
@@ -50,7 +50,7 @@ export function AffectationForm({
         </div>
         <div>
           <Label htmlFor="classeId">Classe</Label>
-          <Select id="classeId" name="classeId" defaultValue="" required>
+          <Select id="classeId" name="classeId" defaultValue="" required className="mobile:text-base">
             <option value="" disabled>
               Choisir…
             </option>
@@ -63,7 +63,7 @@ export function AffectationForm({
         </div>
         <div>
           <Label htmlFor="disciplineId">Discipline</Label>
-          <Select id="disciplineId" name="disciplineId" defaultValue="" required>
+          <Select id="disciplineId" name="disciplineId" defaultValue="" required className="mobile:text-base">
             <option value="" disabled>
               Choisir…
             </option>
@@ -76,14 +76,14 @@ export function AffectationForm({
         </div>
       </div>
       <label className="flex cursor-pointer items-start gap-2.5">
-        <input type="checkbox" name="manuel" className="mt-0.5 h-4 w-4 accent-forest-700" />
+        <input type="checkbox" name="manuel" className="mt-0.5 h-4 w-4 accent-forest-700 mobile:h-5 mobile:w-5" />
         <span className="text-sm text-ink-800">
           <strong>Épingler pour l&apos;emploi du temps</strong> — le générateur IMPOSERA cet
           enseignant à cette classe pour cette discipline (choix RH), au lieu de choisir librement
           parmi les enseignants compétents.
         </span>
       </label>
-      <SubmitButton className="w-auto px-8">Affecter</SubmitButton>
+      <SubmitButton className="w-auto px-8 mobile:w-full">Affecter</SubmitButton>
     </form>
   );
 }

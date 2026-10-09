@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 
 export interface DemiJournee {
@@ -5,16 +7,25 @@ export interface DemiJournee {
   moment: 0 | 1; // 0 = matin, 1 = après-midi
 }
 
-const fmt = (liste: DemiJournee[]) =>
-  liste.length
-    ? liste.map((d) => `${JOURS[d.jour] ?? "?"} ${d.moment === 0 ? "matin" : "après-midi"}`).join(", ")
-    : "—";
+const libelleDemi = (d: DemiJournee) => `${JOURS[d.jour] ?? "?"} ${d.moment === 0 ? "matin" : "après-midi"}`;
 
 function LigneDemi({ label, liste }: { label: string; liste: DemiJournee[] }) {
+  // Ordinateur et impression : texte continu « Lundi matin, Mardi après-midi » (les virgules sont
+  // dans leurs propres <span>, rendu identique). Téléphone : intitulé sur sa ligne, puis une
+  // pastille par demi-journée, plus lisible que la liste à virgules.
   return (
     <div className="flex flex-wrap gap-x-2 gap-y-0.5">
       <span className="font-medium text-forest-900">{label} :</span>
-      <span className="text-ink-700/75">{fmt(liste)}</span>
+      <span className="text-ink-700/75 mobile:flex mobile:basis-full mobile:flex-wrap mobile:gap-1.5">
+        {liste.length
+          ? liste.map((d, i) => (
+              <Fragment key={`${d.jour}-${d.moment}-${i}`}>
+                {i > 0 && <span className="mobile:hidden">{", "}</span>}
+                <span className="mobile:rounded-full mobile:bg-white mobile:px-2.5 mobile:py-0.5 mobile:ring-1 mobile:ring-cream-200">{libelleDemi(d)}</span>
+              </Fragment>
+            ))
+          : "—"}
+      </span>
     </div>
   );
 }
@@ -39,7 +50,7 @@ export function DemiJourneesLibres({
   return (
     <div className="edt-volumes mt-4 rounded-2xl border border-cream-200 bg-cream-50/50 p-4 text-sm print:mt-3">
       <p className="mb-2 font-display text-base font-bold text-forest-900">Demi-journées sans cours pour tous</p>
-      <div className="space-y-1">
+      <div className="space-y-1 mobile:space-y-2.5">
         <LigneDemi label={`Tout le niveau ${niveauNom}`} liste={parNiveau} />
         <LigneDemi label={`Tout le cycle (${cycleLabel})`} liste={parCycle} />
         <LigneDemi label="Tout l'établissement" liste={parEtablissement} />
@@ -69,7 +80,7 @@ export function DemiJourneesLibresEnseignant({
   return (
     <div className="edt-volumes mt-4 rounded-2xl border border-cream-200 bg-cream-50/50 p-4 text-sm print:mt-3">
       <p className="mb-2 font-display text-base font-bold text-forest-900">Demi-journées sans cours pour tous</p>
-      <div className="space-y-1">
+      <div className="space-y-1 mobile:space-y-2.5">
         {specialites.map((s, i) => (
           <LigneDemi key={`sp-${i}`} label={s.label} liste={s.liste} />
         ))}
